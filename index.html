@@ -1054,23 +1054,6 @@ document.addEventListener("DOMContentLoaded", function() {
     copyOverlayLogo();
   }
 })();
-
-// Swipe-down → sayfa yenile (overflow:hidden sayfada native pull-to-refresh çalışmaz)
-(function() {
-  var swipeStartY = 0;
-  var swipeStartX = 0;
-  document.addEventListener('touchstart', function(e) {
-    swipeStartY = e.touches[0].clientY;
-    swipeStartX = e.touches[0].clientX;
-  }, {passive: true});
-  document.addEventListener('touchend', function(e) {
-    var overlay = document.getElementById('gameOverlay');
-    if (overlay && overlay.style.display !== 'none') return; // oyun açıksa tetikleme
-    var dy = e.changedTouches[0].clientY - swipeStartY;
-    var dx = Math.abs(e.changedTouches[0].clientX - swipeStartX);
-    if (dy > 100 && dx < 60) window.location.reload(); // aşağı ≥100px, yatay <60px
-  }, {passive: true});
-})();
 </script>
 </body>
 </html>
