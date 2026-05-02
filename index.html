@@ -532,11 +532,11 @@ function stop(){
 </div>
 
 <script>
-var TOM_HIT_TIME = 11.93; // gerçek tom vuruşu ~11.75s + 180ms ort. reaksiyon (kalibre edildi)
-var WIN_PERFECT   = 0.05;  // ±50ms  → Mükemmel → %15 indirim
-var WIN_GREAT     = 0.13;  // ±130ms → Harika   → %10 indirim
-var WIN_GOOD      = 0.30;  // ±300ms → İyi      → 1 saat prova
-var WIN_IDAREDER  = 0.70;  // ±700ms → İdare eder → Akademi 1 ders
+var TOM_HIT_TIME = 12.18; // 12.0s + ~180ms ort. reaksiyon (orijinal kalibrasyon)
+var WIN_PERFECT   = 0.03;  // ±30ms  → Mükemmel → %15 indirim
+var WIN_GREAT     = 0.08;  // ±80ms  → Harika   → %10 indirim
+var WIN_GOOD      = 0.18;  // ±180ms → İyi      → 1 saat prova
+var WIN_IDAREDER  = 0.50;  // ±500ms → İdare eder → Akademi 1 ders
 // Dışarısı → Çalışmaya devam → Bez çanta
 // BACKUP: TOM_HIT_TIME=12.18, WIN_PERFECT=0.03
 var STORE_CODE   = "AKS";
@@ -746,6 +746,7 @@ function startWhitneyGame() {
   wShowPanel("gamePlaying");
   hitMade = false;
   gameRunning = true;
+  lastHitElapsed = -1; // sıfırla — miss'te önceki oyunun değeri görünmesin
 
   var bar = document.getElementById("progressBar");
   if (bar) bar.style.width = "0%";
@@ -940,8 +941,12 @@ function showWhitneyResult(result) {
   // DEBUG — kalibrasyon için: vuruş anı ve fark
   var dbg = document.getElementById("winDebug");
   if (dbg) {
-    var diff = Math.abs(lastHitElapsed - TOM_HIT_TIME);
-    dbg.textContent = "⏱ elapsed:" + lastHitElapsed.toFixed(3) + "s  |  diff:" + (diff*1000).toFixed(0) + "ms  |  hedef:" + TOM_HIT_TIME + "s";
+    if (lastHitElapsed < 0) {
+      dbg.textContent = "⏱ butona vurulmadı — miss timer tetikledi";
+    } else {
+      var dbgDiff = Math.abs(lastHitElapsed - TOM_HIT_TIME);
+      dbg.textContent = "⏱ elapsed:" + lastHitElapsed.toFixed(3) + "s  |  diff:" + (dbgDiff*1000).toFixed(0) + "ms  |  hedef:" + TOM_HIT_TIME + "s";
+    }
   }
   if (p.type === "code") {
     document.getElementById("prizeCode").textContent = makeCode(p.code);
