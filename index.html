@@ -453,11 +453,11 @@ function stop(){
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
           <span style="font-size:18px;">🎵</span>
-          <div><div style="color:#fff;letter-spacing:2px;">İYİ</div><div style="color:#fff;font-size:9px;margin-top:2px;">1 Saat Stüdyo Prova</div></div>
+          <div><div style="color:#fff;letter-spacing:2px;">İYİ</div><div style="color:#fff;font-size:9px;margin-top:2px;">2 Saat Stüdyo Prova</div></div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
           <span style="font-size:18px;">🎓</span>
-          <div><div style="color:#fff;letter-spacing:2px;">İDARE EDER</div><div style="color:#fff;font-size:9px;margin-top:2px;">Akademi 1 Deneme Dersi</div></div>
+          <div><div style="color:#fff;letter-spacing:2px;">İDARE EDER</div><div style="color:#fff;font-size:9px;margin-top:2px;">Akademi 1 Ders / Stüdyo 1 Saat / %5 İndirim</div></div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
           <span style="font-size:18px;">🎁</span>
@@ -604,10 +604,9 @@ var whitneyPrizes = {
     desc:"Tam zamanında vurdun!\nBir sonraki alışverişinde %15 indirim kazandın!", code:"IND15", type:"code" },
   great:     { emoji:"🎯", label:"HARİKA!",           title:"%10 İNDİRİM",
     desc:"Bir sonraki alışverişinde\n%10 indirim kazandın!", code:"IND10", type:"code" },
-  good:      { emoji:"🎵", label:"İYİ!",              title:"1 SAAT STÜDYO PROVA",
-    desc:"Zuhal Akademi stüdyosunda\n1 saat ücretsiz prova kazandın!", code:"STD1S", type:"code" },
-  idareder:  { emoji:"🎓", label:"İDARE EDER!",       title:"AKADEMİ 1 DERS",
-    desc:"Zuhal Akademi'de\n1 ücretsiz deneme dersi kazandın!", code:"AKDRS", type:"code" },
+  good:      { emoji:"🎵", label:"İYİ!",              title:"2 SAAT STÜDYO PROVA",
+    desc:"Zuhal Akademi stüdyosunda\n2 saat ücretsiz prova kazandın!", code:"STD2S", type:"code" },
+  idareder:  null,
   miss:      { emoji:"🎁", label:"ÇALIŞMAYA DEVAM!", title:"50. YIL BEZ ÇANTA",
     desc:"Zuhal'in 50. yılına özel\nbez çantayı kazandın!", code:"", type:"canta" }
 };
@@ -916,8 +915,22 @@ function handleHit() {
 }
 
 
+var idarederPrizes = [
+  { emoji:"🎓", label:"İDARE EDER!", title:"AKADEMİ 1 DERS",
+    desc:"Zuhal Akademi'de\n1 ücretsiz deneme dersi kazandın!", code:"AKDRS", type:"code" },
+  { emoji:"🎵", label:"İDARE EDER!", title:"1 SAAT STÜDYO PROVA",
+    desc:"Zuhal Akademi stüdyosunda\n1 saat ücretsiz prova kazandın!", code:"STD1S", type:"code" },
+  { emoji:"💰", label:"İDARE EDER!", title:"%5 İNDİRİM",
+    desc:"Bir sonraki alışverişinde\n%5 indirim kazandın!", code:"IND05", type:"code" }
+];
+
 function showWhitneyResult(result) {
-  var p = whitneyPrizes[result] || whitneyPrizes["miss"];
+  var p;
+  if (result === "idareder") {
+    p = idarederPrizes[Math.floor(Math.random() * idarederPrizes.length)];
+  } else {
+    p = whitneyPrizes[result] || whitneyPrizes["miss"];
+  }
   document.getElementById("winEmoji").textContent = p.emoji;
   document.getElementById("winLabel").textContent = p.label;
   document.getElementById("winTitle").textContent = p.title;
