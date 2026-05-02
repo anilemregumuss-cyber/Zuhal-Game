@@ -532,7 +532,7 @@ function stop(){
 </div>
 
 <script>
-var TOM_HIT_TIME = 12.18; // 12.0s + ~180ms ort. reaksiyon (orijinal kalibrasyon)
+var TOM_HIT_TIME = 11.95; // 2 gerçek vuruş ortalaması: 11.931 + 11.971 = 11.951s
 var WIN_PERFECT   = 0.03;  // ±30ms  → Mükemmel → %15 indirim
 var WIN_GREAT     = 0.08;  // ±80ms  → Harika   → %10 indirim
 var WIN_GOOD      = 0.18;  // ±180ms → İyi      → 1 saat prova
@@ -629,8 +629,8 @@ function makeCode(prizeCode) {
   var r = "";
   for (var i=0;i<4;i++) r += Math.floor(Math.random()*10);
   var d = new Date();
-  return "HT50-" + STORE_CODE + prizeCode + "-" +
-    String(d.getDate()).padStart(2,"0") + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + r;
+  return "HT50-" + prizeCode + "-" +
+    String(d.getDate()).padStart(2,"0") + String(d.getMonth()+1).padStart(2,"0") + "-" + r;
 }
 
 function wShowPanel(id) {
