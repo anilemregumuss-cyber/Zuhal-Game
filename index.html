@@ -522,11 +522,9 @@ function stop(){
         🎁 Mağaza ekibine göster, ödülünü al!
       </div>
     </div>
+    <div id="debugLog" style="display:none;font-family:'Space Mono',monospace;font-size:11px;color:#FFD700;letter-spacing:1px;text-align:center;border:1px solid #333;padding:8px 16px;width:100%;max-width:380px;box-sizing:border-box;"></div>
     <button id="btnTamam" aria-label="Kapat" style="padding:clamp(14px,2vh,22px) clamp(50px,8vmin,80px);background:#FFD700;color:#000;border:none;font-family:'Space Mono',monospace;font-size:clamp(12px,1.8vmin,18px);font-weight:700;letter-spacing:5px;cursor:pointer;touch-action:manipulation;">✓ TAMAM</button>
   </div>
-
-  <!-- DEBUG LOG BAR — overlay içinde, her panelin altında sabit -->
-  <div id="debugLog" style="display:none;position:absolute;bottom:0;left:0;width:100%;z-index:20;background:rgba(0,0,0,0.92);border-top:2px solid #FFD700;padding:12px 16px;box-sizing:border-box;font-family:'Space Mono',monospace;font-size:14px;color:#FFD700;letter-spacing:2px;text-align:center;"></div>
 
 </div>
 
@@ -832,7 +830,6 @@ function startWhitneyGame() {
     return;
   }
   wShowPanel("gamePlaying");
-  debugLog("▶ " + playerName + " | hedef: " + TOM_HIT_TIME + "s");
   hitMade = false;
   gameRunning = true;
 
