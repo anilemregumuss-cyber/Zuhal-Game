@@ -429,7 +429,7 @@ function stop(){
 <!-- OYUN EKRANI -->
 <div id="gameOverlay" role="dialog" aria-modal="true" aria-label="Ritim Challenge Oyunu" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:9999;overflow:hidden;">
   <div id="overlayLogoBar" style="position:absolute;top:0;left:0;width:100%;padding:clamp(12px,2vh,24px) 0;display:flex;justify-content:center;align-items:center;z-index:2;pointer-events:none;">
-    <img id="overlayLogo" alt="Zuhal Müzik" style="height:clamp(88px,10vh,144px);width:auto;object-fit:contain;opacity:0.92;display:block;filter:invert(1);" />
+    <img id="overlayLogo" alt="Zuhal Müzik" style="height:clamp(88px,10vh,144px);width:auto;object-fit:contain;opacity:0.92;display:block;filter:invert(1);pointer-events:auto;cursor:default;" />
   </div>
 
   <!-- BAŞLANGIÇ -->
@@ -466,9 +466,10 @@ function stop(){
       </div>
     </div>
     <div style="width:100%;max-width:380px;display:flex;flex-direction:column;gap:8px;">
-      <div style="font-family:'Space Mono',monospace;font-size:9px;color:#FFD700;letter-spacing:3px;">ADINI YAZAR MISIN?</div>
-      <input id="playerNameInput" type="text" maxlength="30" placeholder="Adın..." autocomplete="off" autocorrect="off" spellcheck="false"
+      <div style="font-family:'Space Mono',monospace;font-size:9px;color:#FFD700;letter-spacing:3px;">AD SOYAD <span style="color:#f66;">*</span></div>
+      <input id="playerNameInput" type="text" maxlength="40" placeholder="Adın Soyadın..." autocomplete="off" autocorrect="off" spellcheck="false"
         style="width:100%;box-sizing:border-box;background:#111;color:#fff;border:1px solid #444;font-family:'Space Mono',monospace;font-size:16px;letter-spacing:3px;padding:14px 16px;outline:none;text-transform:uppercase;" />
+      <div id="nameError" style="font-family:'Space Mono',monospace;font-size:9px;color:#f66;letter-spacing:2px;display:none;"></div>
     </div>
     <button id="btnBasla" aria-label="Oyunu Başlat" style="padding:clamp(16px,2.5vh,26px) clamp(50px,8vmin,80px);background:#FFD700;color:#000;border:none;font-family:'Space Mono',monospace;font-size:clamp(14px,2vmin,20px);font-weight:700;letter-spacing:5px;cursor:pointer;touch-action:manipulation;">▶ BAŞLA</button>
     <button id="btnGeri" aria-label="Ana Sayfaya Dön" style="background:transparent;color:#555;border:none;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;cursor:pointer;padding:10px;">← GERİ DÖN</button>
@@ -492,6 +493,7 @@ function stop(){
       </div>
     </div>
     <div id="midiStatus" style="font-family:'Space Mono',monospace;font-size:9px;color:#444;letter-spacing:2px;">MIDI bağlı değil</div>
+    <div id="debugLog" style="font-family:'Space Mono',monospace;font-size:9px;color:#555;letter-spacing:1px;text-align:center;min-height:14px;"></div>
   </div>
 
   <!-- KAZANDIN -->
@@ -526,6 +528,22 @@ function stop(){
 
 </div>
 
+<!-- İSTATİSTİK MODALİ -->
+<div id="statsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.96);z-index:9999;flex-direction:column;align-items:center;overflow-y:auto;padding:40px 20px 60px;box-sizing:border-box;">
+  <div style="width:100%;max-width:480px;">
+    <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:5px;color:#FFD700;margin-bottom:6px;">ZUHAL · HALFTIME 50</div>
+    <div style="font-family:'Space Mono',monospace;font-size:16px;letter-spacing:4px;color:#fff;margin-bottom:4px;">GÜNLÜK İSTATİSTİK</div>
+    <div id="statsDate" style="font-family:'Space Mono',monospace;font-size:9px;color:#555;letter-spacing:2px;margin-bottom:24px;"></div>
+    <div id="statsSummary" style="font-family:'Space Mono',monospace;font-size:10px;color:#aaa;letter-spacing:2px;margin-bottom:20px;line-height:2.2;border:1px solid #222;padding:14px 18px;"></div>
+    <div style="font-family:'Space Mono',monospace;font-size:9px;color:#FFD700;letter-spacing:3px;margin-bottom:10px;">OYUNCULAR</div>
+    <div id="statsTable" style="font-family:'Space Mono',monospace;font-size:9px;color:#ccc;letter-spacing:1px;line-height:1;display:flex;flex-direction:column;gap:8px;"></div>
+    <div style="margin-top:32px;display:flex;gap:16px;justify-content:center;">
+      <button id="btnStatsClear" style="background:transparent;color:#f44;border:1px solid #f44;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;padding:10px 20px;cursor:pointer;">VERİYİ SİL</button>
+      <button id="btnStatsClose" style="background:#FFD700;color:#000;border:none;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;padding:10px 20px;cursor:pointer;font-weight:700;">KAPAT</button>
+    </div>
+  </div>
+</div>
+
 <script>
 var TOM_HIT_TIME = 11.95; // 2 gerçek vuruş ortalaması: 11.931 + 11.971 = 11.951s
 var WIN_PERFECT   = 0.03;  // ±30ms  → Mükemmel → %15 indirim
@@ -536,6 +554,43 @@ var WIN_IDAREDER  = 0.50;  // ±500ms → İdare eder → Akademi 1 ders
 // BACKUP: TOM_HIT_TIME=12.18, WIN_PERFECT=0.03
 var STORE_CODE   = "AKS";
 var playerName   = "";
+var MAX_PLAYS_PER_DAY = 2;
+
+function todayKey() {
+  var d = new Date();
+  return "zuhal_plays_" + d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+
+function loadPlays() {
+  try { return JSON.parse(localStorage.getItem(todayKey()) || "{}"); } catch(e) { return {}; }
+}
+
+function savePlays(data) {
+  try { localStorage.setItem(todayKey(), JSON.stringify(data)); } catch(e) {}
+}
+
+function getPlayCount(name) {
+  var data = loadPlays();
+  return data[name] ? data[name].plays.length : 0;
+}
+
+function recordPlay(name, result, prizeTitle, code) {
+  var data = loadPlays();
+  if (!data[name]) data[name] = { plays: [] };
+  var now = new Date();
+  data[name].plays.push({
+    time: String(now.getHours()).padStart(2,"0") + ":" + String(now.getMinutes()).padStart(2,"0"),
+    result: result,
+    prize: prizeTitle,
+    code: code
+  });
+  savePlays(data);
+}
+
+function debugLog(msg) {
+  var el = document.getElementById("debugLog");
+  if (el) el.textContent = msg;
+}
 
 var hitMade        = false;
 var gameRunning    = false;
@@ -736,11 +791,38 @@ function playBufferAndStart() {
   }, totalMs);
 }
 
+function showNameError(msg) {
+  var el = document.getElementById("nameError");
+  var inp = document.getElementById("playerNameInput");
+  if (el) { el.textContent = msg; el.style.display = "block"; }
+  if (inp) inp.style.borderColor = "#f66";
+}
+
+function clearNameError() {
+  var el = document.getElementById("nameError");
+  var inp = document.getElementById("playerNameInput");
+  if (el) { el.style.display = "none"; }
+  if (inp) inp.style.borderColor = "#444";
+}
+
 function startWhitneyGame() {
   if (gameRunning) return;
+  clearNameError();
   var nameInput = document.getElementById("playerNameInput");
-  playerName = nameInput ? nameInput.value.trim().toUpperCase() : "";
+  var rawName = nameInput ? nameInput.value.trim() : "";
+  var parts = rawName.trim().split(/\s+/);
+  if (parts.length < 2 || parts[1].length < 1) {
+    showNameError("! AD VE SOYAD GEREKLİ");
+    return;
+  }
+  playerName = rawName.toUpperCase();
+  var playCount = getPlayCount(playerName);
+  if (playCount >= MAX_PLAYS_PER_DAY) {
+    showNameError("! BUGÜN " + MAX_PLAYS_PER_DAY + " KEZ OYNADINI — YARIN GEL");
+    return;
+  }
   wShowPanel("gamePlaying");
+  debugLog("");
   hitMade = false;
   gameRunning = true;
 
@@ -907,6 +989,8 @@ function handleHit() {
   else if (diff <= WIN_IDAREDER)  result = "idareder";
   else                            result = "miss";
 
+  debugLog("⏱ elapsed:" + elapsed.toFixed(3) + "s | diff:" + Math.round(diff*1000) + "ms | hedef:" + TOM_HIT_TIME + "s → " + result.toUpperCase());
+
   // Buton efekti
   var btn = document.getElementById("btnVur");
   if (btn) {
@@ -957,18 +1041,85 @@ function showWhitneyResult(result) {
   document.getElementById("winTitle").textContent = p.title;
   document.getElementById("winDesc").textContent  = p.desc;
 
+  var prizeCode = "";
   if (p.type === "code") {
-    document.getElementById("prizeCode").textContent = makeCode(p.code);
+    prizeCode = makeCode(p.code);
+    document.getElementById("prizeCode").textContent = prizeCode;
     document.getElementById("codeBox").style.display  = "flex";
     document.getElementById("cantaBox").style.display = "none";
   } else {
     document.getElementById("codeBox").style.display  = "none";
     document.getElementById("cantaBox").style.display = "flex";
   }
+  recordPlay(playerName, result, p.title, prizeCode);
   wShowPanel("gameWin");
 }
 
+var RESULT_LABELS = { perfect:"MÜKEMMEL", great:"HARİKA", good:"İYİ", idareder:"İDARE EDER", miss:"KAÇIRDI" };
+
+function openStats() {
+  var data = loadPlays();
+  var d = new Date();
+  var dateStr = String(d.getDate()).padStart(2,"0") + "." + String(d.getMonth()+1).padStart(2,"0") + "." + d.getFullYear();
+  document.getElementById("statsDate").textContent = dateStr;
+
+  var names = Object.keys(data);
+  var totalPlays = 0, counts = { perfect:0, great:0, good:0, idareder:0, miss:0 };
+  names.forEach(function(n) {
+    data[n].plays.forEach(function(pl) {
+      totalPlays++;
+      if (counts[pl.result] !== undefined) counts[pl.result]++;
+    });
+  });
+
+  var summaryEl = document.getElementById("statsSummary");
+  summaryEl.innerHTML =
+    "TOPLAM OYUN: <b style='color:#fff'>" + totalPlays + "</b> &nbsp;|&nbsp; OYUNCU: <b style='color:#fff'>" + names.length + "</b><br/>" +
+    "🏆 MÜKEMMEL: " + counts.perfect + " &nbsp; 🎯 HARİKA: " + counts.great + "<br/>" +
+    "🎵 İYİ: " + counts.good + " &nbsp; 🎓 İDARE EDER: " + counts.idareder + " &nbsp; 🎁 KAÇIRDI: " + counts.miss;
+
+  var tableEl = document.getElementById("statsTable");
+  tableEl.innerHTML = "";
+  if (names.length === 0) {
+    tableEl.innerHTML = "<div style='color:#555;'>Henüz oyun yok.</div>";
+  } else {
+    names.forEach(function(n) {
+      var row = document.createElement("div");
+      row.style.cssText = "border:1px solid #1e1e1e;padding:10px 14px;display:flex;flex-direction:column;gap:6px;";
+      var header = "<div style='color:#FFD700;letter-spacing:2px;font-size:10px;'>" + n + "</div>";
+      var plays = data[n].plays.map(function(pl, i) {
+        return "<div style='color:#666;padding-left:8px;'>[" + pl.time + "] " +
+          "<span style='color:#ccc'>" + (RESULT_LABELS[pl.result]||pl.result) + "</span> — " +
+          "<span style='color:#aaa'>" + pl.prize + "</span>" +
+          (pl.code ? " <span style='color:#555;font-size:8px;'>" + pl.code + "</span>" : "") +
+          "</div>";
+      }).join("");
+      row.innerHTML = header + plays;
+      tableEl.appendChild(row);
+    });
+  }
+
+  document.getElementById("statsModal").style.display = "flex";
+}
+
+function closeStats() {
+  document.getElementById("statsModal").style.display = "none";
+}
+
 document.addEventListener("DOMContentLoaded", function() {
+
+  // Logoya 5 kez hızlı basınca istatistik paneli açılır
+  var logoTapCount = 0, logoTapTimer = null;
+  var logoEl = document.getElementById("overlayLogo");
+  if (logoEl) {
+    logoEl.addEventListener("pointerdown", function(e) {
+      e.preventDefault();
+      logoTapCount++;
+      clearTimeout(logoTapTimer);
+      logoTapTimer = setTimeout(function() { logoTapCount = 0; }, 2000);
+      if (logoTapCount >= 5) { logoTapCount = 0; openStats(); }
+    });
+  }
 
   function addBtn(id, fn) {
     var el = document.getElementById(id);
@@ -986,6 +1137,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
   addBtn("btnGeri",  closeGame);
   addBtn("btnTamam", closeGame);
+  addBtn("btnStatsClose", closeStats);
+  addBtn("btnStatsClear", function() {
+    if (confirm("Bugünkü tüm veriler silinsin mi?")) {
+      localStorage.removeItem(todayKey());
+      openStats();
+    }
+  });
 
   var btnVur = document.getElementById("btnVur");
   if (btnVur) {
