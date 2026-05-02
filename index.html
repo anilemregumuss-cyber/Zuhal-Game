@@ -792,9 +792,10 @@ function playBufferAndStart() {
 
   missTimerW = setTimeout(function() {
     if (!hitMade && gameRunning) {
-      gameRunning = false; // MIDI'nin tekrar tetiklemesini engelle
+      gameRunning = false;
       stopWAudio();
       clearInterval(progressTimerW);
+      debugLog("⏱ BUTONA VURULMADI | hedef:" + TOM_HIT_TIME + "s → MISS");
       showWhitneyResult("miss");
     }
   }, totalMs);
@@ -831,7 +832,7 @@ function startWhitneyGame() {
     return;
   }
   wShowPanel("gamePlaying");
-  debugLog("");
+  debugLog("▶ " + playerName + " | hedef: " + TOM_HIT_TIME + "s");
   hitMade = false;
   gameRunning = true;
 
@@ -871,9 +872,10 @@ function startWhitneyGame() {
 
         missTimerW = setTimeout(function() {
           if (!hitMade && gameRunning) {
-            gameRunning = false; // MIDI'nin tekrar tetiklemesini engelle
+            gameRunning = false;
             stopWAudio();
             clearInterval(progressTimerW);
+            debugLog("⏱ BUTONA VURULMADI | hedef:" + TOM_HIT_TIME + "s → MISS");
             showWhitneyResult("miss");
           }
         }, totalMs);
@@ -1140,43 +1142,89 @@ function closeStats() {
   document.getElementById("statsModal").style.display = "none";
 }
 
+function xlCell(v, bold, bg, color) {
+  var style = "";
+  if (bold) style += "font-weight:bold;";
+  if (bg)   style += "background:" + bg + ";";
+  if (color) style += "color:" + color + ";";
+  return "<td style='" + style + "'>" + (v !== undefined ? v : "") + "</td>";
+}
+
 function downloadStats() {
   var data = loadPlays();
   var d = new Date();
   var dateStr = String(d.getDate()).padStart(2,"0") + "." + String(d.getMonth()+1).padStart(2,"0") + "." + d.getFullYear();
 
-  // CSV oluştur
-  var lines = [
-    "ZUHAL MUZİK - RİTİM CHALLENGE - " + dateStr,
-    "",
-    "AD SOYAD;OYUN NO;SAAT;SONUÇ;HEDİYE;KUPON KODU"
-  ];
   var names = Object.keys(data);
   var totalPlays = 0, counts = { perfect:0, great:0, good:0, idareder:0, miss:0 };
   names.forEach(function(n) {
-    data[n].plays.forEach(function(pl, i) {
+    data[n].plays.forEach(function(pl) {
       totalPlays++;
       if (counts[pl.result] !== undefined) counts[pl.result]++;
-      lines.push([n, i+1, pl.time, RESULT_LABELS[pl.result]||pl.result, pl.prize, pl.code||"-"].join(";"));
     });
   });
 
-  lines.push("");
-  lines.push("ÖZET");
-  lines.push("Toplam Oyun;" + totalPlays);
-  lines.push("Toplam Oyuncu;" + names.length);
-  lines.push("Mükemmel;" + counts.perfect + ";" + pct(counts.perfect, totalPlays));
-  lines.push("Harika;" + counts.great + ";" + pct(counts.great, totalPlays));
-  lines.push("İyi;" + counts.good + ";" + pct(counts.good, totalPlays));
-  lines.push("İdare Eder;" + counts.idareder + ";" + pct(counts.idareder, totalPlays));
-  lines.push("Kaçırdı;" + counts.miss + ";" + pct(counts.miss, totalPlays));
+  var rows = "";
 
-  var csv = "﻿" + lines.join("\r\n"); // BOM → Excel'de Türkçe karakter düzgün açılır
-  var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  // Başlık
+  rows += "<tr>" + xlCell("ZUHAL MÜZİK — RİTİM CHALLENGE — " + dateStr, true, "#FFD700", "#000") + "<td colspan='5'></td></tr>";
+  rows += "<tr><td colspan='6'></td></tr>";
+
+  // Tablo başlığı
+  rows += "<tr>" +
+    xlCell("AD SOYAD", true, "#222222", "#FFD700") +
+    xlCell("OYUN NO", true, "#222222", "#FFD700") +
+    xlCell("SAAT", true, "#222222", "#FFD700") +
+    xlCell("SONUÇ", true, "#222222", "#FFD700") +
+    xlCell("HEDİYE", true, "#222222", "#FFD700") +
+    xlCell("KUPON KODU", true, "#222222", "#FFD700") +
+  "</tr>";
+
+  // Oyuncu satırları
+  var resultColors = { perfect:"#2a4a1a", great:"#1a3a4a", good:"#1a2a4a", idareder:"#2a2a1a", miss:"#3a1a1a" };
+  names.forEach(function(n) {
+    data[n].plays.forEach(function(pl, i) {
+      var bg = resultColors[pl.result] || "";
+      rows += "<tr>" +
+        xlCell(n, false, bg) +
+        xlCell(i+1, false, bg) +
+        xlCell(pl.time, false, bg) +
+        xlCell(RESULT_LABELS[pl.result]||pl.result, true, bg) +
+        xlCell(pl.prize, false, bg) +
+        xlCell(pl.code||"-", false, bg) +
+      "</tr>";
+    });
+  });
+
+  // Boş satır + özet
+  rows += "<tr><td colspan='6'></td></tr>";
+  rows += "<tr>" + xlCell("ÖZET", true, "#FFD700", "#000") + "<td colspan='5'></td></tr>";
+  rows += "<tr>" + xlCell("Toplam Oyun",true) + xlCell(totalPlays,true) + xlCell("Toplam Oyuncu",true) + xlCell(names.length,true) + "<td colspan='2'></td></tr>";
+
+  var summaryRows = [
+    ["🏆 Mükemmel", counts.perfect, "#2a4a1a"],
+    ["🎯 Harika",   counts.great,   "#1a3a4a"],
+    ["🎵 İyi",      counts.good,    "#1a2a4a"],
+    ["🎓 İdare Eder",counts.idareder,"#2a2a1a"],
+    ["🎁 Kaçırdı",  counts.miss,    "#3a1a1a"]
+  ];
+  summaryRows.forEach(function(s) {
+    rows += "<tr>" +
+      xlCell(s[0], true, s[2]) +
+      xlCell(s[1], true, s[2]) +
+      xlCell(pct(s[1], totalPlays), true, s[2]) +
+      "<td colspan='3'></td></tr>";
+  });
+
+  var html = "<!DOCTYPE html><html><head><meta charset='UTF-8'></head><body>" +
+    "<table border='1' cellpadding='6' cellspacing='0' style='border-collapse:collapse;font-family:Calibri,Arial;font-size:11pt;'>" +
+    rows + "</table></body></html>";
+
+  var blob = new Blob([html], { type: "application/vnd.ms-excel;charset=utf-8;" });
   var url = URL.createObjectURL(blob);
   var a = document.createElement("a");
   a.href = url;
-  a.download = "zuhal-ritim-" + d.getFullYear() + String(d.getMonth()+1).padStart(2,"0") + String(d.getDate()).padStart(2,"0") + ".csv";
+  a.download = "zuhal-ritim-" + d.getFullYear() + String(d.getMonth()+1).padStart(2,"0") + String(d.getDate()).padStart(2,"0") + ".xls";
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
