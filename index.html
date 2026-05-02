@@ -429,21 +429,36 @@ function stop(){
 <div id="gameOverlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:9999;overflow:hidden;">
 
   <!-- BAŞLANGIÇ -->
-  <div id="gameStart" style="display:none;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:40px;box-sizing:border-box;text-align:center;">
+  <div id="gameStart" style="display:none;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:36px;box-sizing:border-box;text-align:center;">
     <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:5px;color:#888;border:1px solid #444;padding:6px 18px;">ZUHAL · HALFTIME 50</div>
     <div style="font-family:'Oddee','Space Mono',monospace;font-size:48px;font-weight:700;color:#FFD700;letter-spacing:3px;line-height:1.1;">RİTİM<br/>CHALLENGE</div>
-    <div style="font-family:'Space Mono',monospace;font-size:10px;color:#aaa;letter-spacing:2px;line-height:2.4;">
+    <div style="font-family:'Space Mono',monospace;font-size:10px;color:#aaa;letter-spacing:2px;line-height:2.2;">
       Whitney Houston çalacak<br/>
-      <span style="color:#FFD700;">Tom vuruşunu duy — o anda bas!</span>
+      <span style="color:#FFD700;">Tom vuruşunu duy — tam o anda bas!</span>
     </div>
-    <div style="border:1px solid #222;padding:16px 28px;text-align:left;width:100%;max-width:380px;box-sizing:border-box;">
-      <div style="font-family:'Space Mono',monospace;font-size:9px;color:#FFD700;letter-spacing:3px;margin-bottom:10px;">KAZANABİLECEKLERİN</div>
-      <div style="font-family:'Space Mono',monospace;font-size:10px;color:#ccc;line-height:2.6;">
-        <span style="color:#FFD700;">🏆</span> Tam isabet → %15 İndirim<br/>
-        <span style="color:#FFD700;">🎯</span> Az Erken → %10 İndirim<br/>
-        <span style="color:#FFD700;">🎵</span> Biraz Erken → 1 Saat Stüdyo Prova<br/>
-        <span style="color:#FFD700;">🎓</span> Çok Erken → Akademi 1 Ders<br/>
-        <span style="color:#FFD700;">🎁</span> Geç veya Kaçır → Bez Çanta!
+    <div style="border:1px solid #222;padding:16px 24px;text-align:left;width:100%;max-width:380px;box-sizing:border-box;">
+      <div style="font-family:'Space Mono',monospace;font-size:9px;color:#FFD700;letter-spacing:3px;margin-bottom:12px;">KAZANABİLECEKLERİN</div>
+      <div style="font-family:'Space Mono',monospace;font-size:10px;color:#ccc;line-height:1;display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:18px;">🏆</span>
+          <div><div style="color:#FFD700;letter-spacing:2px;">MÜKEMMEl</div><div style="color:#888;font-size:9px;margin-top:2px;">%15 İndirim</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:18px;">🎯</span>
+          <div><div style="color:#FFD700;letter-spacing:2px;">HARİKA</div><div style="color:#888;font-size:9px;margin-top:2px;">%10 İndirim</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:18px;">🎵</span>
+          <div><div style="color:#FFD700;letter-spacing:2px;">İYİ</div><div style="color:#888;font-size:9px;margin-top:2px;">1 Saat Stüdyo Prova</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:18px;">🎓</span>
+          <div><div style="color:#FFD700;letter-spacing:2px;">İDARE EDER</div><div style="color:#888;font-size:9px;margin-top:2px;">Akademi 1 Deneme Dersi</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:18px;">🎁</span>
+          <div><div style="color:#555;letter-spacing:2px;">ÇALIŞMAYA DEVAM</div><div style="color:#444;font-size:9px;margin-top:2px;">Bez Çanta</div></div>
+        </div>
       </div>
     </div>
     <button id="btnBasla" style="padding:22px 70px;background:#FFD700;color:#000;border:none;font-family:'Space Mono',monospace;font-size:18px;font-weight:700;letter-spacing:5px;cursor:pointer;touch-action:manipulation;">▶ BAŞLA</button>
@@ -503,11 +518,11 @@ function stop(){
 
 <script>
 var TOM_HIT_TIME = 12.18; // 12.0 + ~180ms ortalama reaksiyon süresi
-var WIN_PERFECT   = 0.03;  // ±30ms önce/sonra → %15 indirim (tam isabet)
-var WIN_BEFORE_1  = 0.20;  // 30-200ms önce    → %10 indirim
-var WIN_BEFORE_2  = 0.50;  // 200-500ms önce   → 1 saat stüdyo
-var WIN_BEFORE_3  = 1.00;  // 500ms-1s önce    → Akademi 1 ders
-// Sonrası veya 1s'den önce → Bez Çanta
+var WIN_PERFECT   = 0.03;  // ±30ms  → Mükemmel → %15 indirim
+var WIN_GREAT     = 0.08;  // ±80ms  → Harika   → %10 indirim
+var WIN_GOOD      = 0.18;  // ±180ms → İyi      → 1 saat prova
+var WIN_IDAREDER  = 0.50;  // ±500ms → İdare eder → Akademi 1 ders
+// Dışarısı → Çalışmaya devam → Bez çanta
 // BACKUP: TOM_HIT_TIME=12.18, WIN_PERFECT=0.03
 var STORE_CODE   = "AKS";
 
@@ -584,15 +599,15 @@ function startAudioOnTouch() {
 }
 
 var whitneyPrizes = {
-  perfect:  { emoji:"🏆", label:"MÜKEMMEL!",   title:"%15 İNDİRİM",
+  perfect:   { emoji:"🏆", label:"MÜKEMMEL!",        title:"%15 İNDİRİM",
     desc:"Tam zamanında vurdun!\nBir sonraki alışverişinde %15 indirim kazandın!", code:"IND15", type:"code" },
-  before1:  { emoji:"🎯", label:"YAKLAŞTIIN!", title:"%10 İNDİRİM",
+  great:     { emoji:"🎯", label:"HARİKA!",           title:"%10 İNDİRİM",
     desc:"Bir sonraki alışverişinde\n%10 indirim kazandın!", code:"IND10", type:"code" },
-  before2:  { emoji:"🎵", label:"RİTİM HISSI VAR!", title:"1 SAAT STÜDYO PROVA",
+  good:      { emoji:"🎵", label:"İYİ!",              title:"1 SAAT STÜDYO PROVA",
     desc:"Zuhal Akademi stüdyosunda\n1 saat ücretsiz prova kazandın!", code:"STD1S", type:"code" },
-  before3:  { emoji:"🎓", label:"POTANSİYEL VAR!", title:"AKADEMİ 1 DERS",
+  idareder:  { emoji:"🎓", label:"İDARE EDER!",       title:"AKADEMİ 1 DERS",
     desc:"Zuhal Akademi'de\n1 ücretsiz deneme dersi kazandın!", code:"AKDRS", type:"code" },
-  miss:     { emoji:"🎁", label:"HEDİYEN VAR!", title:"50. YIL BEZ ÇANTA",
+  miss:      { emoji:"🎁", label:"ÇALIŞMAYA DEVAM!", title:"50. YIL BEZ ÇANTA",
     desc:"Zuhal'in 50. yılına özel\nbez çantayı kazandın!", code:"", type:"canta" }
 };
 
@@ -847,17 +862,15 @@ function handleHit() {
   } else {
     elapsed = (Date.now() - audioStartTime) / 1000;
   }
-  var signedDiff = elapsed - TOM_HIT_TIME; // negatif = erken, pozitif = geç
-  var absDiff = Math.abs(signedDiff);
-  console.log("Vuruş: elapsed=" + elapsed.toFixed(3) + "s | signedDiff=" + (signedDiff*1000).toFixed(0) + "ms (" + (signedDiff < 0 ? "ERKEN" : "GEÇ") + ")");
+  var diff = Math.abs(elapsed - TOM_HIT_TIME);
+  console.log("Vuruş: elapsed=" + elapsed.toFixed(3) + "s | diff=" + (diff*1000).toFixed(0) + "ms");
 
   var result;
-  if      (absDiff <= WIN_PERFECT)                        result = "perfect";   // tam isabet
-  else if (signedDiff > 0)                                result = "miss";      // geç vurdu
-  else if (absDiff <= WIN_BEFORE_1)                       result = "before1";   // az erken → %10
-  else if (absDiff <= WIN_BEFORE_2)                       result = "before2";   // orta erken → stüdyo
-  else if (absDiff <= WIN_BEFORE_3)                       result = "before3";   // çok erken → akademi
-  else                                                    result = "miss";      // çok çok erken
+  if      (diff <= WIN_PERFECT)   result = "perfect";
+  else if (diff <= WIN_GREAT)     result = "great";
+  else if (diff <= WIN_GOOD)      result = "good";
+  else if (diff <= WIN_IDAREDER)  result = "idareder";
+  else                            result = "miss";
 
   // Buton efekti
   var btn = document.getElementById("btnVur");
