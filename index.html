@@ -425,17 +425,6 @@ function stop(){
 }
 </script>
 
-<!-- YENİLE BUTONU (oyun kapalıyken görünür) -->
-<button id="btnReload" onclick="window.location.reload()" aria-label="Sayfayı Yenile"
-  style="position:fixed;top:18px;right:22px;padding:10px 18px;border-radius:6px;
-         background:rgba(0,0,0,0.72);border:1.5px solid rgba(255,255,255,0.30);
-         color:rgba(255,255,255,0.75);font-size:13px;font-family:'Space Mono',monospace;
-         letter-spacing:3px;cursor:pointer;z-index:8888;
-         display:flex;align-items:center;gap:7px;
-         touch-action:manipulation;transition:background 0.15s,color 0.15s,border-color 0.15s;"
-  onpointerdown="this.style.background='rgba(255,215,0,0.18)';this.style.color='#FFD700';this.style.borderColor='#FFD700';"
-  onpointerup="this.style.background='rgba(0,0,0,0.72)';this.style.color='rgba(255,255,255,0.75)';this.style.borderColor='rgba(255,255,255,0.30)';"
-  onpointerleave="this.style.background='rgba(0,0,0,0.72)';this.style.color='rgba(255,255,255,0.75)';this.style.borderColor='rgba(255,255,255,0.30)';">↻ YENİLE</button>
 
 <!-- OYUN EKRANI -->
 <div id="gameOverlay" role="dialog" aria-modal="true" aria-label="Ritim Challenge Oyunu" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:9999;overflow:hidden;">
@@ -687,14 +676,12 @@ function openGameOverlay() {
   hitMade = false;
   gameRunning = false;
   document.getElementById("gameOverlay").style.display = "block";
-  var rb = document.getElementById("btnReload"); if (rb) rb.style.display = "none";
   wShowPanel("gameStart");
   preDecodeAudio();
 }
 
 function closeGame() {
   document.getElementById("gameOverlay").style.display = "none";
-  var rb = document.getElementById("btnReload"); if (rb) rb.style.display = "flex";
   stopWAudio();
   clearTimeout(missTimerW);
   clearInterval(progressTimerW);
