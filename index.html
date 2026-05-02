@@ -539,7 +539,8 @@ function stop(){
     <div id="statsSummary" style="font-family:'Space Mono',monospace;font-size:10px;color:#aaa;letter-spacing:2px;margin-bottom:20px;line-height:2.2;border:1px solid #222;padding:14px 18px;"></div>
     <div style="font-family:'Space Mono',monospace;font-size:9px;color:#FFD700;letter-spacing:3px;margin-bottom:10px;">OYUNCULAR</div>
     <div id="statsTable" style="font-family:'Space Mono',monospace;font-size:9px;color:#ccc;letter-spacing:1px;line-height:1;display:flex;flex-direction:column;gap:8px;"></div>
-    <div style="margin-top:32px;display:flex;gap:16px;justify-content:center;">
+    <div style="margin-top:32px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <button id="btnStatsDownload" style="background:transparent;color:#FFD700;border:1px solid #FFD700;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;padding:10px 20px;cursor:pointer;">⬇ İNDİR</button>
       <button id="btnStatsClear" style="background:transparent;color:#f44;border:1px solid #f44;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;padding:10px 20px;cursor:pointer;">VERİYİ SİL</button>
       <button id="btnStatsClose" style="background:#FFD700;color:#000;border:none;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;padding:10px 20px;cursor:pointer;font-weight:700;">KAPAT</button>
     </div>
@@ -1065,6 +1066,11 @@ function showWhitneyResult(result) {
 
 var RESULT_LABELS = { perfect:"MÜKEMMEL", great:"HARİKA", good:"İYİ", idareder:"İDARE EDER", miss:"KAÇIRDI" };
 
+function pct(n, total) {
+  if (!total) return "0%";
+  return Math.round(n / total * 100) + "%";
+}
+
 function openStats() {
   var data = loadPlays();
   var d = new Date();
@@ -1080,11 +1086,31 @@ function openStats() {
     });
   });
 
+  function row(emoji, label, count) {
+    var p = pct(count, totalPlays);
+    var barW = totalPlays ? Math.round(count / totalPlays * 100) : 0;
+    return "<div style='display:flex;align-items:center;gap:8px;margin-bottom:6px;'>" +
+      "<span style='width:18px;text-align:center;font-size:13px;'>" + emoji + "</span>" +
+      "<span style='width:90px;color:#ccc;font-size:9px;letter-spacing:1px;'>" + label + "</span>" +
+      "<div style='flex:1;background:#1a1a1a;height:8px;border-radius:2px;overflow:hidden;'>" +
+        "<div style='background:#FFD700;height:100%;width:" + barW + "%;'></div>" +
+      "</div>" +
+      "<span style='width:36px;text-align:right;color:#FFD700;font-size:10px;'>" + p + "</span>" +
+      "<span style='width:20px;text-align:right;color:#555;font-size:9px;'>(" + count + ")</span>" +
+    "</div>";
+  }
+
   var summaryEl = document.getElementById("statsSummary");
   summaryEl.innerHTML =
-    "TOPLAM OYUN: <b style='color:#fff'>" + totalPlays + "</b> &nbsp;|&nbsp; OYUNCU: <b style='color:#fff'>" + names.length + "</b><br/>" +
-    "🏆 MÜKEMMEL: " + counts.perfect + " &nbsp; 🎯 HARİKA: " + counts.great + "<br/>" +
-    "🎵 İYİ: " + counts.good + " &nbsp; 🎓 İDARE EDER: " + counts.idareder + " &nbsp; 🎁 KAÇIRDI: " + counts.miss;
+    "<div style='margin-bottom:12px;font-size:11px;'>" +
+      "TOPLAM OYUN: <b style='color:#fff;font-size:14px;'>" + totalPlays + "</b>" +
+      " &nbsp;|&nbsp; OYUNCU: <b style='color:#fff;font-size:14px;'>" + names.length + "</b>" +
+    "</div>" +
+    row("🏆","MÜKEMMEL", counts.perfect) +
+    row("🎯","HARİKA",   counts.great) +
+    row("🎵","İYİ",      counts.good) +
+    row("🎓","İDARE EDER",counts.idareder) +
+    row("🎁","KAÇIRDI",  counts.miss);
 
   var tableEl = document.getElementById("statsTable");
   tableEl.innerHTML = "";
@@ -1092,18 +1118,18 @@ function openStats() {
     tableEl.innerHTML = "<div style='color:#555;'>Henüz oyun yok.</div>";
   } else {
     names.forEach(function(n) {
-      var row = document.createElement("div");
-      row.style.cssText = "border:1px solid #1e1e1e;padding:10px 14px;display:flex;flex-direction:column;gap:6px;";
+      var rowEl = document.createElement("div");
+      rowEl.style.cssText = "border:1px solid #1e1e1e;padding:10px 14px;display:flex;flex-direction:column;gap:6px;";
       var header = "<div style='color:#FFD700;letter-spacing:2px;font-size:10px;'>" + n + "</div>";
-      var plays = data[n].plays.map(function(pl, i) {
+      var plays = data[n].plays.map(function(pl) {
         return "<div style='color:#666;padding-left:8px;'>[" + pl.time + "] " +
           "<span style='color:#ccc'>" + (RESULT_LABELS[pl.result]||pl.result) + "</span> — " +
           "<span style='color:#aaa'>" + pl.prize + "</span>" +
           (pl.code ? " <span style='color:#555;font-size:8px;'>" + pl.code + "</span>" : "") +
           "</div>";
       }).join("");
-      row.innerHTML = header + plays;
-      tableEl.appendChild(row);
+      rowEl.innerHTML = header + plays;
+      tableEl.appendChild(rowEl);
     });
   }
 
@@ -1112,6 +1138,49 @@ function openStats() {
 
 function closeStats() {
   document.getElementById("statsModal").style.display = "none";
+}
+
+function downloadStats() {
+  var data = loadPlays();
+  var d = new Date();
+  var dateStr = String(d.getDate()).padStart(2,"0") + "." + String(d.getMonth()+1).padStart(2,"0") + "." + d.getFullYear();
+
+  // CSV oluştur
+  var lines = [
+    "ZUHAL MUZİK - RİTİM CHALLENGE - " + dateStr,
+    "",
+    "AD SOYAD;OYUN NO;SAAT;SONUÇ;HEDİYE;KUPON KODU"
+  ];
+  var names = Object.keys(data);
+  var totalPlays = 0, counts = { perfect:0, great:0, good:0, idareder:0, miss:0 };
+  names.forEach(function(n) {
+    data[n].plays.forEach(function(pl, i) {
+      totalPlays++;
+      if (counts[pl.result] !== undefined) counts[pl.result]++;
+      lines.push([n, i+1, pl.time, RESULT_LABELS[pl.result]||pl.result, pl.prize, pl.code||"-"].join(";"));
+    });
+  });
+
+  lines.push("");
+  lines.push("ÖZET");
+  lines.push("Toplam Oyun;" + totalPlays);
+  lines.push("Toplam Oyuncu;" + names.length);
+  lines.push("Mükemmel;" + counts.perfect + ";" + pct(counts.perfect, totalPlays));
+  lines.push("Harika;" + counts.great + ";" + pct(counts.great, totalPlays));
+  lines.push("İyi;" + counts.good + ";" + pct(counts.good, totalPlays));
+  lines.push("İdare Eder;" + counts.idareder + ";" + pct(counts.idareder, totalPlays));
+  lines.push("Kaçırdı;" + counts.miss + ";" + pct(counts.miss, totalPlays));
+
+  var csv = "﻿" + lines.join("\r\n"); // BOM → Excel'de Türkçe karakter düzgün açılır
+  var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = "zuhal-ritim-" + d.getFullYear() + String(d.getMonth()+1).padStart(2,"0") + String(d.getDate()).padStart(2,"0") + ".csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -1146,6 +1215,7 @@ document.addEventListener("DOMContentLoaded", function() {
   addBtn("btnGeri",  closeGame);
   addBtn("btnTamam", closeGame);
   addBtn("btnStatsClose", closeStats);
+  addBtn("btnStatsDownload", downloadStats);
   addBtn("btnStatsClear", function() {
     if (confirm("Bugünkü tüm veriler silinsin mi?")) {
       localStorage.removeItem(todayKey());
