@@ -457,7 +457,7 @@ function stop(){
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
           <span style="font-size:18px;">🎁</span>
-          <div><div style="color:#555;letter-spacing:2px;">ÇALIŞMAYA DEVAM</div><div style="color:#444;font-size:9px;margin-top:2px;">Bez Çanta</div></div>
+          <div><div style="color:#fff;letter-spacing:2px;">ÇALIŞMAYA DEVAM</div><div style="color:#aaa;font-size:9px;margin-top:2px;">Bez Çanta</div></div>
         </div>
       </div>
     </div>
@@ -573,8 +573,10 @@ function preDecodeAudio() {
 }
 
 function unlockAC() {
-  // AudioContext'i her durumda unlock et (buton tıklaması ile)
-  if (AC && AC.state === 'suspended') { try { AC.resume(); } catch(e) {} }
+  // Sadece oyun kapalıyken metronom AC'yi aç
+  var overlay = document.getElementById("gameOverlay");
+  var gameOpen = overlay && overlay.style.display !== "none";
+  if (!gameOpen && AC && AC.state === 'suspended') { try { AC.resume(); } catch(e) {} }
   preDecodeAudio();
 }
 
@@ -924,11 +926,11 @@ document.addEventListener("DOMContentLoaded", function() {
   if (btnBasla) {
     btnBasla.addEventListener("touchstart", function(e) {
       e.preventDefault();
-      unlockAC();
+      preDecodeAudio();
       startWhitneyGame();
     }, {passive:false});
     btnBasla.addEventListener("click", function() {
-      unlockAC();
+      preDecodeAudio();
       startWhitneyGame();
     });
   }
