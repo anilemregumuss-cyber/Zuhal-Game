@@ -1055,20 +1055,55 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 })();
 
-// Swipe-down → sayfa yenile (overflow:hidden sayfada native pull-to-refresh çalışmaz)
+// Pull-to-refresh: pointer events (touch + mouse destekli, overflow:hidden'da native çalışmaz)
 (function() {
-  var swipeStartY = 0;
-  var swipeStartX = 0;
-  document.addEventListener('touchstart', function(e) {
-    swipeStartY = e.touches[0].clientY;
-    swipeStartX = e.touches[0].clientX;
+  var ptY0 = 0, ptX0 = 0, ptActive = false;
+
+  // Görsel gösterge
+  var ind = document.createElement('div');
+  ind.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:56px;display:flex;' +
+    'align-items:center;justify-content:center;font-family:"Space Mono",monospace;' +
+    'font-size:13px;letter-spacing:4px;color:#FFD700;background:rgba(0,0,0,0.85);' +
+    'z-index:99999;pointer-events:none;opacity:0;transition:opacity 0.15s;';
+  ind.textContent = '↓  YENİLE';
+  document.body.appendChild(ind);
+
+  function gameOpen() {
+    var ov = document.getElementById('gameOverlay');
+    return ov && ov.style.display !== 'none';
+  }
+
+  document.addEventListener('pointerdown', function(e) {
+    if (gameOpen()) return;
+    ptY0 = e.clientY; ptX0 = e.clientX; ptActive = true;
   }, {passive: true});
-  document.addEventListener('touchend', function(e) {
-    var overlay = document.getElementById('gameOverlay');
-    if (overlay && overlay.style.display !== 'none') return; // oyun açıksa tetikleme
-    var dy = e.changedTouches[0].clientY - swipeStartY;
-    var dx = Math.abs(e.changedTouches[0].clientX - swipeStartX);
-    if (dy > 100 && dx < 60) window.location.reload(); // aşağı ≥100px, yatay <60px
+
+  document.addEventListener('pointermove', function(e) {
+    if (!ptActive || gameOpen()) return;
+    var dy = e.clientY - ptY0;
+    var dx = Math.abs(e.clientX - ptX0);
+    if (dy > 20 && dx < 80) {
+      ind.style.opacity = Math.min((dy - 20) / 60, 1).toFixed(2);
+    } else {
+      ind.style.opacity = '0';
+    }
+  }, {passive: true});
+
+  document.addEventListener('pointerup', function(e) {
+    if (!ptActive) return;
+    ptActive = false;
+    ind.style.opacity = '0';
+    if (gameOpen()) return;
+    var dy = e.clientY - ptY0;
+    var dx = Math.abs(e.clientX - ptX0);
+    if (dy > 80 && dx < 80) {
+      ind.style.opacity = '1';
+      setTimeout(function() { window.location.reload(); }, 200);
+    }
+  }, {passive: true});
+
+  document.addEventListener('pointercancel', function() {
+    ptActive = false; ind.style.opacity = '0';
   }, {passive: true});
 })();
 </script>
