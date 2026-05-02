@@ -439,11 +439,11 @@ function stop(){
     <div style="border:1px solid #222;padding:16px 28px;text-align:left;width:100%;max-width:380px;box-sizing:border-box;">
       <div style="font-family:'Space Mono',monospace;font-size:9px;color:#FFD700;letter-spacing:3px;margin-bottom:10px;">KAZANABİLECEKLERİN</div>
       <div style="font-family:'Space Mono',monospace;font-size:10px;color:#ccc;line-height:2.6;">
-        <span style="color:#FFD700;">🏆</span> Mükemmel → %20 İndirim<br/>
-        <span style="color:#FFD700;">🎯</span> Harika → 6 Saat Stüdyo Prova<br/>
-        <span style="color:#FFD700;">👍</span> İyi → %15 İndirim<br/>
-        <span style="color:#FFD700;">😅</span> İdare Eder → %10 / 3 Saat / Akademi Ders<br/>
-        <span style="color:#FFD700;">🎁</span> Çok Kötü → Bez Çanta!
+        <span style="color:#FFD700;">🏆</span> Tam isabet → %15 İndirim<br/>
+        <span style="color:#FFD700;">🎯</span> Az Erken → %10 İndirim<br/>
+        <span style="color:#FFD700;">🎵</span> Biraz Erken → 1 Saat Stüdyo Prova<br/>
+        <span style="color:#FFD700;">🎓</span> Çok Erken → Akademi 1 Ders<br/>
+        <span style="color:#FFD700;">🎁</span> Geç veya Kaçır → Bez Çanta!
       </div>
     </div>
     <button id="btnBasla" style="padding:22px 70px;background:#FFD700;color:#000;border:none;font-family:'Space Mono',monospace;font-size:18px;font-weight:700;letter-spacing:5px;cursor:pointer;touch-action:manipulation;">▶ BAŞLA</button>
@@ -503,11 +503,12 @@ function stop(){
 
 <script>
 var TOM_HIT_TIME = 12.18; // 12.0 + ~180ms ortalama reaksiyon süresi
-var WIN_PERFECT  = 0.03;   // ±30ms  → %20 indirim (çok zor)
-var WIN_GREAT    = 0.08;   // ±80ms  → 6 saat stüdyo (zor)
-var WIN_GOOD     = 0.18;   // ±180ms → %15 indirim (orta)
-var WIN_IDAREDER = 0.50;   // ±500ms → idare eder (kolay)
-// BACKUP: TOM_HIT_TIME=12.0, WIN_PERFECT=0.03, WIN_GREAT=0.08, WIN_GOOD=0.18, WIN_IDAREDER=0.50
+var WIN_PERFECT   = 0.03;  // ±30ms önce/sonra → %15 indirim (tam isabet)
+var WIN_BEFORE_1  = 0.20;  // 30-200ms önce    → %10 indirim
+var WIN_BEFORE_2  = 0.50;  // 200-500ms önce   → 1 saat stüdyo
+var WIN_BEFORE_3  = 1.00;  // 500ms-1s önce    → Akademi 1 ders
+// Sonrası veya 1s'den önce → Bez Çanta
+// BACKUP: TOM_HIT_TIME=12.18, WIN_PERFECT=0.03
 var STORE_CODE   = "AKS";
 
 var audioStarted   = false;
@@ -582,25 +583,16 @@ function startAudioOnTouch() {
   startMetronomeIfBanner();
 }
 
-// İdare eder havuzu — rastgele 3'ten biri
-var idareHavuzu = [
-  { emoji:"😅", title:"%10 İNDİRİM",
-    desc:"Bir sonraki alışverişinde\n%10 indirim kazandın!", code:"IND10", type:"code" },
-  { emoji:"😅", title:"3 SAAT STÜDYO",
-    desc:"Zuhal Akademi stüdyosunda\n3 saat ücretsiz prova!", code:"STD3S", type:"code" },
-  { emoji:"😅", title:"AKADEMİ 1 DERS",
-    desc:"Zuhal Akademi'de\n1 ücretsiz deneme dersi!", code:"AKDRS", type:"code" }
-];
-
-
 var whitneyPrizes = {
-  perfect: { emoji:"🏆", label:"MÜKEMMEL!",   title:"%20 İNDİRİM",
-    desc:"Bir sonraki alışverişinde\n%20 indirim kazandın!", code:"IND20", type:"code" },
-  great:   { emoji:"🎯", label:"HARİKA!",      title:"6 SAAT STÜDYO PROVA",
-    desc:"Zuhal Akademi stüdyosunda\n6 saat ücretsiz prova kazandın!", code:"STD6S", type:"code" },
-  good:    { emoji:"👍", label:"İYİ!",         title:"%15 İNDİRİM",
-    desc:"Bir sonraki alışverişinde\n%15 indirim kazandın!", code:"IND15", type:"code" },
-  miss:    { emoji:"🎁", label:"HEDİYEN VAR!", title:"50. YIL BEZ ÇANTA",
+  perfect:  { emoji:"🏆", label:"MÜKEMMEL!",   title:"%15 İNDİRİM",
+    desc:"Tam zamanında vurdun!\nBir sonraki alışverişinde %15 indirim kazandın!", code:"IND15", type:"code" },
+  before1:  { emoji:"🎯", label:"YAKLAŞTIIN!", title:"%10 İNDİRİM",
+    desc:"Bir sonraki alışverişinde\n%10 indirim kazandın!", code:"IND10", type:"code" },
+  before2:  { emoji:"🎵", label:"RİTİM HISSI VAR!", title:"1 SAAT STÜDYO PROVA",
+    desc:"Zuhal Akademi stüdyosunda\n1 saat ücretsiz prova kazandın!", code:"STD1S", type:"code" },
+  before3:  { emoji:"🎓", label:"POTANSİYEL VAR!", title:"AKADEMİ 1 DERS",
+    desc:"Zuhal Akademi'de\n1 ücretsiz deneme dersi kazandın!", code:"AKDRS", type:"code" },
+  miss:     { emoji:"🎁", label:"HEDİYEN VAR!", title:"50. YIL BEZ ÇANTA",
     desc:"Zuhal'in 50. yılına özel\nbez çantayı kazandın!", code:"", type:"canta" }
 };
 
@@ -855,15 +847,17 @@ function handleHit() {
   } else {
     elapsed = (Date.now() - audioStartTime) / 1000;
   }
-  var diff = Math.abs(elapsed - TOM_HIT_TIME);
-  console.log("Vuruş: elapsed=" + elapsed.toFixed(3) + "s | diff=" + (diff*1000).toFixed(0) + "ms | result threshold: perfect<" + (WIN_PERFECT*1000) + "ms");
+  var signedDiff = elapsed - TOM_HIT_TIME; // negatif = erken, pozitif = geç
+  var absDiff = Math.abs(signedDiff);
+  console.log("Vuruş: elapsed=" + elapsed.toFixed(3) + "s | signedDiff=" + (signedDiff*1000).toFixed(0) + "ms (" + (signedDiff < 0 ? "ERKEN" : "GEÇ") + ")");
 
   var result;
-  if      (diff <= WIN_PERFECT)  result = "perfect";
-  else if (diff <= WIN_GREAT)    result = "great";
-  else if (diff <= WIN_GOOD)     result = "good";
-  else if (diff <= WIN_IDAREDER) result = "idareder";
-  else                           result = "miss";
+  if      (absDiff <= WIN_PERFECT)                        result = "perfect";   // tam isabet
+  else if (signedDiff > 0)                                result = "miss";      // geç vurdu
+  else if (absDiff <= WIN_BEFORE_1)                       result = "before1";   // az erken → %10
+  else if (absDiff <= WIN_BEFORE_2)                       result = "before2";   // orta erken → stüdyo
+  else if (absDiff <= WIN_BEFORE_3)                       result = "before3";   // çok erken → akademi
+  else                                                    result = "miss";      // çok çok erken
 
   // Buton efekti
   var btn = document.getElementById("btnVur");
@@ -888,26 +882,9 @@ function handleHit() {
 
 
 function showWhitneyResult(result) {
-  var p;
-  if (result === "idareder") {
-    p = idareHavuzu[Math.floor(Math.random() * idareHavuzu.length)];
-    document.getElementById("winEmoji").textContent = p.emoji;
-    document.getElementById("winLabel").textContent = "İDARE EDER!";
-  } else if (result === "miss") {
-    p = { emoji:"🎁", label:"HEDİYEN VAR!", title:"50. YIL BEZ ÇANTA",
-      desc:"Zuhal'in 50. yılına özel\nbez çantayı kazandın!", code:"", type:"canta" };
-    document.getElementById("winEmoji").textContent = p.emoji;
-    document.getElementById("winLabel").textContent = p.label;
-  } else {
-    p = whitneyPrizes[result];
-    if (!p) {
-      // Beklenmedik result — bez çanta ver
-      p = { emoji:"🎁", label:"HEDİYEN VAR!", title:"50. YIL BEZ ÇANTA",
-        desc:"Zuhal'in 50. yılına özel\nbez çantayı kazandın!", code:"", type:"canta" };
-    }
-    document.getElementById("winEmoji").textContent = p.emoji;
-    document.getElementById("winLabel").textContent = p.label;
-  }
+  var p = whitneyPrizes[result] || whitneyPrizes["miss"];
+  document.getElementById("winEmoji").textContent = p.emoji;
+  document.getElementById("winLabel").textContent = p.label;
   document.getElementById("winTitle").textContent = p.title;
   document.getElementById("winDesc").textContent  = p.desc;
   if (p.type === "code") {
