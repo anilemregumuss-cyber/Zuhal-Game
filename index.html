@@ -525,7 +525,6 @@ function stop(){
         🎁 Mağaza ekibine göster, ödülünü al!
       </div>
     </div>
-    <div id="winDebug" style="font-family:'Space Mono',monospace;font-size:9px;color:#333;letter-spacing:1px;margin-bottom:4px;"></div>
     <button id="btnTamam" aria-label="Kapat" style="padding:clamp(14px,2vh,22px) clamp(50px,8vmin,80px);background:#FFD700;color:#000;border:none;font-family:'Space Mono',monospace;font-size:clamp(12px,1.8vmin,18px);font-weight:700;letter-spacing:5px;cursor:pointer;touch-action:manipulation;">✓ TAMAM</button>
   </div>
 
@@ -548,7 +547,6 @@ var missTimerW     = null;
 var audioStartTime = 0;   // Date.now() bazlı (fallback)
 var audioStartOffset = 0; // wAudioCtx.currentTime bazlı (hassas)
 var wSourcePlaying = false; // source.start() çağrıldıktan sonra true
-var lastHitElapsed = 0;    // debug: son vuruşun elapsed süresi (saniye)
 var wSource        = null;  // AudioBufferSourceNode
 var wAudioCtx      = null;  // Oyun için ayrı AudioContext
 var wBuffer        = null;  // Decode edilmiş buffer (cache)
@@ -746,7 +744,6 @@ function startWhitneyGame() {
   wShowPanel("gamePlaying");
   hitMade = false;
   gameRunning = true;
-  lastHitElapsed = -1; // sıfırla — miss'te önceki oyunun değeri görünmesin
 
   var bar = document.getElementById("progressBar");
   if (bar) bar.style.width = "0%";
@@ -902,7 +899,6 @@ function handleHit() {
   } else {
     elapsed = (Date.now() - audioStartTime) / 1000;
   }
-  lastHitElapsed = elapsed;
   var diff = Math.abs(elapsed - TOM_HIT_TIME);
 
   var result;
@@ -938,16 +934,7 @@ function showWhitneyResult(result) {
   document.getElementById("winLabel").textContent = p.label;
   document.getElementById("winTitle").textContent = p.title;
   document.getElementById("winDesc").textContent  = p.desc;
-  // DEBUG — kalibrasyon için: vuruş anı ve fark
-  var dbg = document.getElementById("winDebug");
-  if (dbg) {
-    if (lastHitElapsed < 0) {
-      dbg.textContent = "⏱ butona vurulmadı — miss timer tetikledi";
-    } else {
-      var dbgDiff = Math.abs(lastHitElapsed - TOM_HIT_TIME);
-      dbg.textContent = "⏱ elapsed:" + lastHitElapsed.toFixed(3) + "s  |  diff:" + (dbgDiff*1000).toFixed(0) + "ms  |  hedef:" + TOM_HIT_TIME + "s";
-    }
-  }
+
   if (p.type === "code") {
     document.getElementById("prizeCode").textContent = makeCode(p.code);
     document.getElementById("codeBox").style.display  = "flex";
