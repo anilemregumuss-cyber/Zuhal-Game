@@ -702,6 +702,7 @@ function playBufferAndStart() {
   wSource.start(0);
   // Web Audio currentTime — Date.now()'dan çok daha hassas
   audioStartOffset = wAudioCtx.currentTime;
+  audioStartTime   = Date.now(); // fallback için
 
   var statusEl = document.getElementById("gameStatusTxt");
   if (statusEl) statusEl.textContent = "DİNLE VE BEKLE...";
@@ -717,9 +718,10 @@ function playBufferAndStart() {
 
   missTimerW = setTimeout(function() {
     if (!hitMade && gameRunning) {
+      gameRunning = false; // MIDI'nin tekrar tetiklemesini engelle
       stopWAudio();
       clearInterval(progressTimerW);
-      showWhitneyResult("surpriz");
+      showWhitneyResult("miss");
     }
   }, totalMs);
 }
@@ -751,6 +753,7 @@ function startWhitneyGame() {
         wSource.connect(wAudioCtx.destination);
         wSource.start(0);
         audioStartOffset = wAudioCtx.currentTime;
+        audioStartTime   = Date.now(); // fallback için
         if (statusEl) statusEl.textContent = "DİNLE VE BEKLE...";
 
         var totalMs = (TOM_HIT_TIME + 1.5) * 1000;
@@ -763,9 +766,10 @@ function startWhitneyGame() {
 
         missTimerW = setTimeout(function() {
           if (!hitMade && gameRunning) {
+            gameRunning = false; // MIDI'nin tekrar tetiklemesini engelle
             stopWAudio();
             clearInterval(progressTimerW);
-            showWhitneyResult("surpriz");
+            showWhitneyResult("miss");
           }
         }, totalMs);
 
@@ -854,10 +858,14 @@ function handleHit() {
   if (!gameRunning || hitMade) return;
   hitMade = true;
 
+  // Miss timer'ı hemen iptal et — artık beklemeye gerek yok
+  clearTimeout(missTimerW);
+  clearInterval(progressTimerW);
+
   // Tom sesi hemen çal
   playTomSound();
 
-  // Web Audio API currentTime ile hassas ölçüm
+  // Web Audio API currentTime ile hassas ölçüm (fallback: Date.now())
   var elapsed;
   if (wAudioCtx) {
     elapsed = wAudioCtx.currentTime - audioStartOffset;
@@ -865,7 +873,7 @@ function handleHit() {
     elapsed = (Date.now() - audioStartTime) / 1000;
   }
   var diff = Math.abs(elapsed - TOM_HIT_TIME);
-  console.log("Vuruş: elapsed=" + elapsed.toFixed(3) + "s | diff=" + (diff*1000).toFixed(0) + "ms");
+  console.log("Vuruş: elapsed=" + elapsed.toFixed(3) + "s | diff=" + (diff*1000).toFixed(0) + "ms | TOM_HIT_TIME=" + TOM_HIT_TIME);
 
   var result;
   if      (diff <= WIN_PERFECT)   result = "perfect";
@@ -889,8 +897,6 @@ function handleHit() {
   setTimeout(function() {
     gameRunning = false;
     stopWAudio();
-    clearTimeout(missTimerW);
-    clearInterval(progressTimerW);
     showWhitneyResult(result);
   }, 3000);
 }
