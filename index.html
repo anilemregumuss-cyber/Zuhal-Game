@@ -465,6 +465,11 @@ function stop(){
         </div>
       </div>
     </div>
+    <div style="width:100%;max-width:380px;display:flex;flex-direction:column;gap:8px;">
+      <div style="font-family:'Space Mono',monospace;font-size:9px;color:#FFD700;letter-spacing:3px;">ADINI YAZAR MISIN?</div>
+      <input id="playerNameInput" type="text" maxlength="30" placeholder="Adın..." autocomplete="off" autocorrect="off" spellcheck="false"
+        style="width:100%;box-sizing:border-box;background:#111;color:#fff;border:1px solid #444;font-family:'Space Mono',monospace;font-size:16px;letter-spacing:3px;padding:14px 16px;outline:none;text-transform:uppercase;" />
+    </div>
     <button id="btnBasla" aria-label="Oyunu Başlat" style="padding:clamp(16px,2.5vh,26px) clamp(50px,8vmin,80px);background:#FFD700;color:#000;border:none;font-family:'Space Mono',monospace;font-size:clamp(14px,2vmin,20px);font-weight:700;letter-spacing:5px;cursor:pointer;touch-action:manipulation;">▶ BAŞLA</button>
     <button id="btnGeri" aria-label="Ana Sayfaya Dön" style="background:transparent;color:#555;border:none;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;cursor:pointer;padding:10px;">← GERİ DÖN</button>
   </div>
@@ -491,6 +496,7 @@ function stop(){
 
   <!-- KAZANDIN -->
   <div id="gameWin" style="display:none;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:center;gap:clamp(10px,1.8vh,20px);padding:clamp(80px,10vh,120px) clamp(20px,4vw,48px) clamp(20px,4vh,48px);box-sizing:border-box;text-align:center;">
+    <div id="winPlayerName" style="font-family:'Oddee','Space Mono',monospace;font-size:clamp(22px,4vmin,40px);font-weight:700;color:#FFD700;letter-spacing:4px;display:none;"></div>
     <div id="winEmoji" aria-live="polite" style="font-size:clamp(48px,7vmin,80px);line-height:1;">🥁</div>
     <div id="winLabel" style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:5px;color:#888;"></div>
     <div id="winTitle" style="font-family:'Oddee','Space Mono',monospace;font-size:clamp(30px,5vmin,52px);font-weight:700;color:#fff;line-height:1.2;"></div>
@@ -529,6 +535,7 @@ var WIN_IDAREDER  = 0.50;  // ±500ms → İdare eder → Akademi 1 ders
 // Dışarısı → Çalışmaya devam → Bez çanta
 // BACKUP: TOM_HIT_TIME=12.18, WIN_PERFECT=0.03
 var STORE_CODE   = "AKS";
+var playerName   = "";
 
 var hitMade        = false;
 var gameRunning    = false;
@@ -674,6 +681,9 @@ function openGameOverlay() {
   clearInterval(progressTimerW);
   hitMade = false;
   gameRunning = false;
+  playerName = "";
+  var ni = document.getElementById("playerNameInput");
+  if (ni) ni.value = "";
   document.getElementById("gameOverlay").style.display = "block";
   wShowPanel("gameStart");
   preDecodeAudio();
@@ -728,6 +738,8 @@ function playBufferAndStart() {
 
 function startWhitneyGame() {
   if (gameRunning) return;
+  var nameInput = document.getElementById("playerNameInput");
+  playerName = nameInput ? nameInput.value.trim().toUpperCase() : "";
   wShowPanel("gamePlaying");
   hitMade = false;
   gameRunning = true;
@@ -930,6 +942,15 @@ function showWhitneyResult(result) {
     p = idarederPrizes[Math.floor(Math.random() * idarederPrizes.length)];
   } else {
     p = whitneyPrizes[result] || whitneyPrizes["miss"];
+  }
+  var nameEl = document.getElementById("winPlayerName");
+  if (nameEl) {
+    if (playerName) {
+      nameEl.textContent = playerName;
+      nameEl.style.display = "block";
+    } else {
+      nameEl.style.display = "none";
+    }
   }
   document.getElementById("winEmoji").textContent = p.emoji;
   document.getElementById("winLabel").textContent = p.label;
