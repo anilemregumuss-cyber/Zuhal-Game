@@ -426,14 +426,15 @@ function stop(){
 
 <!-- YENİLE BUTONU (oyun kapalıyken görünür) -->
 <button id="btnReload" onclick="window.location.reload()" aria-label="Sayfayı Yenile"
-  style="position:fixed;bottom:20px;right:20px;width:52px;height:52px;border-radius:50%;
-         background:rgba(0,0,0,0.55);border:1.5px solid rgba(255,255,255,0.18);
-         color:rgba(255,255,255,0.5);font-size:22px;cursor:pointer;z-index:8888;
-         display:flex;align-items:center;justify-content:center;
-         touch-action:manipulation;transition:background 0.2s,color 0.2s;"
-  onpointerdown="this.style.background='rgba(255,215,0,0.25)';this.style.color='#FFD700';"
-  onpointerup="this.style.background='rgba(0,0,0,0.55)';this.style.color='rgba(255,255,255,0.5)';"
-  onpointerleave="this.style.background='rgba(0,0,0,0.55)';this.style.color='rgba(255,255,255,0.5)';">↻</button>
+  style="position:fixed;top:18px;right:22px;padding:10px 18px;border-radius:6px;
+         background:rgba(0,0,0,0.72);border:1.5px solid rgba(255,255,255,0.30);
+         color:rgba(255,255,255,0.75);font-size:13px;font-family:'Space Mono',monospace;
+         letter-spacing:3px;cursor:pointer;z-index:8888;
+         display:flex;align-items:center;gap:7px;
+         touch-action:manipulation;transition:background 0.15s,color 0.15s,border-color 0.15s;"
+  onpointerdown="this.style.background='rgba(255,215,0,0.18)';this.style.color='#FFD700';this.style.borderColor='#FFD700';"
+  onpointerup="this.style.background='rgba(0,0,0,0.72)';this.style.color='rgba(255,255,255,0.75)';this.style.borderColor='rgba(255,255,255,0.30)';"
+  onpointerleave="this.style.background='rgba(0,0,0,0.72)';this.style.color='rgba(255,255,255,0.75)';this.style.borderColor='rgba(255,255,255,0.30)';">↻ YENİLE</button>
 
 <!-- OYUN EKRANI -->
 <div id="gameOverlay" role="dialog" aria-modal="true" aria-label="Ritim Challenge Oyunu" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:9999;overflow:hidden;">
@@ -524,6 +525,7 @@ function stop(){
         🎁 Mağaza ekibine göster, ödülünü al!
       </div>
     </div>
+    <div id="winDebug" style="font-family:'Space Mono',monospace;font-size:9px;color:#333;letter-spacing:1px;margin-bottom:4px;"></div>
     <button id="btnTamam" aria-label="Kapat" style="padding:clamp(14px,2vh,22px) clamp(50px,8vmin,80px);background:#FFD700;color:#000;border:none;font-family:'Space Mono',monospace;font-size:clamp(12px,1.8vmin,18px);font-weight:700;letter-spacing:5px;cursor:pointer;touch-action:manipulation;">✓ TAMAM</button>
   </div>
 
@@ -546,6 +548,7 @@ var missTimerW     = null;
 var audioStartTime = 0;   // Date.now() bazlı (fallback)
 var audioStartOffset = 0; // wAudioCtx.currentTime bazlı (hassas)
 var wSourcePlaying = false; // source.start() çağrıldıktan sonra true
+var lastHitElapsed = 0;    // debug: son vuruşun elapsed süresi (saniye)
 var wSource        = null;  // AudioBufferSourceNode
 var wAudioCtx      = null;  // Oyun için ayrı AudioContext
 var wBuffer        = null;  // Decode edilmiş buffer (cache)
@@ -898,6 +901,7 @@ function handleHit() {
   } else {
     elapsed = (Date.now() - audioStartTime) / 1000;
   }
+  lastHitElapsed = elapsed;
   var diff = Math.abs(elapsed - TOM_HIT_TIME);
 
   var result;
@@ -933,6 +937,12 @@ function showWhitneyResult(result) {
   document.getElementById("winLabel").textContent = p.label;
   document.getElementById("winTitle").textContent = p.title;
   document.getElementById("winDesc").textContent  = p.desc;
+  // DEBUG — kalibrasyon için: vuruş anı ve fark
+  var dbg = document.getElementById("winDebug");
+  if (dbg) {
+    var diff = Math.abs(lastHitElapsed - TOM_HIT_TIME);
+    dbg.textContent = "⏱ elapsed:" + lastHitElapsed.toFixed(3) + "s  |  diff:" + (diff*1000).toFixed(0) + "ms  |  hedef:" + TOM_HIT_TIME + "s";
+  }
   if (p.type === "code") {
     document.getElementById("prizeCode").textContent = makeCode(p.code);
     document.getElementById("codeBox").style.display  = "flex";
