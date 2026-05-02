@@ -534,6 +534,7 @@ var progressTimerW = null;
 var missTimerW     = null;
 var audioStartTime = 0;   // Date.now() bazlı (fallback)
 var audioStartOffset = 0; // wAudioCtx.currentTime bazlı (hassas)
+var wSourcePlaying = false; // source.start() çağrıldıktan sonra true
 var wSource        = null;  // AudioBufferSourceNode
 var wAudioCtx      = null;  // Oyun için ayrı AudioContext
 var wBuffer        = null;  // Decode edilmiş buffer (cache)
@@ -627,6 +628,7 @@ function wShowPanel(id) {
 }
 
 function stopWAudio() {
+  wSourcePlaying = false;
   if (wSource) {
     try { wSource.stop(); } catch(e) {}
     wSource.disconnect();
@@ -699,6 +701,7 @@ function playBufferAndStart() {
   audioStartOffset = wAudioCtx.currentTime;
   audioStartTime   = Date.now();
   wSource.start(0);
+  wSourcePlaying = true;
 
   var statusEl = document.getElementById("gameStatusTxt");
   if (statusEl) statusEl.textContent = "DİNLE VE BEKLE...";
@@ -751,6 +754,7 @@ function startWhitneyGame() {
         audioStartOffset = wAudioCtx.currentTime;
         audioStartTime   = Date.now();
         wSource.start(0);
+        wSourcePlaying = true;
         if (statusEl) statusEl.textContent = "DİNLE VE BEKLE...";
 
         var totalMs = (TOM_HIT_TIME + 1.5) * 1000;
@@ -863,8 +867,8 @@ function playTomSound() {
 
 function handleHit() {
   if (!gameRunning || hitMade) return;
-  // audioStartOffset=0 ise ses henüz başlamamış — MIDI erken gelmiş
-  if (wAudioCtx && audioStartOffset === 0) { hitMade = false; return; }
+  // Ses henüz başlamamışsa (MIDI erken geldi) vuruşu reddet
+  if (!wSourcePlaying) { hitMade = false; return; }
   hitMade = true;
 
   // Miss timer'ı hemen iptal et — artık beklemeye gerek yok
