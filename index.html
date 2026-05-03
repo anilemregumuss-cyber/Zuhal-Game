@@ -502,6 +502,10 @@ function stop(){
     <div id="winLabel" style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:5px;color:#888;"></div>
     <div id="winTitle" style="font-family:'Oddee','Space Mono',monospace;font-size:clamp(30px,5vmin,52px);font-weight:700;color:#fff;line-height:1.2;"></div>
     <div id="winDesc" style="font-family:'Space Mono',monospace;font-size:10px;color:#888;line-height:2.4;white-space:pre-line;"></div>
+    <div id="firstPlayMsg" style="display:none;border:2px solid #FFD700;padding:16px 24px;width:100%;max-width:380px;box-sizing:border-box;">
+      <div style="font-family:'Space Mono',monospace;font-size:9px;color:#FFD700;letter-spacing:3px;margin-bottom:8px;">1. DENEME TAMAMLANDI</div>
+      <div style="font-family:'Space Mono',monospace;font-size:10px;color:#ccc;line-height:2.2;">Ödülün <span style="color:#FFD700;font-weight:700;">2. oyununda</span> kesinleşiyor.<br/>Tekrar oyna — son şansını kullan!</div>
+    </div>
     <div id="codeBox" style="display:none;flex-direction:column;align-items:center;gap:8px;width:100%;">
       <div style="font-family:'Space Mono',monospace;font-size:9px;color:#FFD700;letter-spacing:4px;">KUPON KODUN</div>
       <div style="background:#FFD700;color:#000;padding:14px 32px;font-family:'Space Mono',monospace;font-size:20px;font-weight:700;letter-spacing:6px;border:3px solid #fff;" id="prizeCode"></div>
@@ -513,7 +517,7 @@ function stop(){
         <div style="font-family:'Space Mono',monospace;font-size:10px;color:#fff;line-height:2.2;">Bu ekranı mağaza ekibine göster</div>
       </div>
     </div>
-    <div style="border:1px solid #1a1a1a;padding:14px 24px;width:100%;max-width:380px;box-sizing:border-box;">
+    <div id="socialBox" style="border:1px solid #1a1a1a;padding:14px 24px;width:100%;max-width:380px;box-sizing:border-box;">
       <div style="font-family:'Space Mono',monospace;font-size:8px;color:#FFD700;letter-spacing:3px;margin-bottom:8px;">KAZANMAK İÇİN:</div>
       <div style="font-family:'Space Mono',monospace;font-size:9px;color:#999;line-height:2.4;">
         📷 Bu anı fotoğrafla veya video çek<br/>
@@ -523,7 +527,7 @@ function stop(){
       </div>
     </div>
     <div id="debugLog" style="display:none;font-family:'Space Mono',monospace;font-size:11px;color:#FFD700;letter-spacing:1px;text-align:center;border:1px solid #333;padding:8px 16px;width:100%;max-width:380px;box-sizing:border-box;"></div>
-    <button id="btnTekrarOyna" aria-label="Tekrar Oyna" style="display:none;padding:clamp(14px,2vh,22px) clamp(50px,8vmin,80px);background:#111;color:#FFD700;border:2px solid #FFD700;font-family:'Space Mono',monospace;font-size:clamp(12px,1.8vmin,18px);font-weight:700;letter-spacing:5px;cursor:pointer;touch-action:manipulation;">▶ TEKRAR OYNA</button>
+    <button id="btnTekrarOyna" aria-label="Tekrar Oyna" style="display:none;padding:clamp(14px,2vh,22px) clamp(50px,8vmin,80px);background:#FFD700;color:#000;border:none;font-family:'Space Mono',monospace;font-size:clamp(12px,1.8vmin,18px);font-weight:700;letter-spacing:5px;cursor:pointer;touch-action:manipulation;">▶ TEKRAR OYNA</button>
     <button id="btnTamam" aria-label="Kapat" style="padding:clamp(14px,2vh,22px) clamp(50px,8vmin,80px);background:#FFD700;color:#000;border:none;font-family:'Space Mono',monospace;font-size:clamp(12px,1.8vmin,18px);font-weight:700;letter-spacing:5px;cursor:pointer;touch-action:manipulation;">✓ TAMAM</button>
   </div>
 
@@ -1065,22 +1069,38 @@ function showWhitneyResult(result) {
   document.getElementById("winTitle").textContent = p.title;
   document.getElementById("winDesc").textContent  = p.desc;
 
-  var prizeCode = "";
-  if (p.type === "code") {
-    prizeCode = makeCode(p.code);
-    document.getElementById("prizeCode").textContent = prizeCode;
-    document.getElementById("codeBox").style.display  = "flex";
-    document.getElementById("cantaBox").style.display = "none";
+  recordPlay(playerName, result, p.title, "");
+  var remaining = MAX_PLAYS_PER_DAY - getPlayCount(playerName);
+  var isFinal = remaining <= 0;
+
+  if (isFinal) {
+    // 2. (son) oyun — gerçek ödülü göster
+    var prizeCode = "";
+    if (p.type === "code") {
+      prizeCode = makeCode(p.code);
+      document.getElementById("prizeCode").textContent = prizeCode;
+      document.getElementById("codeBox").style.display  = "flex";
+      document.getElementById("cantaBox").style.display = "none";
+    } else {
+      document.getElementById("codeBox").style.display  = "none";
+      document.getElementById("cantaBox").style.display = "flex";
+    }
+    document.getElementById("firstPlayMsg").style.display = "none";
+    document.getElementById("socialBox").style.display    = "block";
+    document.getElementById("winTitle").style.display     = "block";
+    document.getElementById("winDesc").style.display      = "block";
   } else {
-    document.getElementById("codeBox").style.display  = "none";
-    document.getElementById("cantaBox").style.display = "flex";
+    // 1. oyun — ödülü henüz gösterme
+    document.getElementById("codeBox").style.display     = "none";
+    document.getElementById("cantaBox").style.display    = "none";
+    document.getElementById("firstPlayMsg").style.display = "flex";
+    document.getElementById("socialBox").style.display   = "none";
+    document.getElementById("winTitle").style.display    = "none";
+    document.getElementById("winDesc").style.display     = "none";
   }
-  recordPlay(playerName, result, p.title, prizeCode);
+
   var btnTO = document.getElementById("btnTekrarOyna");
-  if (btnTO) {
-    var remaining = MAX_PLAYS_PER_DAY - getPlayCount(playerName);
-    btnTO.style.display = remaining > 0 ? "block" : "none";
-  }
+  if (btnTO) btnTO.style.display = isFinal ? "none" : "block";
   wShowPanel("gameWin");
 }
 
