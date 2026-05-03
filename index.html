@@ -1033,11 +1033,13 @@ function handleHit() {
     }, 150);
   }
 
-  // Tom anından SONRA vuruş → anında bez çanta, bekleme yok
+  // Tom anından SONRA vuruş
   if (elapsed > TOM_HIT_TIME) {
+    var lateMs = (elapsed - TOM_HIT_TIME) * 1000;
     gameRunning = false;
     stopWAudio();
-    showWhitneyResult("miss");
+    // 0-20ms geç → %10 indirim, 20ms+ → bez çanta
+    showWhitneyResult(lateMs <= 20 ? "great" : "miss");
     return;
   }
 
