@@ -544,7 +544,6 @@ function stop(){
     <div id="statsTable" style="font-family:'Space Mono',monospace;font-size:9px;color:#ccc;letter-spacing:1px;line-height:1;display:flex;flex-direction:column;gap:8px;"></div>
     <div style="margin-top:32px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
       <button id="btnStatsDownload" style="background:transparent;color:#FFD700;border:1px solid #FFD700;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;padding:10px 20px;cursor:pointer;">⬇ İNDİR</button>
-      <button id="btnStatsClear" style="background:transparent;color:#f44;border:1px solid #f44;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;padding:10px 20px;cursor:pointer;">VERİYİ SİL</button>
       <button id="btnStatsClose" style="background:#FFD700;color:#000;border:none;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;padding:10px 20px;cursor:pointer;font-weight:700;">KAPAT</button>
     </div>
   </div>
@@ -565,6 +564,18 @@ var MAX_PLAYS_PER_DAY = 2;
 function todayKey() {
   var d = new Date();
   return "zuhal_plays_" + d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+
+function cleanOldData() {
+  try {
+    var today = new Date(); today.setHours(0,0,0,0);
+    for (var i = localStorage.length - 1; i >= 0; i--) {
+      var k = localStorage.key(i);
+      if (!k || !k.startsWith("zuhal_plays_")) continue;
+      var d = new Date(k.replace("zuhal_plays_", ""));
+      if (!isNaN(d) && (today - d) > 2 * 86400000) localStorage.removeItem(k);
+    }
+  } catch(e) {}
 }
 
 function loadPlays() {
@@ -1048,36 +1059,43 @@ var idarederPrizes = [
     desc:"Bir sonraki alışverişinde\n%5 indirim kazandın!", code:"IND05", type:"code" }
 ];
 
+var RESULT_RANKS = { perfect:5, great:4, good:3, idareder:2, miss:1 };
+
+function prizeForResult(r) {
+  if (r === "idareder") return idarederPrizes[Math.floor(Math.random() * idarederPrizes.length)];
+  return whitneyPrizes[r] || whitneyPrizes["miss"];
+}
+
 function showWhitneyResult(result) {
-  var p;
-  if (result === "idareder") {
-    p = idarederPrizes[Math.floor(Math.random() * idarederPrizes.length)];
-  } else {
-    p = whitneyPrizes[result] || whitneyPrizes["miss"];
-  }
+  var p = prizeForResult(result);
+
   var nameEl = document.getElementById("winPlayerName");
   if (nameEl) {
-    if (playerName) {
-      nameEl.textContent = playerName;
-      nameEl.style.display = "block";
-    } else {
-      nameEl.style.display = "none";
-    }
+    if (playerName) { nameEl.textContent = playerName; nameEl.style.display = "block"; }
+    else { nameEl.style.display = "none"; }
   }
-  document.getElementById("winEmoji").textContent = p.emoji;
-  document.getElementById("winLabel").textContent = p.label;
-  document.getElementById("winTitle").textContent = p.title;
-  document.getElementById("winDesc").textContent  = p.desc;
 
   recordPlay(playerName, result, p.title, "");
   var remaining = MAX_PLAYS_PER_DAY - getPlayCount(playerName);
   var isFinal = remaining <= 0;
 
   if (isFinal) {
-    // 2. (son) oyun — gerçek ödülü göster
+    // Best of 2: 1. oyunun sonucuyla karşılaştır, iyisini ver
+    var data = loadPlays();
+    var firstResult = (data[playerName] && data[playerName].plays.length >= 2)
+      ? data[playerName].plays[0].result : null;
+    var finalResult = (firstResult && (RESULT_RANKS[firstResult]||0) > (RESULT_RANKS[result]||0))
+      ? firstResult : result;
+    var fp = prizeForResult(finalResult);
+
+    document.getElementById("winEmoji").textContent = fp.emoji;
+    document.getElementById("winLabel").textContent = fp.label;
+    document.getElementById("winTitle").textContent = fp.title;
+    document.getElementById("winDesc").textContent  = fp.desc;
+
     var prizeCode = "";
-    if (p.type === "code") {
-      prizeCode = makeCode(p.code);
+    if (fp.type === "code") {
+      prizeCode = makeCode(fp.code);
       document.getElementById("prizeCode").textContent = prizeCode;
       document.getElementById("codeBox").style.display  = "flex";
       document.getElementById("cantaBox").style.display = "none";
@@ -1085,18 +1103,30 @@ function showWhitneyResult(result) {
       document.getElementById("codeBox").style.display  = "none";
       document.getElementById("cantaBox").style.display = "flex";
     }
+
+    // Kayıttaki son oyunu nihai ödülle güncelle
+    var d2 = loadPlays();
+    if (d2[playerName] && d2[playerName].plays.length > 0) {
+      var last = d2[playerName].plays.length - 1;
+      d2[playerName].plays[last].prize = fp.title;
+      d2[playerName].plays[last].code  = prizeCode;
+      savePlays(d2);
+    }
+
     document.getElementById("firstPlayMsg").style.display = "none";
     document.getElementById("socialBox").style.display    = "block";
     document.getElementById("winTitle").style.display     = "block";
     document.getElementById("winDesc").style.display      = "block";
   } else {
     // 1. oyun — ödülü henüz gösterme
-    document.getElementById("codeBox").style.display     = "none";
-    document.getElementById("cantaBox").style.display    = "none";
-    document.getElementById("firstPlayMsg").style.display = "flex";
-    document.getElementById("socialBox").style.display   = "none";
-    document.getElementById("winTitle").style.display    = "none";
-    document.getElementById("winDesc").style.display     = "none";
+    document.getElementById("winEmoji").textContent = p.emoji;
+    document.getElementById("winLabel").textContent = p.label;
+    document.getElementById("codeBox").style.display      = "none";
+    document.getElementById("cantaBox").style.display     = "none";
+    document.getElementById("firstPlayMsg").style.display = "block";
+    document.getElementById("socialBox").style.display    = "none";
+    document.getElementById("winTitle").style.display     = "none";
+    document.getElementById("winDesc").style.display      = "none";
   }
 
   var btnTO = document.getElementById("btnTekrarOyna");
@@ -1270,6 +1300,7 @@ function downloadStats() {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
+  cleanOldData();
 
   // Logoya 5 kez hızlı basınca istatistik paneli açılır
   var logoTapCount = 0, logoTapTimer = null;
@@ -1303,12 +1334,6 @@ document.addEventListener("DOMContentLoaded", function() {
   addBtn("btnTekrarOyna", startGameDirectly);
   addBtn("btnStatsClose", closeStats);
   addBtn("btnStatsDownload", downloadStats);
-  addBtn("btnStatsClear", function() {
-    if (confirm("Bugünkü tüm veriler silinsin mi?")) {
-      localStorage.removeItem(todayKey());
-      openStats();
-    }
-  });
 
   var btnVur = document.getElementById("btnVur");
   if (btnVur) {
