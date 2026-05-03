@@ -1059,8 +1059,6 @@ var idarederPrizes = [
     desc:"Bir sonraki alışverişinde\n%5 indirim kazandın!", code:"IND05", type:"code" }
 ];
 
-var RESULT_RANKS = { perfect:5, great:4, good:3, idareder:2, miss:1 };
-
 function prizeForResult(r) {
   if (r === "idareder") return idarederPrizes[Math.floor(Math.random() * idarederPrizes.length)];
   return whitneyPrizes[r] || whitneyPrizes["miss"];
@@ -1080,22 +1078,15 @@ function showWhitneyResult(result) {
   var isFinal = remaining <= 0;
 
   if (isFinal) {
-    // Best of 2: 1. oyunun sonucuyla karşılaştır, iyisini ver
-    var data = loadPlays();
-    var firstResult = (data[playerName] && data[playerName].plays.length >= 2)
-      ? data[playerName].plays[0].result : null;
-    var finalResult = (firstResult && (RESULT_RANKS[firstResult]||0) > (RESULT_RANKS[result]||0))
-      ? firstResult : result;
-    var fp = prizeForResult(finalResult);
-
-    document.getElementById("winEmoji").textContent = fp.emoji;
-    document.getElementById("winLabel").textContent = fp.label;
-    document.getElementById("winTitle").textContent = fp.title;
-    document.getElementById("winDesc").textContent  = fp.desc;
+    // 2. (gerçek) oyun — doğrudan bu oyunun ödülü geçerli
+    document.getElementById("winEmoji").textContent = p.emoji;
+    document.getElementById("winLabel").textContent = p.label;
+    document.getElementById("winTitle").textContent = p.title;
+    document.getElementById("winDesc").textContent  = p.desc;
 
     var prizeCode = "";
-    if (fp.type === "code") {
-      prizeCode = makeCode(fp.code);
+    if (p.type === "code") {
+      prizeCode = makeCode(p.code);
       document.getElementById("prizeCode").textContent = prizeCode;
       document.getElementById("codeBox").style.display  = "flex";
       document.getElementById("cantaBox").style.display = "none";
@@ -1104,12 +1095,11 @@ function showWhitneyResult(result) {
       document.getElementById("cantaBox").style.display = "flex";
     }
 
-    // Kayıttaki son oyunu nihai ödülle güncelle
+    // Kayıttaki son oyunu kod ile güncelle
     var d2 = loadPlays();
     if (d2[playerName] && d2[playerName].plays.length > 0) {
       var last = d2[playerName].plays.length - 1;
-      d2[playerName].plays[last].prize = fp.title;
-      d2[playerName].plays[last].code  = prizeCode;
+      d2[playerName].plays[last].code = prizeCode;
       savePlays(d2);
     }
 
