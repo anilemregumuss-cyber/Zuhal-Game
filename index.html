@@ -523,6 +523,7 @@ function stop(){
       </div>
     </div>
     <div id="debugLog" style="display:none;font-family:'Space Mono',monospace;font-size:11px;color:#FFD700;letter-spacing:1px;text-align:center;border:1px solid #333;padding:8px 16px;width:100%;max-width:380px;box-sizing:border-box;"></div>
+    <button id="btnTekrarOyna" aria-label="Tekrar Oyna" style="display:none;padding:clamp(14px,2vh,22px) clamp(50px,8vmin,80px);background:#111;color:#FFD700;border:2px solid #FFD700;font-family:'Space Mono',monospace;font-size:clamp(12px,1.8vmin,18px);font-weight:700;letter-spacing:5px;cursor:pointer;touch-action:manipulation;">▶ TEKRAR OYNA</button>
     <button id="btnTamam" aria-label="Kapat" style="padding:clamp(14px,2vh,22px) clamp(50px,8vmin,80px);background:#FFD700;color:#000;border:none;font-family:'Space Mono',monospace;font-size:clamp(12px,1.8vmin,18px);font-weight:700;letter-spacing:5px;cursor:pointer;touch-action:manipulation;">✓ TAMAM</button>
   </div>
 
@@ -674,7 +675,7 @@ var whitneyPrizes = {
   great:     { emoji:"🎯", label:"HARİKA!",           title:"%10 İNDİRİM",
     desc:"Bir sonraki alışverişinde\n%10 indirim kazandın!", code:"IND10", type:"code" },
   good:      { emoji:"🎵", label:"İYİ!",              title:"2 SAAT STÜDYO PROVA",
-    desc:"Zuhal Akademi stüdyosunda\n2 saat ücretsiz prova kazandın!", code:"STD2S", type:"code" },
+    desc:"Zuhal Stüdyoları'nda\n2 saat ücretsiz prova kazandın!", code:"STD2S", type:"code" },
   idareder:  null,
   miss:      { emoji:"🎁", label:"ÇALIŞMAYA DEVAM!", title:"50. YIL BEZ ÇANTA",
     desc:"Zuhal'in 50. yılına özel\nbez çantayı kazandın!", code:"", type:"canta" }
@@ -813,23 +814,7 @@ function clearNameError() {
   if (inp) inp.style.borderColor = "#444";
 }
 
-function startWhitneyGame() {
-  if (gameRunning) return;
-  clearNameError();
-  var nameInput = document.getElementById("playerNameInput");
-  var rawName = nameInput ? nameInput.value.trim() : "";
-  var parts = rawName.trim().split(/\s+/);
-  if (parts.length < 2 || parts[1].length < 1) {
-    showNameError("! AD VE SOYAD GEREKLİ");
-    return;
-  }
-  playerName = rawName.toUpperCase();
-  var playCount = getPlayCount(playerName);
-  if (playCount >= MAX_PLAYS_PER_DAY) {
-    showNameError("! BUGÜN " + MAX_PLAYS_PER_DAY + " KEZ OYNADINI — YARIN GEL");
-    return;
-  }
-  wShowPanel("gamePlaying");
+function _launchGame() {
   hitMade = false;
   gameRunning = true;
 
@@ -837,12 +822,11 @@ function startWhitneyGame() {
   if (bar) bar.style.width = "0%";
 
   var statusEl = document.getElementById("gameStatusTxt");
+  wShowPanel("gamePlaying");
 
   if (wBuffer) {
-    // Buffer hazır, hemen çal
     playBufferAndStart();
   } else {
-    // Henüz decode olmadı — decode et ve çal
     if (statusEl) statusEl.textContent = "YÜKLENIYOR...";
     try {
       wAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -887,13 +871,37 @@ function startWhitneyGame() {
             statusEl.style.cursor = "";
             statusEl.style.color = "";
             statusEl.onclick = null;
-            startWhitneyGame();
+            _launchGame();
           };
         }
       });
-    } catch(e) {
-    }
+    } catch(e) {}
   }
+}
+
+function startWhitneyGame() {
+  if (gameRunning) return;
+  clearNameError();
+  var nameInput = document.getElementById("playerNameInput");
+  var rawName = nameInput ? nameInput.value.trim() : "";
+  var parts = rawName.trim().split(/\s+/);
+  if (parts.length < 2 || parts[1].length < 1) {
+    showNameError("! AD VE SOYAD GEREKLİ");
+    return;
+  }
+  playerName = rawName.toUpperCase();
+  var playCount = getPlayCount(playerName);
+  if (playCount >= MAX_PLAYS_PER_DAY) {
+    showNameError("! BUGÜN " + MAX_PLAYS_PER_DAY + " KEZ OYNADIN — YARIN GEL");
+    return;
+  }
+  _launchGame();
+}
+
+function startGameDirectly() {
+  if (gameRunning || !playerName) return;
+  if (getPlayCount(playerName) >= MAX_PLAYS_PER_DAY) return;
+  _launchGame();
 }
 
 function playTomSound() {
@@ -1010,7 +1018,15 @@ function handleHit() {
     }, 150);
   }
 
-  // Parça 3 sn daha çalsın — kullanıcı nerede vurduğunu duysun
+  // Tom anından SONRA vuruş → anında bez çanta, bekleme yok
+  if (elapsed > TOM_HIT_TIME) {
+    gameRunning = false;
+    stopWAudio();
+    showWhitneyResult("miss");
+    return;
+  }
+
+  // Erken vuruş: parça 3 sn daha çalsın — kullanıcı nerede vurduğunu duysun
   setTimeout(function() {
     gameRunning = false;
     stopWAudio();
@@ -1023,7 +1039,7 @@ var idarederPrizes = [
   { emoji:"🎓", label:"İDARE EDER!", title:"AKADEMİ 1 DERS",
     desc:"Zuhal Akademi'de\n1 ücretsiz deneme dersi kazandın!", code:"AKDRS", type:"code" },
   { emoji:"🎵", label:"İDARE EDER!", title:"1 SAAT STÜDYO PROVA",
-    desc:"Zuhal Akademi stüdyosunda\n1 saat ücretsiz prova kazandın!", code:"STD1S", type:"code" },
+    desc:"Zuhal Stüdyoları'nda\n1 saat ücretsiz prova kazandın!", code:"STD1S", type:"code" },
   { emoji:"💰", label:"İDARE EDER!", title:"%5 İNDİRİM",
     desc:"Bir sonraki alışverişinde\n%5 indirim kazandın!", code:"IND05", type:"code" }
 ];
@@ -1060,6 +1076,11 @@ function showWhitneyResult(result) {
     document.getElementById("cantaBox").style.display = "flex";
   }
   recordPlay(playerName, result, p.title, prizeCode);
+  var btnTO = document.getElementById("btnTekrarOyna");
+  if (btnTO) {
+    var remaining = MAX_PLAYS_PER_DAY - getPlayCount(playerName);
+    btnTO.style.display = remaining > 0 ? "block" : "none";
+  }
   wShowPanel("gameWin");
 }
 
@@ -1259,6 +1280,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   addBtn("btnGeri",  closeGame);
   addBtn("btnTamam", closeGame);
+  addBtn("btnTekrarOyna", startGameDirectly);
   addBtn("btnStatsClose", closeStats);
   addBtn("btnStatsDownload", downloadStats);
   addBtn("btnStatsClear", function() {
