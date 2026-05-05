@@ -23,8 +23,8 @@ body{background:#000;width:100vw;min-height:100vh;font-family:'Bebas Neue',sans-
 .diag-line{font-family:'Space Mono',monospace;font-size:clamp(8px,1.1vw,12px);font-weight:700;color:rgba(195,155,0,0.45);letter-spacing:clamp(3px,0.7vw,7px);white-space:nowrap;line-height:1.1;}
 
 /* ── TICKET CARD ── */
-.ticket-card{width:min(76%,400px);position:relative;z-index:3;background:#f0e8c8;border-radius:clamp(8px,1.5vw,18px);display:flex;flex-direction:column;align-items:stretch;overflow:hidden;box-shadow:0 10px 50px rgba(0,0,0,0.6);flex-shrink:1;max-height:98%;}
-.ticket-card::before,.ticket-card::after{content:'';position:absolute;width:clamp(16px,2.5vw,26px);height:clamp(16px,2.5vw,26px);background:#1c1208;border-radius:50%;z-index:6;top:63%;}
+.ticket-card{width:min(66%,360px);position:relative;z-index:3;background:#e8ddb5;border-radius:clamp(8px,1.5vw,18px);display:flex;flex-direction:column;align-items:stretch;overflow:hidden;box-shadow:0 10px 50px rgba(0,0,0,0.6);flex-shrink:1;max-height:98%;}
+.ticket-card::before,.ticket-card::after{content:'';position:absolute;width:clamp(16px,2.5vw,26px);height:clamp(16px,2.5vw,26px);background:#1c1208;border-radius:50%;z-index:6;top:55%;}
 .ticket-card::before{left:calc(clamp(-8px,-1.25vw,-13px));}
 .ticket-card::after{right:calc(clamp(-8px,-1.25vw,-13px));}
 
@@ -36,14 +36,14 @@ body{background:#000;width:100vw;min-height:100vh;font-family:'Bebas Neue',sans-
 
 /* ── CARD BODY ── */
 .card-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:clamp(6px,1.2vh,14px) clamp(10px,2.5vw,24px) clamp(4px,1vh,12px);min-height:0;}
-.card-main-text{font-size:clamp(16px,4.5vw,56px);color:#1c1208;text-align:center;line-height:0.92;letter-spacing:clamp(0px,0.3vw,3px);flex-shrink:0;}
-.card-metro{width:min(82%,250px);flex-shrink:1;min-height:0;}
+.card-main-text{font-size:clamp(18px,5vw,60px);color:#1c1208;text-align:center;line-height:0.9;letter-spacing:clamp(0px,0.3vw,3px);flex-shrink:0;font-weight:900;}
+.card-metro{width:min(90%,300px);flex-shrink:1;min-height:0;position:relative;}
 .card-metro svg{display:block;width:100%;height:auto;}
-.card-tagline{font-size:clamp(20px,5.5vw,70px);color:#1c1208;text-align:center;line-height:0.9;letter-spacing:clamp(0px,0.2vw,2px);flex-shrink:0;}
-.card-logo{max-height:clamp(30px,5.5vh,62px);width:auto;object-fit:contain;flex-shrink:0;}
+.card-tagline{font-size:clamp(22px,6vw,76px);color:#1c1208;text-align:center;line-height:0.88;letter-spacing:clamp(0px,0.2vw,2px);flex-shrink:0;position:relative;z-index:2;}
+.card-logo{max-height:clamp(28px,5vh,56px);width:auto;object-fit:contain;flex-shrink:0;position:relative;z-index:2;}
 
 /* ── INVERTED METRONOME (pivot at top) ── */
-.needle-group{transform-origin:160px 22px;animation:swing 0.6s ease-in-out infinite alternate;}
+.needle-group{transform-origin:160px 18px;animation:swing 0.6s ease-in-out infinite alternate;}
 @keyframes swing{from{transform:rotate(-32deg);}to{transform:rotate(32deg);}}
 
 /* ── BANNER BOTTOM ── */
@@ -155,34 +155,35 @@ body{background:#000;width:100vw;min-height:100vh;font-family:'Bebas Neue',sans-
         <div class="card-main-text">ZUHAL<br>MAĞAZALARINDA<br>SÜRPRİZ<br>ÜRÜNLERDE</div>
 
         <div class="card-metro">
-          <svg width="100%" viewBox="0 0 320 210">
-          <!-- Outer decorative arc -->
-          <path d="M42 155 A185 185 0 0 1 278 155" fill="none" stroke="rgba(0,0,0,0.08)" stroke-width="1"/>
-          <!-- Main arc -->
-          <path d="M68 162 A155 155 0 0 1 252 162" fill="none" stroke="rgba(0,0,0,0.18)" stroke-width="1.5"/>
-          <!-- Inner arc -->
-          <path d="M96 172 A120 120 0 0 1 224 172" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1"/>
-          <!-- Innermost arc -->
-          <path d="M118 178 A88 88 0 0 1 202 178" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
-          <!-- Tick marks on main arc (at 0, ±15, ±30 degrees) -->
-          <g stroke="rgba(0,0,0,0.3)" stroke-width="1.5">
-            <line x1="160" y1="176" x2="160" y2="185"/>
-            <line x1="117" y1="168" x2="114" y2="177"/>
-            <line x1="203" y1="168" x2="206" y2="177"/>
-            <line x1="82" y1="152" x2="77" y2="160"/>
-            <line x1="238" y1="152" x2="243" y2="160"/>
+          <svg width="100%" viewBox="0 0 320 250">
+          <!-- Konsantrik yaylar (referanstaki radar görünümü) -->
+          <circle cx="160" cy="240" r="95" fill="none" stroke="rgba(0,0,0,0.08)" stroke-width="1.2"/>
+          <circle cx="160" cy="240" r="70" fill="none" stroke="rgba(0,0,0,0.08)" stroke-width="1.2"/>
+          <circle cx="160" cy="240" r="46" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
+          <circle cx="160" cy="240" r="25" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
+          <!-- Ana salınım yayı -->
+          <path d="M75 135 A140 140 0 0 1 245 135" fill="none" stroke="rgba(0,0,0,0.22)" stroke-width="2"/>
+          <!-- Dış yay -->
+          <path d="M48 124 A170 170 0 0 1 272 124" fill="none" stroke="rgba(0,0,0,0.09)" stroke-width="1"/>
+          <!-- Tick marks ana yay üzerinde -->
+          <g stroke="rgba(0,0,0,0.28)" stroke-width="1.5">
+            <line x1="160" y1="156" x2="160" y2="168"/>
+            <line x1="118" y1="147" x2="115" y2="159"/>
+            <line x1="202" y1="147" x2="205" y2="159"/>
+            <line x1="84" y1="128" x2="79" y2="138"/>
+            <line x1="236" y1="128" x2="241" y2="138"/>
           </g>
-          <!-- Small open circles at ±22° positions on main arc -->
-          <circle cx="101" cy="174" r="4.5" fill="#f0e8c8" stroke="rgba(0,0,0,0.3)" stroke-width="1.5"/>
-          <circle cx="219" cy="174" r="4.5" fill="#f0e8c8" stroke="rgba(0,0,0,0.3)" stroke-width="1.5"/>
-          <!-- Needle group: pivot at top (160, 22) -->
+          <!-- Küçük açık daireler ana yay üzerinde (±24°) -->
+          <circle cx="103" cy="143" r="5" fill="#e8ddb5" stroke="rgba(0,0,0,0.32)" stroke-width="1.8"/>
+          <circle cx="217" cy="143" r="5" fill="#e8ddb5" stroke="rgba(0,0,0,0.32)" stroke-width="1.8"/>
+          <!-- İğne grubu: pivot (160,18) -->
           <g id="needle" class="needle-group">
-            <!-- Pivot housing -->
-            <polygon points="152,12 168,12 164,28 156,28" fill="#1c1208"/>
-            <!-- Needle shaft -->
-            <line x1="160" y1="22" x2="160" y2="184" stroke="#1c1208" stroke-width="2" stroke-linecap="round"/>
-            <!-- Pendulum bob (large filled circle) -->
-            <circle cx="160" cy="185" r="13" fill="#1c1208"/>
+            <!-- Pivot housing (küçük üçgen/trapez) -->
+            <polygon points="151,8 169,8 165,24 155,24" fill="#1c1208"/>
+            <!-- İğne gövdesi -->
+            <line x1="160" y1="18" x2="160" y2="225" stroke="#1c1208" stroke-width="2.2" stroke-linecap="round"/>
+            <!-- Sarkaç ağırlığı (büyük dolu daire) -->
+            <circle cx="160" cy="228" r="15" fill="#1c1208"/>
           </g>
         </svg>
         </div>
