@@ -7,60 +7,169 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 html{touch-action:pan-y;overscroll-behavior-y:auto;}
 body{background:#000;width:100vw;min-height:100vh;font-family:'Bebas Neue',sans-serif;}
-.banner{width:100vw;height:100vh;background:#1c1208;position:relative;overflow:hidden;display:flex;flex-direction:column;}
+
+/* ── BANNER ── */
+.banner{
+  width:100vw;height:100vh;
+  background:#000;
+  position:relative;overflow:hidden;
+  display:flex;flex-direction:column;
+}
 .tick-flash{position:absolute;inset:0;background:rgba(255,255,255,0.08);opacity:0;pointer-events:none;z-index:40;}
 
-/* BANNER TOP */
-.banner-top{text-align:left;padding:clamp(14px,3vh,36px) clamp(16px,4vw,40px) clamp(6px,1.2vh,14px);flex-shrink:0;position:relative;z-index:5;}
-.halftime-title{font-size:clamp(60px,16vw,210px);color:#FFD700;line-height:0.82;transform:skewX(-5deg);display:inline-block;text-shadow:3px 5px 0 rgba(0,0,0,0.45);}
-.banner-sub1{font-size:clamp(14px,3.8vw,48px);color:#fff;letter-spacing:clamp(1px,0.5vw,5px);line-height:1;margin-top:clamp(2px,0.5vh,8px);}
-.banner-sub2{font-size:clamp(13px,3.4vw,44px);color:#fff;letter-spacing:clamp(1px,0.5vw,5px);line-height:1;}
+/* ── SIDE TICKERS (sol ve sağ dikey şeritler) ── */
+.side-ticker{
+  position:absolute;top:0;bottom:0;
+  width:clamp(22px,3.5vw,38px);
+  overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  z-index:2;
+}
+.side-ticker.left{left:0;}
+.side-ticker.right{right:0;}
+.side-ticker-inner{
+  writing-mode:vertical-rl;
+  white-space:nowrap;
+  font-family:'Space Mono',monospace;
+  font-size:clamp(7px,1vw,11px);
+  font-weight:700;
+  color:rgba(210,170,0,0.65);
+  letter-spacing:3px;
+  animation:tickerUp 10s linear infinite;
+}
+.side-ticker.right .side-ticker-inner{
+  transform:rotate(180deg);
+  animation-direction:reverse;
+}
+@keyframes tickerUp{from{transform:translateY(0);}to{transform:translateY(-50%);}}
 
-/* BANNER MAIN */
-.banner-main{flex:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:0;}
+/* ── BANNER TOP ── */
+.banner-top{
+  text-align:left;
+  padding:clamp(12px,2.5vh,30px) clamp(40px,8vw,80px) clamp(4px,1vh,12px);
+  flex-shrink:0;
+  position:relative;z-index:5;
+}
+.halftime-title{
+  font-size:clamp(56px,14vw,190px);
+  color:#FFD700;
+  line-height:0.83;
+  transform:skewX(-5deg);
+  display:inline-block;
+  text-shadow:3px 4px 0 rgba(0,0,0,0.5);
+}
+.banner-sub1{
+  font-size:clamp(13px,3.2vw,42px);
+  color:#fff;
+  letter-spacing:clamp(1px,0.4vw,4px);
+  line-height:1.05;
+  margin-top:clamp(2px,0.5vh,6px);
+}
+.banner-sub2{
+  font-size:clamp(13px,3.2vw,42px);
+  color:#fff;
+  letter-spacing:clamp(1px,0.4vw,4px);
+  line-height:1.05;
+}
 
-/* DIAGONAL SINIRLI STOK */
-.diag-overlay{position:absolute;top:-60%;left:-40%;right:-40%;bottom:-60%;transform:rotate(-45deg);display:flex;flex-direction:column;gap:clamp(8px,1.5vh,18px);pointer-events:none;z-index:1;}
-.diag-line{font-family:'Space Mono',monospace;font-size:clamp(9px,1.2vw,13px);font-weight:700;color:rgba(200,160,0,0.42);letter-spacing:clamp(3px,0.8vw,8px);white-space:nowrap;line-height:1.1;}
+/* ── BANNER MAIN ── */
+.banner-main{
+  flex:1;min-height:0;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;z-index:3;
+  padding:0 clamp(36px,6vw,64px);
+}
 
-/* TICKET CARD */
-.ticket-card{width:min(80%,440px);position:relative;z-index:3;background:#ede5c0;border-radius:clamp(8px,1.5vw,16px) clamp(8px,1.5vw,16px) 0 0;display:flex;flex-direction:column;align-items:stretch;overflow:visible;box-shadow:0 10px 50px rgba(0,0,0,0.6);flex-shrink:1;max-height:96%;}
-/* Card inner clip (rounded top only, bottom has notches) */
-.card-inner{border-radius:clamp(8px,1.5vw,16px) clamp(8px,1.5vw,16px) 0 0;overflow:hidden;display:flex;flex-direction:column;flex:1;}
+/* ── TICKET CARD ── */
+.ticket-card{
+  width:100%;max-width:480px;
+  position:relative;
+  background:#e8ddb5;
+  display:flex;flex-direction:column;
+  box-shadow:0 8px 40px rgba(0,0,0,0.7);
+  /* Tırtıklı üst kenar — radial-gradient ile */
+  border-radius:0;
+}
 
-/* Notch cut-outs on left and right (at ~55% from top) */
-.ticket-card::before,.ticket-card::after{content:'';position:absolute;width:clamp(18px,2.8vw,30px);height:clamp(18px,2.8vw,30px);background:#1c1208;border-radius:50%;z-index:6;top:52%;}
-.ticket-card::before{left:calc(clamp(-9px,-1.4vw,-15px));}
-.ticket-card::after{right:calc(clamp(-9px,-1.4vw,-15px));}
+/* Üst tırtık (scallop) — pseudo element ile */
+.card-scallop-top{
+  width:100%;
+  height:clamp(12px,2vh,20px);
+  flex-shrink:0;
+  background:
+    radial-gradient(circle at 5.55% 0%, #000 50%, #e8ddb5 50%),
+    radial-gradient(circle at 16.66% 0%, #000 50%, #e8ddb5 50%),
+    radial-gradient(circle at 27.77% 0%, #000 50%, #e8ddb5 50%),
+    radial-gradient(circle at 38.88% 0%, #000 50%, #e8ddb5 50%),
+    radial-gradient(circle at 50%    0%, #000 50%, #e8ddb5 50%),
+    radial-gradient(circle at 61.11% 0%, #000 50%, #e8ddb5 50%),
+    radial-gradient(circle at 72.22% 0%, #000 50%, #e8ddb5 50%),
+    radial-gradient(circle at 83.33% 0%, #000 50%, #e8ddb5 50%),
+    radial-gradient(circle at 94.44% 0%, #000 50%, #e8ddb5 50%);
+}
 
-/* TOP TICKER BAND */
-.card-ticker-band{width:100%;overflow:hidden;padding:clamp(4px,0.8vh,8px) 0;border-bottom:1.5px solid rgba(0,0,0,0.14);flex-shrink:0;background:rgba(0,0,0,0.04);}
+/* Alt tırtık */
+.card-scallop-bot{
+  width:100%;
+  height:clamp(12px,2vh,20px);
+  flex-shrink:0;
+  background:
+    radial-gradient(circle at 5.55% 100%, #000 50%, #e8ddb5 50%),
+    radial-gradient(circle at 16.66% 100%, #000 50%, #e8ddb5 50%),
+    radial-gradient(circle at 27.77% 100%, #000 50%, #e8ddb5 50%),
+    radial-gradient(circle at 38.88% 100%, #000 50%, #e8ddb5 50%),
+    radial-gradient(circle at 50%    100%, #000 50%, #e8ddb5 50%),
+    radial-gradient(circle at 61.11% 100%, #000 50%, #e8ddb5 50%),
+    radial-gradient(circle at 72.22% 100%, #000 50%, #e8ddb5 50%),
+    radial-gradient(circle at 83.33% 100%, #000 50%, #e8ddb5 50%),
+    radial-gradient(circle at 94.44% 100%, #000 50%, #e8ddb5 50%);
+}
+
+/* Sol/sağ notch (yarım daire kesik) */
+.ticket-card::before,.ticket-card::after{
+  content:'';position:absolute;
+  width:clamp(18px,3vw,32px);height:clamp(18px,3vw,32px);
+  background:#000;border-radius:50%;z-index:6;top:50%;
+  transform:translateY(-50%);
+}
+.ticket-card::before{left:calc(clamp(-9px,-1.5vw,-16px));}
+.ticket-card::after{right:calc(clamp(-9px,-1.5vw,-16px));}
+
+/* ── CARD TOP TICKER ── */
+.card-ticker-band{
+  width:100%;overflow:hidden;
+  padding:clamp(4px,0.7vh,7px) 0;
+  border-bottom:1.5px solid rgba(0,0,0,0.15);
+  flex-shrink:0;
+  background:rgba(0,0,0,0.03);
+}
 .card-ticker-inner{display:inline-flex;animation:scrollLeft 14s linear infinite;white-space:nowrap;}
-.card-ticker-txt{font-family:'Space Mono',monospace;font-size:clamp(7px,1vw,11px);font-weight:700;letter-spacing:clamp(2px,0.5vw,5px);color:rgba(0,0,0,0.4);padding:0 8px;}
+.card-ticker-txt{font-family:'Space Mono',monospace;font-size:clamp(7px,1vw,10px);font-weight:700;letter-spacing:3px;color:rgba(0,0,0,0.38);padding:0 6px;}
 @keyframes scrollLeft{from{transform:translateX(0);}to{transform:translateX(-50%);}}
 
-/* CARD BODY */
-.card-body{flex:1;display:flex;flex-direction:column;align-items:center;padding:clamp(6px,1.2vh,14px) clamp(10px,2.5vw,24px) 0;min-height:0;position:relative;}
+/* ── CARD BODY ── */
+.card-body{
+  flex:1;min-height:0;
+  display:flex;flex-direction:column;align-items:center;
+  padding:clamp(6px,1.2vh,14px) clamp(12px,3vw,28px) clamp(4px,0.8vh,10px);
+}
 
 /* %50 İNDİRİM */
-.card-pct{font-size:clamp(48px,13vw,170px);color:#1c1208;line-height:0.82;text-align:center;letter-spacing:clamp(-2px,0px,2px);flex-shrink:0;}
-.card-ind{font-size:clamp(28px,7.5vw,96px);color:#1c1208;line-height:0.85;text-align:center;letter-spacing:clamp(2px,1vw,10px);flex-shrink:0;margin-top:clamp(-4px,0px,4px);}
+.card-pct{font-size:clamp(50px,13.5vw,180px);color:#1a1008;line-height:0.82;text-align:center;flex-shrink:0;}
+.card-ind{font-size:clamp(28px,7.5vw,100px);color:#1a1008;line-height:0.85;text-align:center;letter-spacing:clamp(2px,1vw,8px);flex-shrink:0;}
 
-/* Dashed separator */
-.card-sep{width:90%;border:none;border-top:2px dashed rgba(0,0,0,0.22);margin:clamp(4px,0.8vh,10px) 0;flex-shrink:0;}
+/* Kesikli ayraç */
+.card-sep{width:85%;border:none;border-top:2px dashed rgba(0,0,0,0.2);margin:clamp(4px,0.8vh,10px) 0;flex-shrink:0;}
 
-/* METRONOME AREA */
-.card-metro{width:100%;flex:1;position:relative;min-height:0;display:flex;flex-direction:column;align-items:center;}
+/* Metronom alanı */
+.card-metro{width:100%;flex:1;min-height:0;}
 .card-metro svg{width:100%;height:100%;display:block;}
 
-/* Bottom notch row */
-.card-notch-row{width:100%;height:clamp(14px,2.5vh,24px);flex-shrink:0;overflow:hidden;position:relative;}
-
-/* NEEDLE */
-.needle-group{transform-origin:160px 16px;animation:swing 0.65s ease-in-out infinite alternate;}
+/* ── METRONOM İĞNESİ ── */
+.needle-group{transform-origin:160px 14px;animation:swing 0.65s ease-in-out infinite alternate;}
 @keyframes swing{from{transform:rotate(-30deg);}to{transform:rotate(30deg);}}
 
-/* BANNER BOTTOM */
+/* ── BANNER BOTTOM ── */
 .banner-bottom{background:#000;flex-shrink:0;display:flex;flex-direction:column;align-items:center;}
 .pct-block{width:100%;display:flex;align-items:center;justify-content:center;border-top:2.5px solid #fff;border-bottom:2.5px solid #fff;padding:4px 0;position:relative;}
 .pct-line{height:2px;width:clamp(14px,3vw,28px);background:#fff;transition:background 0.2s;}
@@ -106,106 +215,79 @@ body{background:#000;width:100vw;min-height:100vh;font-family:'Bebas Neue',sans-
 <div class="banner">
   <div class="tick-flash" id="tf"></div>
 
+  <!-- Sol dikey SINIRLI STOK -->
+  <div class="side-ticker left">
+    <div class="side-ticker-inner">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
+  </div>
+  <!-- Sağ dikey SINIRLI STOK -->
+  <div class="side-ticker right">
+    <div class="side-ticker-inner">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
+  </div>
+
+  <!-- Üst başlık -->
   <div class="banner-top">
     <div class="halftime-title">HALFTIME</div>
     <div class="banner-sub1">ZUHAL MAĞAZALARINDA</div>
     <div class="banner-sub2">SÜRPRİZ ÜRÜNLERDE</div>
   </div>
 
+  <!-- Kart alanı -->
   <div class="banner-main">
-    <div class="diag-overlay">
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-      <div class="diag-line">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-    </div>
-
     <div class="ticket-card">
-      <div class="card-inner">
-        <div class="card-ticker-band">
-          <div class="card-ticker-inner"><span class="card-ticker-txt">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </span><span class="card-ticker-txt">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </span></div>
-        </div>
-        <div class="card-body">
-          <div class="card-pct">%50</div>
-          <div class="card-ind">İNDİRİM</div>
-          <hr class="card-sep">
-          <div class="card-metro">
-            <svg width="100%" height="100%" viewBox="0 0 320 280" preserveAspectRatio="xMidYMid meet">
-          <!-- Konsantrik halkalar altta (radar efekti) -->
-          <circle cx="160" cy="268" r="110" fill="none" stroke="rgba(0,0,0,0.08)" stroke-width="1.2"/>
-          <circle cx="160" cy="268" r="82"  fill="none" stroke="rgba(0,0,0,0.09)" stroke-width="1.2"/>
-          <circle cx="160" cy="268" r="56"  fill="none" stroke="rgba(0,0,0,0.1)"  stroke-width="1.2"/>
-          <circle cx="160" cy="268" r="32"  fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1.2"/>
-          <!-- Ana salınım yayı -->
-          <path d="M76 129 A140 140 0 0 1 244 129" fill="none" stroke="rgba(0,0,0,0.25)" stroke-width="2"/>
-          <!-- Dış yay -->
-          <path d="M50 118 A168 168 0 0 1 270 118" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
-          <!-- Yay üzerindeki küçük çemberler (7 adet: ±0,±12,±24,±35°) -->
-          <circle cx="160" cy="152" r="4.5" fill="#ede5c0" stroke="rgba(0,0,0,0.35)" stroke-width="1.8"/>
-          <circle cx="131" cy="148" r="4.5" fill="#ede5c0" stroke="rgba(0,0,0,0.32)" stroke-width="1.8"/>
-          <circle cx="189" cy="148" r="4.5" fill="#ede5c0" stroke="rgba(0,0,0,0.32)" stroke-width="1.8"/>
-          <circle cx="104" cy="138" r="4.5" fill="#ede5c0" stroke="rgba(0,0,0,0.28)" stroke-width="1.8"/>
-          <circle cx="216" cy="138" r="4.5" fill="#ede5c0" stroke="rgba(0,0,0,0.28)" stroke-width="1.8"/>
-          <circle cx="82"  cy="124" r="5"   fill="#ede5c0" stroke="rgba(0,0,0,0.25)" stroke-width="1.8"/>
-          <circle cx="238" cy="124" r="5"   fill="#ede5c0" stroke="rgba(0,0,0,0.25)" stroke-width="1.8"/>
-          <!-- YARIM TEMPO, TAM FIRSAT -->
-          <text x="160" y="184" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="32" fill="#1c1208" letter-spacing="1">YARIM TEMPO,</text>
-          <text x="160" y="216" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="32" fill="#1c1208" letter-spacing="1">TAM FIRSAT</text>
-          <!-- İğne grubu: pivot (160,14) -->
-          <g id="needle" class="needle-group">
-            <polygon points="152,4 168,4 165,20 155,20" fill="#1c1208"/>
-            <line x1="160" y1="14" x2="160" y2="258" stroke="#1c1208" stroke-width="2.2" stroke-linecap="round"/>
-            <circle cx="160" cy="261" r="15" fill="#1c1208"/>
-          </g>
-        </svg>
-          </div>
-        </div>
-        <div class="card-notch-row">
-          <svg width="100%" height="100%" viewBox="0 0 360 20" preserveAspectRatio="none">
-        <rect width="360" height="20" fill="#ede5c0"/>
-        <circle cx="20" cy="0" r="10" fill="#1c1208"/><circle cx="56" cy="0" r="10" fill="#1c1208"/><circle cx="92" cy="0" r="10" fill="#1c1208"/><circle cx="128" cy="0" r="10" fill="#1c1208"/><circle cx="164" cy="0" r="10" fill="#1c1208"/><circle cx="200" cy="0" r="10" fill="#1c1208"/><circle cx="236" cy="0" r="10" fill="#1c1208"/><circle cx="272" cy="0" r="10" fill="#1c1208"/><circle cx="308" cy="0" r="10" fill="#1c1208"/>
-      </svg>
+      <!-- Üst tırtık -->
+      <div class="card-scallop-top"></div>
+
+      <!-- Yatay ticker band -->
+      <div class="card-ticker-band">
+        <div class="card-ticker-inner">
+          <span class="card-ticker-txt">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </span>
+          <span class="card-ticker-txt">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </span>
         </div>
       </div>
+
+      <!-- Kart içeriği -->
+      <div class="card-body">
+        <div class="card-pct">%50</div>
+        <div class="card-ind">İNDİRİM</div>
+        <hr class="card-sep">
+        <div class="card-metro">
+          <svg width="100%" height="100%" viewBox="0 0 320 280" preserveAspectRatio="xMidYMid meet">
+  <!-- Konsantrik halkalar (radar) -->
+  <circle cx="160" cy="270" r="108" fill="none" stroke="rgba(0,0,0,0.09)" stroke-width="1.2"/>
+  <circle cx="160" cy="270" r="80"  fill="none" stroke="rgba(0,0,0,0.09)" stroke-width="1.2"/>
+  <circle cx="160" cy="270" r="54"  fill="none" stroke="rgba(0,0,0,0.1)"  stroke-width="1.2"/>
+  <circle cx="160" cy="270" r="30"  fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1.2"/>
+  <!-- Ana salınım yayı -->
+  <path d="M74 132 A140 140 0 0 1 246 132" fill="none" stroke="rgba(0,0,0,0.28)" stroke-width="2"/>
+  <!-- Dış yay -->
+  <path d="M48 120 A170 170 0 0 1 272 120" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
+  <!-- Yay üzerinde 7 küçük çember -->
+  <circle cx="160" cy="152" r="4.5" fill="#e8ddb5" stroke="rgba(0,0,0,0.35)" stroke-width="1.8"/>
+  <circle cx="130" cy="147" r="4.5" fill="#e8ddb5" stroke="rgba(0,0,0,0.3)"  stroke-width="1.8"/>
+  <circle cx="190" cy="147" r="4.5" fill="#e8ddb5" stroke="rgba(0,0,0,0.3)"  stroke-width="1.8"/>
+  <circle cx="103" cy="135" r="4.5" fill="#e8ddb5" stroke="rgba(0,0,0,0.25)" stroke-width="1.8"/>
+  <circle cx="217" cy="135" r="4.5" fill="#e8ddb5" stroke="rgba(0,0,0,0.25)" stroke-width="1.8"/>
+  <circle cx="80"  cy="120" r="5"   fill="#e8ddb5" stroke="rgba(0,0,0,0.22)" stroke-width="1.8"/>
+  <circle cx="240" cy="120" r="5"   fill="#e8ddb5" stroke="rgba(0,0,0,0.22)" stroke-width="1.8"/>
+  <!-- YARIM TEMPO, TAM FIRSAT -->
+  <text x="160" y="182" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="34" fill="#1a1008" letter-spacing="1">YARIM TEMPO,</text>
+  <text x="160" y="216" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="34" fill="#1a1008" letter-spacing="1">TAM FIRSAT</text>
+  <!-- İğne grubu -->
+  <g id="needle" class="needle-group">
+    <polygon points="153,4 167,4 164,20 156,20" fill="#1a1008"/>
+    <line x1="160" y1="14" x2="160" y2="258" stroke="#1a1008" stroke-width="2.2" stroke-linecap="round"/>
+    <circle cx="160" cy="261" r="14" fill="#1a1008"/>
+  </g>
+</svg>
+        </div>
+      </div>
+
+      <!-- Alt tırtık -->
+      <div class="card-scallop-bot"></div>
     </div>
   </div>
 
+  <!-- Alt ritim bölümü -->
   <div class="banner-bottom">
     <div class="pct-block" id="pctBlock">
       <div class="pct-line" id="pctLine1"></div>
@@ -226,11 +308,11 @@ body{background:#000;width:100vw;min-height:100vh;font-family:'Bebas Neue',sans-
         <div class="step-cell" id="s14"></div><div class="step-cell" id="s15"></div>
       </div>
       <div class="beat-row">
-        <div class="beat-bar" style="height:9px" id="b0"></div><div class="beat-bar" style="height:6px" id="b1"></div>
-        <div class="beat-bar" style="height:13px" id="b2"></div><div class="beat-bar" style="height:5px" id="b3"></div>
-        <div class="beat-bar" style="height:16px" id="b4"></div><div class="beat-bar" style="height:6px" id="b5"></div>
-        <div class="beat-bar" style="height:10px" id="b6"></div><div class="beat-bar" style="height:8px" id="b7"></div>
-        <div class="beat-bar" style="height:14px" id="b8"></div><div class="beat-bar" style="height:5px" id="b9"></div>
+        <div class="beat-bar" style="height:9px"  id="b0"></div><div class="beat-bar" style="height:6px"  id="b1"></div>
+        <div class="beat-bar" style="height:13px" id="b2"></div><div class="beat-bar" style="height:5px"  id="b3"></div>
+        <div class="beat-bar" style="height:16px" id="b4"></div><div class="beat-bar" style="height:6px"  id="b5"></div>
+        <div class="beat-bar" style="height:10px" id="b6"></div><div class="beat-bar" style="height:8px"  id="b7"></div>
+        <div class="beat-bar" style="height:14px" id="b8"></div><div class="beat-bar" style="height:5px"  id="b9"></div>
         <div class="beat-bar" style="height:10px" id="b10"></div><div class="beat-bar" style="height:7px" id="b11"></div>
         <div class="beat-bar" style="height:18px" id="b12"></div><div class="beat-bar" style="height:6px" id="b13"></div>
         <div class="beat-bar" style="height:12px" id="b14"></div><div class="beat-bar" style="height:8px" id="b15"></div>
