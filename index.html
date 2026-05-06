@@ -257,17 +257,16 @@ function updateUI(){
 function start(){
   if(playing) return;
   if(AC.state==='suspended') AC.resume();
-  // MST bağlantısını kontrol et
   try { MST.connect(AC.destination); } catch(e) {}
   playing=true; isHalf=false; step=0; measure=0; barInPhase=0;
   lastDrawn=-1; Q.length=0;
   nextTime=AC.currentTime+0.05;
-  document.getElementById('btnStart').disabled=true;
-  document.getElementById('btnStop').disabled=false;
-  document.getElementById('stxt').textContent='NORMAL — 100 BPM';
-  document.getElementById('dot').classList.add('on');
-  document.getElementById('pctBlock').classList.remove('blink-hard');
-  document.getElementById('slogan').classList.remove('blink-hard');
+  var bs=document.getElementById('btnStart'); if(bs) bs.disabled=true;
+  var bst=document.getElementById('btnStop'); if(bst) bst.disabled=false;
+  var stxt=document.getElementById('stxt'); if(stxt) stxt.textContent='NORMAL — 100 BPM';
+  var dot=document.getElementById('dot'); if(dot) dot.classList.add('on');
+  var pb=document.getElementById('pctBlock'); if(pb) pb.classList.remove('blink-hard');
+  var sl=document.getElementById('slogan'); if(sl) sl.classList.remove('blink-hard');
   schedule();
   requestAnimationFrame(rafLoop);
 }
@@ -275,17 +274,15 @@ function start(){
 function stop(){
   playing=false; clearTimeout(timerId); Q.length=0;
   isHalf=false; step=0; measure=0; barInPhase=0;
-  // Tüm sesi kes — AudioContext suspend
   if(AC && AC.state==='running') AC.suspend().catch(function(){});
-  document.getElementById('btnStart').disabled=false;
-  document.getElementById('btnStop').disabled=true;
-  document.getElementById('stxt').textContent='DURDURULDU';
-  document.getElementById('dot').classList.remove('on');
-  document.getElementById('mtxt').textContent='ÖLÇÜ: 0';
-  document.getElementById('badge').textContent='● NORMAL — 4/4';
-  document.getElementById('badge').className='mode-badge';
-  document.getElementById('pctBlock').classList.remove('blink-hard');
-  document.getElementById('slogan').classList.remove('blink-hard');
+  var bs=document.getElementById('btnStart'); if(bs) bs.disabled=false;
+  var bst=document.getElementById('btnStop'); if(bst) bst.disabled=true;
+  var stxt=document.getElementById('stxt'); if(stxt) stxt.textContent='DURDURULDU';
+  var dot=document.getElementById('dot'); if(dot) dot.classList.remove('on');
+  var mtxt=document.getElementById('mtxt'); if(mtxt) mtxt.textContent='ÖLÇÜ: 0';
+  var badge=document.getElementById('badge'); if(badge){badge.textContent='● NORMAL — 4/4';badge.className='mode-badge';}
+  var pb=document.getElementById('pctBlock'); if(pb) pb.classList.remove('blink-hard');
+  var sl=document.getElementById('slogan'); if(sl) sl.classList.remove('blink-hard');
   for(let i=0;i<16;i++){const s=document.getElementById('s'+i);if(s)s.classList.remove('on');}
   const rest=[9,6,13,5,16,6,10,8,14,5,10,7,18,6,12,8];
   for(let i=0;i<16;i++){const b=document.getElementById('b'+i);if(b){b.style.height=rest[i]+'px';b.style.opacity='0.15';}}
