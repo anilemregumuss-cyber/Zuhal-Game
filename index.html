@@ -625,8 +625,8 @@ function stop(){
     <div id="winTitle" style="font-family:'Oddee','Space Mono',monospace;font-size:clamp(30px,5vmin,52px);font-weight:700;color:#fff;line-height:1.2;"></div>
     <div id="winDesc" style="font-family:'Space Mono',monospace;font-size:10px;color:#888;line-height:2.4;white-space:pre-line;"></div>
     <div id="firstPlayMsg" style="display:none;border:2px solid #FFD700;padding:16px 24px;width:100%;max-width:380px;box-sizing:border-box;">
-      <div style="font-family:'Space Mono',monospace;font-size:9px;color:#FFD700;letter-spacing:3px;margin-bottom:8px;">1. DENEME TAMAMLANDI</div>
-      <div style="font-family:'Space Mono',monospace;font-size:10px;color:#ccc;line-height:2.2;">Ödülün <span style="color:#FFD700;font-weight:700;">2. oyununda</span> kesinleşiyor.<br/>Tekrar oyna — son şansını kullan!</div>
+      <div id="firstPlayLabel" style="font-family:'Space Mono',monospace;font-size:9px;color:#FFD700;letter-spacing:3px;margin-bottom:8px;">1. DENEME TAMAMLANDI</div>
+      <div id="firstPlayDesc" style="font-family:'Space Mono',monospace;font-size:10px;color:#ccc;line-height:2.2;"></div>
     </div>
     <div id="codeBox" style="display:none;flex-direction:column;align-items:center;gap:8px;width:100%;">
       <div style="font-family:'Space Mono',monospace;font-size:9px;color:#FFD700;letter-spacing:4px;">KUPON KODUN</div>
@@ -681,7 +681,7 @@ var WIN_IDAREDER  = 0.50;  // ±500ms → İdare eder → rastgele 3 ödül
 // BACKUP: TOM_HIT_TIME=11.95, WIN_PERFECT=0.03, WIN_GREAT=0.08, WIN_GOOD=0.18
 var STORE_CODE   = "AKS";
 var playerName   = "";
-var MAX_PLAYS_PER_DAY = 2;
+var MAX_PLAYS_PER_DAY = 3;
 
 function todayKey() {
   var d = new Date();
@@ -1232,7 +1232,8 @@ function showWhitneyResult(result) {
     document.getElementById("winTitle").style.display     = "block";
     document.getElementById("winDesc").style.display      = "block";
   } else {
-    // 1. oyun — ödülü henüz gösterme
+    // Ara oyun — ödülü henüz gösterme
+    var playsDone = MAX_PLAYS_PER_DAY - remaining;
     document.getElementById("winEmoji").textContent = p.emoji;
     document.getElementById("winLabel").textContent = p.label;
     document.getElementById("codeBox").style.display      = "none";
@@ -1241,6 +1242,16 @@ function showWhitneyResult(result) {
     document.getElementById("socialBox").style.display    = "none";
     document.getElementById("winTitle").style.display     = "none";
     document.getElementById("winDesc").style.display      = "none";
+    var labelEl = document.getElementById("firstPlayLabel");
+    var descEl  = document.getElementById("firstPlayDesc");
+    if (labelEl) labelEl.textContent = playsDone + ". DENEME TAMAMLANDI";
+    if (descEl) {
+      if (remaining === 1) {
+        descEl.innerHTML = "Ödülün <span style='color:#FFD700;font-weight:700;'>" + MAX_PLAYS_PER_DAY + ". oyununda</span> kesinleşiyor.<br/>Son şansını kullan!";
+      } else {
+        descEl.innerHTML = "Ödülün <span style='color:#FFD700;font-weight:700;'>" + MAX_PLAYS_PER_DAY + ". oyununda</span> kesinleşiyor.<br/>Tekrar oyna — " + remaining + " hakkın kaldı!";
+      }
+    }
   }
 
   var btnTO = document.getElementById("btnTekrarOyna");
