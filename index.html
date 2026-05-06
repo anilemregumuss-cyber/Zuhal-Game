@@ -500,13 +500,12 @@ function startBannerAudio() {
   }
   bannerAudioEl.play().catch(function(){});
   bannerAudioOn = true;
-  startMetronomeIfBanner();
+  // Synthesized metronom çalmıyor — sadece WAV
 }
 
 function stopBannerAudio() {
   if (bannerAudioEl) { bannerAudioEl.pause(); bannerAudioEl.currentTime = 0; }
   bannerAudioOn = false;
-  stop();
 }
 var wDecodePending = false;
 
@@ -1227,10 +1226,14 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 
-  // Banner dokunuş toggle
+  // Banner dokunuş toggle — Android'de touchstart+click çift tetiklenmesini önle
+  var lastBannerToggle = 0;
   function bannerTouch(e) {
     var overlay = document.getElementById("gameOverlay");
     if (overlay && overlay.style.display !== "none") return;
+    var now = Date.now();
+    if (now - lastBannerToggle < 600) return; // çift tetiklenmeyi engelle
+    lastBannerToggle = now;
     unlockAC();
     if (bannerAudioOn) {
       stopBannerAudio();
