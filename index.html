@@ -8,34 +8,160 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{width:100vw;height:100vh;background:#000;overflow:hidden;}
 body{font-family:'Bebas Neue',sans-serif;}
+
 .banner{
-  width:100vw;height:100vh;
-  background:#000;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:flex-end;
   position:relative;
+  width:100vw;height:100vh;
   overflow:hidden;
+  display:flex;align-items:flex-end;justify-content:center;
 }
+
+/* PNG tam arka plan */
 .banner-img{
-  position:absolute;
-  top:0;left:0;
+  position:absolute;top:0;left:0;
   width:100%;height:100%;
-  object-fit:cover;
-  object-position:center top;
-  display:block;
+  object-fit:cover;object-position:center top;
+  display:block;z-index:0;
 }
+
+/* ══ DIŞ SOL/SAĞ TICKER (üstten aşağı, koyu şerit) ══ */
+.ot-side{
+  position:absolute;top:0;bottom:0;
+  width:5.5vw;
+  overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  background:#1a1208;
+  z-index:2;
+}
+.ot-side-l{left:0;}
+.ot-side-r{right:0;}
+.ot-side-text{
+  writing-mode:vertical-rl;
+  white-space:nowrap;
+  font-family:'Space Mono',monospace;
+  font-size:clamp(7px,1vw,11px);
+  font-weight:700;
+  color:rgba(210,170,0,0.7);
+  letter-spacing:3px;
+  animation:sideDown 14s linear infinite;
+}
+.ot-side-r .ot-side-text{
+  transform:rotate(180deg);
+  animation-direction:reverse;
+}
+@keyframes sideDown{from{transform:translateY(0);}to{transform:translateY(-50%);}}
+
+/* ══ İÇ YATAY TICKER ÜST (soldan sağa) ══ */
+.ot-h{
+  position:absolute;
+  left:5.5vw;right:5.5vw;
+  height:22px;
+  overflow:hidden;
+  background:#e8ddb5;
+  border-bottom:1px solid rgba(0,0,0,0.12);
+  z-index:3;
+  display:flex;align-items:center;
+}
+.ot-h-top{top:21vh;}
+.ot-h-bot{
+  bottom:14vh;
+  border-bottom:none;
+  border-top:1px solid rgba(0,0,0,0.12);
+}
+.ot-h-inner{
+  display:inline-flex;
+  animation:tickH 16s linear infinite;
+  white-space:nowrap;
+  font-family:'Space Mono',monospace;
+  font-size:8px;font-weight:700;
+  letter-spacing:3px;
+  color:rgba(0,0,0,0.38);
+  padding:0 6px;
+}
+@keyframes tickH{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+/* ══ METRONOM İĞNESİ OVERLAY ══ */
+.ot-needle-wrap{
+  position:absolute;
+  left:50%;
+  top:23vh;
+  transform:translateX(-50%);
+  width:75vw;
+  max-width:420px;
+  z-index:4;
+  pointer-events:none;
+}
+.ot-needle-wrap svg{width:100%;height:auto;display:block;}
+.needle-group{
+  transform-origin:160px 10px;
+  animation:swing 0.6s ease-in-out infinite alternate;
+}
+@keyframes swing{from{transform:rotate(-28deg);}to{transform:rotate(28deg);}}
+
+/* ══ YARIM TEMPO / TAM FIRSAT ritim animasyonu ══ */
+.ot-txt{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  font-family:'Bebas Neue',sans-serif;
+  color:#1a1008;
+  text-align:center;
+  white-space:nowrap;
+  z-index:5;
+  pointer-events:none;
+  font-size:clamp(28px,7.5vw,60px);
+  line-height:1;
+}
+.ot-yarim{
+  top:59vh;
+  animation:pulseF 0.6s ease-in-out infinite alternate;
+}
+.ot-tam{
+  top:67vh;
+  animation:pulseF 0.6s ease-in-out infinite alternate-reverse;
+}
+@keyframes pulseF{
+  from{transform:translateX(-50%) scale(1) perspective(400px) translateZ(0);}
+  to  {transform:translateX(-50%) scale(1.07) perspective(400px) translateZ(10px);}
+}
+
+/* ══ SÜRPİZ ÜRÜNLERDE — halftime'da yanıp söner ══ */
+.ot-surprise{
+  position:absolute;
+  left:50%;top:27vh;
+  transform:translateX(-50%);
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(20px,5.5vw,44px);
+  color:#1a1008;
+  text-align:center;
+  line-height:0.98;
+  z-index:5;
+  pointer-events:none;
+  opacity:0; /* PNG'de zaten görünüyor, biz sadece halftime'da blink ekleriz */
+}
+.ot-surprise.blink-half{
+  opacity:1;
+  background:#e8ddb5;
+  padding:4px 8px;
+  animation:blinkHalf 0.3s steps(1) infinite;
+}
+@keyframes blinkHalf{0%,49%{opacity:1;}50%,100%{opacity:0.05;}}
+
+/* ══ OYNA BUTONU ══ */
 #btnGame{
   position:relative;z-index:10;
-  margin-bottom:60px;
-  padding:32px 120px;
+  margin-bottom:32px;
+  padding:16px 60px;
   background:#FFD700;color:#000;
   border:none;
   font-family:'Space Mono',monospace;
-  font-size:28px;font-weight:700;
-  letter-spacing:6px;
+  font-size:16px;font-weight:700;
+  letter-spacing:5px;
   cursor:pointer;touch-action:manipulation;
   box-shadow:0 4px 24px rgba(0,0,0,0.5);
 }
+
+/* Diğer keyframe'ler (oyun için) */
 @keyframes ring-spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
 @keyframes ring-spin-rev{from{transform:rotate(0deg);}to{transform:rotate(-360deg);}}
 @keyframes fade-in{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
@@ -47,7 +173,59 @@ body{font-family:'Bebas Neue',sans-serif;}
 <body>
 
 <div class="banner">
+  <!-- PNG arka plan -->
   <img class="banner-img" src="ZuhalHalftimeoyunilksayfa.png" alt="Halftime">
+
+  <!-- Dış sol SINIRLI STOK (üstten aşağı) -->
+  <div class="ot-side ot-side-l">
+    <div class="ot-side-text">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
+  </div>
+  <!-- Dış sağ SINIRLI STOK (üstten aşağı) -->
+  <div class="ot-side ot-side-r">
+    <div class="ot-side-text">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
+  </div>
+
+  <!-- İç üst yatay ticker (soldan sağa) -->
+  <div class="ot-h ot-h-top">
+    <div class="ot-h-inner">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
+  </div>
+  <!-- İç alt yatay ticker -->
+  <div class="ot-h ot-h-bot">
+    <div class="ot-h-inner">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
+  </div>
+
+  <!-- Metronom iğnesi SVG overlay -->
+  <div class="ot-needle-wrap">
+    <svg viewBox="0 0 320 260" preserveAspectRatio="xMidYMid meet">
+      <!-- Beyaz arka plan — statik iğneyi örter -->
+      <rect x="60" y="0" width="200" height="200" fill="#e8ddb5"/>
+      <!-- Yay üzerinde 7 küçük çember -->
+      <path d="M74 132 A140 140 0 0 1 246 132" fill="none" stroke="rgba(0,0,0,0.22)" stroke-width="1.8"/>
+      <circle cx="160" cy="152" r="4" fill="#e8ddb5" stroke="rgba(0,0,0,0.3)" stroke-width="1.6"/>
+      <circle cx="130" cy="147" r="4" fill="#e8ddb5" stroke="rgba(0,0,0,0.25)" stroke-width="1.6"/>
+      <circle cx="190" cy="147" r="4" fill="#e8ddb5" stroke="rgba(0,0,0,0.25)" stroke-width="1.6"/>
+      <circle cx="103" cy="135" r="4" fill="#e8ddb5" stroke="rgba(0,0,0,0.2)"  stroke-width="1.6"/>
+      <circle cx="217" cy="135" r="4" fill="#e8ddb5" stroke="rgba(0,0,0,0.2)"  stroke-width="1.6"/>
+      <circle cx="80"  cy="120" r="4.5" fill="#e8ddb5" stroke="rgba(0,0,0,0.18)" stroke-width="1.6"/>
+      <circle cx="240" cy="120" r="4.5" fill="#e8ddb5" stroke="rgba(0,0,0,0.18)" stroke-width="1.6"/>
+      <!-- Animasyonlu iğne -->
+      <g class="needle-group">
+        <polygon points="154,2 166,2 163,18 157,18" fill="#1a1008"/>
+        <line x1="160" y1="10" x2="160" y2="195" stroke="#1a1008" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="160" cy="198" r="11" fill="#1a1008"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- YARIM TEMPO ritim animasyonu -->
+  <div class="ot-txt ot-yarim">YARIM TEMPO,</div>
+  <!-- TAM FIRSAT ritim animasyonu -->
+  <div class="ot-txt ot-tam">TAM FIRSAT</div>
+
+  <!-- SÜRPİZ ÜRÜNLERDE — halftime'da görünür ve yanıp söner -->
+  <div class="ot-surprise" id="otSurprise">SÜRPİZ ÜRÜNLERDE<br>%50'YE VARAN<br>İNDİRİM FIRSATLARI</div>
+
+  <!-- OYNA butonu -->
   <button id="btnGame">▶ OYNA</button>
 </div>
 <div style="display:none;">
@@ -224,16 +402,16 @@ function updateUI(){
     badge.textContent='◐ HALFTİME — RİTİM 2X YAVAŞ';
     badge.className='mode-badge mode-half';
     stxt.textContent='METRONOMunuz: 100 BPM · RİTİM: HALFTIME';
-    // %50 yanıp sönmeye başla
     pct.classList.add('blink-hard');
     document.getElementById('slogan').classList.add('blink-hard');
+    var sur=document.getElementById('otSurprise'); if(sur) sur.classList.add('blink-half');
   } else {
     badge.textContent='● NORMAL — 4/4';
     badge.className='mode-badge';
     stxt.textContent='NORMAL — 100 BPM';
-    // %50 yanıp sönmeyi durdur
     pct.classList.remove('blink-hard');
     document.getElementById('slogan').classList.remove('blink-hard');
+    var sur=document.getElementById('otSurprise'); if(sur) sur.classList.remove('blink-half');
   }
 }
 
