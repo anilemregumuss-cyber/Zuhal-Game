@@ -424,7 +424,7 @@ var WIN_IDAREDER  = 0.50;  // ±500ms → İdare eder → rastgele 3 ödül
 // BACKUP: TOM_HIT_TIME=11.95, WIN_PERFECT=0.03, WIN_GREAT=0.08, WIN_GOOD=0.18
 var STORE_CODE   = "AKS";
 var playerName   = "";
-var MAX_PLAYS_PER_DAY = 3;
+var MAX_PLAYS_PER_DAY = 2;
 
 function todayKey() {
   var d = new Date();
@@ -578,7 +578,8 @@ function stopWAudio() {
 }
 
 function openGameOverlay() {
-  // Metronom tamamen durdur
+  // Banner sesini durdur
+  if (typeof stopBannerAudio === 'function') stopBannerAudio();
   if (playing) stop();
   playing = false;
   clearTimeout(timerId);
@@ -626,7 +627,7 @@ function closeGame() {
   gameRunning = false;
   hitMade = false;
   setTimeout(function() {
-    startMetronomeIfBanner();
+    if (typeof startBannerAudio === 'function') startBannerAudio();
   }, 400);
 }
 
@@ -1208,12 +1209,37 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 
-  // Sadece ANA SAYFA (banner) için — oyun ekranı açıkken hiç tetiklenme
+  // Banner ses durumu
+  var bannerAudioEl = null;
+  var bannerAudioOn = false;
+
+  function startBannerAudio() {
+    if (!bannerAudioEl) {
+      bannerAudioEl = new Audio('zuhal-muzik.wav');
+      bannerAudioEl.loop = true;
+      bannerAudioEl.volume = 0.85;
+    }
+    bannerAudioEl.play().catch(function(){});
+    bannerAudioOn = true;
+    startMetronomeIfBanner();
+  }
+
+  function stopBannerAudio() {
+    if (bannerAudioEl) { bannerAudioEl.pause(); bannerAudioEl.currentTime = 0; }
+    bannerAudioOn = false;
+    stop();
+  }
+
+  // Sadece ANA SAYFA (banner) için — dokunuşta aç/kapa
   function bannerTouch(e) {
     var overlay = document.getElementById("gameOverlay");
     if (overlay && overlay.style.display !== "none") return;
     unlockAC();
-    startMetronomeIfBanner();
+    if (bannerAudioOn) {
+      stopBannerAudio();
+    } else {
+      startBannerAudio();
+    }
   }
   document.body.addEventListener("touchstart", bannerTouch, {passive:true});
   document.body.addEventListener("click", bannerTouch);
