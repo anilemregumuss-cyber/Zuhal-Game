@@ -23,43 +23,37 @@ body{font-family:'Bebas Neue',sans-serif;}
 }
 
 
-/* ── Sol/sağ dış şeritler: PNG sol ve sağ koyu kenarı örter ── */
-/* PNG 1080px genişlik → sol kenar ~75px = 6.9% */
-.vs{position:absolute;top:0;bottom:0;width:6.9vw;overflow:hidden;background:#1a0f05;z-index:2;display:flex;align-items:center;justify-content:center;}
+/* ── Sol/Sağ şeritler ── */
+.vs{position:absolute;top:0;bottom:0;width:6.9vw;overflow:hidden;background:#1a0f05;z-index:2;}
 .vs-l{left:0;} .vs-r{right:0;}
-.vs-t{writing-mode:vertical-rl;white-space:nowrap;font:700 9px/1 'Space Mono',monospace;color:rgba(210,165,0,0.65);letter-spacing:2px;}
-.vs-l .vs-t{animation:vsUp 10s linear infinite;}
-.vs-r .vs-t{animation:vsDown 10s linear infinite;}
-@keyframes vsUp{from{transform:translateY(0)}to{transform:translateY(-50%)}}
-@keyframes vsDown{from{transform:rotate(180deg)translateY(0)}to{transform:rotate(180deg)translateY(-50%)}}
+.vs-t{position:absolute;top:0;left:50%;writing-mode:vertical-rl;white-space:nowrap;font:700 9px/1 'Space Mono',monospace;color:rgba(210,165,0,0.65);letter-spacing:2px;}
+.vs-l .vs-t{animation:vsL 10s linear infinite;}
+.vs-r .vs-t{animation:vsR 10s linear infinite;}
+@keyframes vsL{0%{transform:translateX(-50%) translateY(0)}100%{transform:translateX(-50%) translateY(-50%)}}
+@keyframes vsR{0%{transform:translateX(-50%) translateY(-50%)}100%{transform:translateX(-50%) translateY(0)}}
 
-/* ── Üst/alt yatay SINIRLI STOK bantları: kart iç kenar ── */
-/* PNG 1920px yükseklik → üst bant ~390px = 20.3% → alt bant ~1700px = 88.5% */
-.hs{position:absolute;left:6.9vw;right:6.9vw;height:22px;overflow:hidden;background:#ede2c4;z-index:3;display:flex;align-items:center;}
-.hs-t{top:20.3vh;}
-.hs-b{top:88.5vh;}
-.hs-i{white-space:nowrap;font:700 8px 'Space Mono',monospace;color:rgba(0,0,0,0.45);letter-spacing:2px;animation:hsScroll 14s linear infinite;}
-@keyframes hsScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+/* ── Üst/Alt yatay bantlar ── */
+.hs{position:absolute;left:6.9vw;right:6.9vw;height:22px;overflow:hidden;background:#ede2c4;z-index:3;}
+.hs-t{top:20.3vh;} .hs-b{top:88.5vh;}
+.hs-i{display:inline-block;white-space:nowrap;font:700 8px 'Space Mono',monospace;color:rgba(0,0,0,0.45);letter-spacing:2px;animation:hsScroll 14s linear infinite;}
+@keyframes hsScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 
-/* ── Statik iğneyi örten ince krem şerit ── */
-/* Pivot: x=50%, y~40.4% → bob: y~60.2% (760/1920, 1155/1920) */
+/* ── Statik iğne örtüsü ── */
 #ndlCover{position:absolute;left:calc(50% - 5px);width:10px;top:40.4vh;height:19.8vh;background:#ede2c4;z-index:3;pointer-events:none;}
 
-/* ── Hareketli iğne SVG'si ── */
-.ndl-wrap{position:absolute;left:50%;top:40.4vh;transform:translateX(-50%);width:40vw;height:19.8vh;z-index:4;pointer-events:none;}
-.ndl-wrap svg{width:100%;height:100%;}
-.ndl-g{transform-origin:200px 5px;animation:ndlSwing 0.6s ease-in-out infinite alternate;}
+/* ── Hareketli iğne: pozisyon anchor + dönen kol ── */
+.ndl-pos{position:absolute;left:50%;top:40.4vh;width:0;height:0;z-index:4;pointer-events:none;}
+.ndl-rot{position:absolute;left:-20vw;top:0;width:40vw;height:20vh;transform-origin:50% 0%;animation:ndlSwing 0.6s ease-in-out infinite alternate;}
+.ndl-rot svg{width:100%;height:100%;}
 @keyframes ndlSwing{from{transform:rotate(-28deg)}to{transform:rotate(28deg)}}
 
-/* ── YARIM TEMPO / TAM FIRSAT: örtü + titreşim ── */
-/* PNG'de ~y=1010-1200px → 52.6% - 62.5% */
+/* ── YARIM TEMPO / TAM FIRSAT ── */
 .yt{position:absolute;left:6.9vw;right:6.9vw;top:52.6vh;height:10vh;background:#ede2c4;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.yt-l1{font-family:'Bebas Neue','Impact',sans-serif;font-size:5.2vh;font-weight:900;color:#1a1008;line-height:1;letter-spacing:1px;animation:ytPulse 0.6s ease-in-out infinite alternate;}
-.yt-l2{font-family:'Bebas Neue','Impact',sans-serif;font-size:5.6vh;font-weight:900;color:#1a1008;line-height:1;letter-spacing:1px;animation:ytPulse 0.6s ease-in-out infinite alternate-reverse;}
-@keyframes ytPulse{from{transform:scale(1) perspective(300px) translateZ(0)}to{transform:scale(1.04) perspective(300px) translateZ(6px)}}
+.yt-l1{font-family:'Bebas Neue','Impact',sans-serif;font-size:5vh;font-weight:900;color:#1a1008;line-height:1;letter-spacing:1px;animation:ytP 0.6s ease-in-out infinite alternate;}
+.yt-l2{font-family:'Bebas Neue','Impact',sans-serif;font-size:5.5vh;font-weight:900;color:#1a1008;line-height:1;letter-spacing:1px;animation:ytP 0.6s ease-in-out infinite alternate-reverse;}
+@keyframes ytP{from{transform:scale(1)}to{transform:scale(1.05)}}
 
-/* ── SÜRPİZ ÜRÜNLERDE: örtü + halftime blink ── */
-/* PNG'de ~y=450-615px → 23.4% - 32% */
+/* ── SÜRPİZ ÜRÜNLERDE ── */
 .sp{position:absolute;left:6.9vw;right:6.9vw;top:23.4vh;height:8.9vh;background:#ede2c4;z-index:3;display:flex;align-items:center;justify-content:center;text-align:center;}
 .sp-t{font-family:'Bebas Neue',sans-serif;font-size:2.5vh;font-weight:700;color:#1a1008;line-height:1.3;letter-spacing:0.5px;}
 .sp.blink-half-active{animation:blinkHalf 0.3s steps(1) infinite;}
@@ -100,15 +94,15 @@ body{font-family:'Bebas Neue',sans-serif;}
 
   <!-- Statik PNG iğnesini örten krem şerit -->
   <div id="ndlCover"></div>
-  <!-- Hareketli iğne -->
-  <div class="ndl-wrap">
-    <svg viewBox="0 0 400 200" preserveAspectRatio="xMidYMin meet">
-      <g class="ndl-g">
-        <ellipse cx="200" cy="6" rx="7" ry="7" fill="#1a1008"/>
-        <line x1="200" y1="8" x2="200" y2="188" stroke="#1a1008" stroke-width="4" stroke-linecap="round"/>
-        <circle cx="200" cy="192" r="12" fill="#1a1008"/>
-      </g>
-    </svg>
+  <!-- Hareketli iğne: sıfır-boyut anchor noktası + dönen kol -->
+  <div class="ndl-pos">
+    <div class="ndl-rot">
+      <svg viewBox="0 0 40 210" preserveAspectRatio="xMidYMin meet">
+        <ellipse cx="20" cy="5" rx="5" ry="5" fill="#1a1008"/>
+        <line x1="20" y1="8" x2="20" y2="200" stroke="#1a1008" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="20" cy="205" r="10" fill="#1a1008"/>
+      </svg>
+    </div>
   </div>
 
   <!-- YARIM TEMPO / TAM FIRSAT kapak + titreşim -->
