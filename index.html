@@ -1225,7 +1225,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Sadece ANA SAYFA (banner) için — oyun ekranı açıkken hiç tetiklenme
   function bannerTouch(e) {
-    if (e.target.tagName === "BUTTON") return;
     var overlay = document.getElementById("gameOverlay");
     if (overlay && overlay.style.display !== "none") return;
     unlockAC();
