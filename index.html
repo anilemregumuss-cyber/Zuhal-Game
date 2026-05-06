@@ -22,71 +22,6 @@ body{font-family:'Bebas Neue',sans-serif;}
   display:block;z-index:0;
 }
 
-/* ── Dış sol/sağ SINIRLI STOK (üstten aşağı) ── */
-.ot-side{
-  position:absolute;top:0;bottom:0;
-  width:5vw;
-  overflow:hidden;
-  display:flex;align-items:center;justify-content:center;
-  background:#1a1208;
-  z-index:2;
-}
-.ot-side-l{left:0;}
-.ot-side-r{right:0;}
-.ot-side-text{
-  writing-mode:vertical-rl;
-  white-space:nowrap;
-  font-family:'Space Mono',monospace;
-  font-size:clamp(7px,1vw,11px);
-  font-weight:700;
-  color:rgba(210,170,0,0.7);
-  letter-spacing:3px;
-  animation:sideDown 14s linear infinite;
-}
-.ot-side-r .ot-side-text{transform:rotate(180deg);animation-direction:reverse;}
-@keyframes sideDown{from{transform:translateY(0);}to{transform:translateY(-50%);}}
-
-/* ── İç yatay SINIRLI STOK (soldan sağa) ── */
-.ot-h{
-  position:absolute;
-  left:5vw;right:5vw;
-  height:20px;
-  overflow:hidden;
-  background:#e8ddb5;
-  z-index:3;
-  display:flex;align-items:center;
-}
-.ot-h-top{top:22.5vh;border-bottom:1px solid rgba(0,0,0,0.12);}
-.ot-h-bot{bottom:16.5vh;border-top:1px solid rgba(0,0,0,0.12);}
-.ot-h-inner{
-  display:inline-flex;
-  animation:tickH 16s linear infinite;
-  white-space:nowrap;
-  font-family:'Space Mono',monospace;
-  font-size:8px;font-weight:700;
-  letter-spacing:3px;
-  color:rgba(0,0,0,0.38);
-  padding:0 6px;
-}
-@keyframes tickH{from{transform:translateX(0);}to{transform:translateX(-50%);}}
-
-/* ── Metronom iğnesi (sadece iğne, arka plan yok) ── */
-.ot-needle-wrap{
-  position:absolute;
-  left:50%;
-  top:38vh;
-  transform:translateX(-50%);
-  width:72vw;
-  max-width:380px;
-  z-index:4;
-  pointer-events:none;
-}
-.ot-needle-wrap svg{width:100%;height:auto;display:block;}
-.needle-group{
-  transform-origin:160px 12px;
-  animation:swing 0.6s ease-in-out infinite alternate;
-}
-@keyframes swing{from{transform:rotate(-28deg);}to{transform:rotate(28deg);}}
 
 /* ── OYNA butonu ── */
 #btnGame{
@@ -120,34 +55,6 @@ body{font-family:'Bebas Neue',sans-serif;}
 <div class="banner">
   <!-- PNG arka plan -->
   <img class="banner-img" src="ZuhalHalftimeoyunilksayfa.png" alt="Halftime">
-
-  <!-- Dış sol SINIRLI STOK -->
-  <div class="ot-side ot-side-l"><div class="ot-side-text">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div></div>
-  <!-- Dış sağ SINIRLI STOK -->
-  <div class="ot-side ot-side-r"><div class="ot-side-text">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div></div>
-
-  <!-- İç üst yatay ticker -->
-  <div class="ot-h ot-h-top">
-    <div class="ot-h-inner">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-  </div>
-  <!-- İç alt yatay ticker -->
-  <div class="ot-h ot-h-bot">
-    <div class="ot-h-inner">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-  </div>
-
-  <!-- Metronom iğnesi — sadece iğne çizgisi, arka plan yok, PNG iğnesini örter -->
-  <div class="ot-needle-wrap">
-    <svg viewBox="0 0 320 210" preserveAspectRatio="xMidYMid meet">
-      <!-- Statik PNG iğnesini örten ince krem şerit -->
-      <polygon points="140,0 180,0 180,210 140,210" fill="#e8ddb5"/>
-      <!-- Animasyonlu iğne -->
-      <g class="needle-group">
-        <polygon points="154,2 166,2 163,16 157,16" fill="#1a1008"/>
-        <line x1="160" y1="10" x2="160" y2="196" stroke="#1a1008" stroke-width="2.5" stroke-linecap="round"/>
-        <circle cx="160" cy="199" r="12" fill="#1a1008"/>
-      </g>
-    </svg>
-  </div>
 
   <!-- OYNA butonu -->
   <button id="btnGame">▶ OYNA</button>
