@@ -9,191 +9,79 @@ html{touch-action:pan-y;overscroll-behavior-y:auto;}
 body{background:#1e1408;width:100vw;min-height:100vh;font-family:'Bebas Neue',sans-serif;}
 
 /* ── BANNER ── */
-.banner{
-  width:100vw;height:100vh;
-  background:#1e1408;
-  position:relative;overflow:hidden;
-  display:flex;flex-direction:column;
-}
+.banner{width:100vw;min-height:100vh;background:#1e1408;position:relative;overflow:hidden;display:flex;flex-direction:column;}
 .tick-flash{position:absolute;inset:0;background:rgba(255,255,255,0.08);opacity:0;pointer-events:none;z-index:40;}
 
-/* ── SIDE TICKERS (sol ve sağ dikey şeritler) ── */
-.side-ticker{
-  position:absolute;top:0;bottom:0;
-  width:clamp(22px,3.5vw,38px);
-  overflow:hidden;
-  display:flex;align-items:center;justify-content:center;
-  z-index:2;
-}
+/* ── SIDE TICKERS ── */
+.side-ticker{position:absolute;top:0;bottom:0;width:clamp(22px,3.5vw,38px);overflow:hidden;display:flex;align-items:center;justify-content:center;z-index:2;}
 .side-ticker.left{left:0;}
 .side-ticker.right{right:0;}
-.side-ticker-inner{
-  writing-mode:vertical-rl;
-  white-space:nowrap;
-  font-family:'Space Mono',monospace;
-  font-size:clamp(7px,1vw,11px);
-  font-weight:700;
-  color:rgba(210,170,0,0.65);
-  letter-spacing:3px;
-  animation:tickerUp 10s linear infinite;
-}
-.side-ticker.right .side-ticker-inner{
-  transform:rotate(180deg);
-  animation-direction:reverse;
-}
+.side-ticker-inner{writing-mode:vertical-rl;white-space:nowrap;font-family:'Space Mono',monospace;font-size:clamp(7px,1vw,11px);font-weight:700;color:rgba(210,170,0,0.65);letter-spacing:3px;animation:tickerUp 10s linear infinite;}
+.side-ticker.right .side-ticker-inner{transform:rotate(180deg);animation-direction:reverse;}
 @keyframes tickerUp{from{transform:translateY(0);}to{transform:translateY(-50%);}}
 
 /* ── BANNER TOP ── */
-.banner-top{
-  text-align:left;
-  padding:clamp(12px,2.5vh,30px) clamp(40px,8vw,80px) clamp(4px,1vh,12px);
-  flex-shrink:0;
-  position:relative;z-index:5;
-}
-.halftime-title{
-  font-size:clamp(56px,14vw,190px);
-  color:#FFD700;
-  line-height:0.83;
-  transform:skewX(-5deg);
-  display:inline-block;
-  text-shadow:3px 4px 0 rgba(0,0,0,0.5);
-}
-.banner-sub1{
-  font-size:clamp(16px,4vw,52px);
-  color:#FFD700;
-  letter-spacing:clamp(2px,0.6vw,6px);
-  line-height:1.05;
-  margin-top:clamp(2px,0.5vh,6px);
-}
-.banner-sub2{display:none;}
+.banner-top{flex-shrink:0;text-align:left;padding:clamp(10px,2vh,22px) clamp(40px,8vw,80px) clamp(2px,0.5vh,8px);position:relative;z-index:5;}
+.halftime-title{font-size:clamp(56px,14vw,190px);color:#FFD700;line-height:0.83;transform:skewX(-5deg);display:inline-block;text-shadow:3px 4px 0 rgba(0,0,0,0.5);}
+.banner-sub{font-size:clamp(16px,4vw,52px);color:#FFD700;letter-spacing:clamp(2px,0.6vw,6px);line-height:1.0;margin-top:clamp(2px,0.4vh,5px);}
 
 /* ── BANNER MAIN ── */
-.banner-main{
-  flex:1;min-height:0;
-  display:flex;align-items:center;justify-content:center;
-  position:relative;z-index:3;
-  padding:0 clamp(28px,5vw,52px);
-}
+.banner-main{flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:clamp(4px,0.8vh,12px) clamp(28px,5vw,52px);position:relative;z-index:3;}
 
 /* ── TICKET CARD ── */
-.ticket-card{
-  width:100%;max-width:460px;
-  height:min(66vh,520px);
-  position:relative;
-  background:#e8ddb5;
-  display:flex;flex-direction:column;
-  box-shadow:0 8px 40px rgba(0,0,0,0.7);
-  border-radius:0;
-}
+.ticket-card{width:100%;max-width:440px;position:relative;background:#e8ddb5;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,0.7);}
 
-/* Üst tırtık (scallop) — pseudo element ile */
-.card-scallop-top{
-  width:100%;
-  height:clamp(12px,2vh,20px);
-  flex-shrink:0;
-  background:
-    radial-gradient(circle at 5.55% 0%, #1e1408 50%, #e8ddb5 50%),
-    radial-gradient(circle at 16.66% 0%, #1e1408 50%, #e8ddb5 50%),
-    radial-gradient(circle at 27.77% 0%, #1e1408 50%, #e8ddb5 50%),
-    radial-gradient(circle at 38.88% 0%, #1e1408 50%, #e8ddb5 50%),
-    radial-gradient(circle at 50%    0%, #1e1408 50%, #e8ddb5 50%),
-    radial-gradient(circle at 61.11% 0%, #1e1408 50%, #e8ddb5 50%),
-    radial-gradient(circle at 72.22% 0%, #1e1408 50%, #e8ddb5 50%),
-    radial-gradient(circle at 83.33% 0%, #1e1408 50%, #e8ddb5 50%),
-    radial-gradient(circle at 94.44% 0%, #1e1408 50%, #e8ddb5 50%);
-}
+/* Üst tırtık */
+.card-scallop-top{width:100%;height:clamp(12px,1.8vh,18px);flex-shrink:0;background:
+  radial-gradient(circle at 5.55%  0%,#1e1408 50%,#e8ddb5 50%),
+  radial-gradient(circle at 16.66% 0%,#1e1408 50%,#e8ddb5 50%),
+  radial-gradient(circle at 27.77% 0%,#1e1408 50%,#e8ddb5 50%),
+  radial-gradient(circle at 38.88% 0%,#1e1408 50%,#e8ddb5 50%),
+  radial-gradient(circle at 50%    0%,#1e1408 50%,#e8ddb5 50%),
+  radial-gradient(circle at 61.11% 0%,#1e1408 50%,#e8ddb5 50%),
+  radial-gradient(circle at 72.22% 0%,#1e1408 50%,#e8ddb5 50%),
+  radial-gradient(circle at 83.33% 0%,#1e1408 50%,#e8ddb5 50%),
+  radial-gradient(circle at 94.44% 0%,#1e1408 50%,#e8ddb5 50%);}
 
 /* Alt tırtık */
-.card-scallop-bot{
-  width:100%;
-  height:clamp(12px,2vh,20px);
-  flex-shrink:0;
-  background:
-    radial-gradient(circle at 5.55% 100%, #1e1408 50%, #e8ddb5 50%),
-    radial-gradient(circle at 16.66% 100%, #1e1408 50%, #e8ddb5 50%),
-    radial-gradient(circle at 27.77% 100%, #1e1408 50%, #e8ddb5 50%),
-    radial-gradient(circle at 38.88% 100%, #1e1408 50%, #e8ddb5 50%),
-    radial-gradient(circle at 50%    100%, #1e1408 50%, #e8ddb5 50%),
-    radial-gradient(circle at 61.11% 100%, #1e1408 50%, #e8ddb5 50%),
-    radial-gradient(circle at 72.22% 100%, #1e1408 50%, #e8ddb5 50%),
-    radial-gradient(circle at 83.33% 100%, #1e1408 50%, #e8ddb5 50%),
-    radial-gradient(circle at 94.44% 100%, #1e1408 50%, #e8ddb5 50%);
-}
+.card-scallop-bot{width:100%;height:clamp(12px,1.8vh,18px);flex-shrink:0;background:
+  radial-gradient(circle at 5.55%  100%,#1e1408 50%,#e8ddb5 50%),
+  radial-gradient(circle at 16.66% 100%,#1e1408 50%,#e8ddb5 50%),
+  radial-gradient(circle at 27.77% 100%,#1e1408 50%,#e8ddb5 50%),
+  radial-gradient(circle at 38.88% 100%,#1e1408 50%,#e8ddb5 50%),
+  radial-gradient(circle at 50%    100%,#1e1408 50%,#e8ddb5 50%),
+  radial-gradient(circle at 61.11% 100%,#1e1408 50%,#e8ddb5 50%),
+  radial-gradient(circle at 72.22% 100%,#1e1408 50%,#e8ddb5 50%),
+  radial-gradient(circle at 83.33% 100%,#1e1408 50%,#e8ddb5 50%),
+  radial-gradient(circle at 94.44% 100%,#1e1408 50%,#e8ddb5 50%);}
 
-/* Sol/sağ notch (yarım daire kesik) */
-.ticket-card::before,.ticket-card::after{
-  content:'';position:absolute;
-  width:clamp(18px,3vw,32px);height:clamp(18px,3vw,32px);
-  background:#1e1408;border-radius:50%;z-index:6;top:50%;
-  transform:translateY(-50%);
-}
-.ticket-card::before{left:calc(clamp(-9px,-1.5vw,-16px));}
-.ticket-card::after{right:calc(clamp(-9px,-1.5vw,-16px));}
+/* Yan notch */
+.ticket-card::before,.ticket-card::after{content:'';position:absolute;width:clamp(18px,3vw,30px);height:clamp(18px,3vw,30px);background:#1e1408;border-radius:50%;z-index:6;top:50%;transform:translateY(-50%);}
+.ticket-card::before{left:calc(clamp(-9px,-1.5vw,-15px));}
+.ticket-card::after{right:calc(clamp(-9px,-1.5vw,-15px));}
 
-/* ── CARD TOP TICKER ── */
-.card-ticker-band{
-  width:100%;overflow:hidden;
-  padding:clamp(4px,0.7vh,7px) 0;
-  border-bottom:1.5px solid rgba(0,0,0,0.15);
-  flex-shrink:0;
-  background:rgba(0,0,0,0.03);
-}
+/* Yatay ticker band */
+.card-ticker-band{width:100%;overflow:hidden;padding:clamp(4px,0.6vh,6px) 0;border-bottom:1px solid rgba(0,0,0,0.12);flex-shrink:0;background:rgba(0,0,0,0.03);}
 .card-ticker-inner{display:inline-flex;animation:scrollLeft 14s linear infinite;white-space:nowrap;}
-.card-ticker-txt{font-family:'Space Mono',monospace;font-size:clamp(7px,1vw,10px);font-weight:700;letter-spacing:3px;color:rgba(0,0,0,0.38);padding:0 6px;}
+.card-ticker-txt{font-family:'Space Mono',monospace;font-size:clamp(6px,1vw,9px);font-weight:700;letter-spacing:3px;color:rgba(0,0,0,0.35);padding:0 6px;}
 @keyframes scrollLeft{from{transform:translateX(0);}to{transform:translateX(-50%);}}
 
-/* ── CARD INNER ROW (body + side tickers) ── */
-.card-inner-row{
-  flex:1;min-height:0;
-  display:flex;flex-direction:row;
-  position:relative;
-}
+/* Kart iç satır */
+.card-inner{display:flex;flex-direction:row;}
+.card-vt{width:clamp(16px,2.8vw,24px);overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-right:1px solid rgba(0,0,0,0.1);}
+.card-vt-r{border-right:none;border-left:1px solid rgba(0,0,0,0.1);}
+.card-vt-inner{writing-mode:vertical-rl;white-space:nowrap;font-family:'Space Mono',monospace;font-size:clamp(5px,0.7vw,7px);font-weight:700;color:rgba(0,0,0,0.35);letter-spacing:2px;animation:tickerUp 12s linear infinite;}
+.card-vt-r .card-vt-inner{transform:rotate(180deg);animation-direction:reverse;}
 
-/* Kart sol/sağ dikey ticker bandı */
-.card-vticker{
-  width:clamp(16px,2.8vw,26px);
-  overflow:hidden;
-  display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;
-  border-right:1px solid rgba(0,0,0,0.12);
-}
-.card-vticker-r{border-right:none;border-left:1px solid rgba(0,0,0,0.12);}
-.card-vticker-inner{
-  writing-mode:vertical-rl;
-  white-space:nowrap;
-  font-family:'Space Mono',monospace;
-  font-size:clamp(5px,0.75vw,8px);
-  font-weight:700;
-  color:rgba(0,0,0,0.38);
-  letter-spacing:2.5px;
-  animation:tickerUp 12s linear infinite;
-}
-.card-vticker-r .card-vticker-inner{
-  transform:rotate(180deg);
-  animation-direction:reverse;
-}
-
-/* ── CARD BODY ── */
-.card-body{
-  flex:1;min-height:0;
-  display:flex;flex-direction:column;align-items:center;
-  padding:clamp(6px,1.2vh,14px) clamp(8px,2vw,18px) clamp(4px,0.8vh,10px);
-}
+/* Kart body */
+.card-body{flex:1;display:flex;flex-direction:column;align-items:center;padding:clamp(8px,1.5vh,16px) clamp(6px,1.5vw,14px) clamp(4px,0.8vh,10px);}
 
 /* Ana kampanya metni */
-.card-main-text{
-  font-size:clamp(18px,5.5vw,48px);
-  color:#1a1008;
-  line-height:1.0;
-  text-align:center;
-  flex-shrink:0;
-  letter-spacing:0.5px;
-  padding-bottom:clamp(4px,0.8vh,10px);
-}
+.card-main-text{font-size:clamp(18px,5.5vw,44px);color:#1a1008;line-height:0.98;text-align:center;margin-bottom:clamp(4px,0.8vh,10px);}
 
-/* Metronom alanı */
-.card-metro{width:100%;flex:1;min-height:0;}
-.card-metro svg{width:100%;height:100%;display:block;}
+/* SVG doğal boyut — height:auto ile viewBox oranını korur, flex trick yok */
+.card-metro{width:100%;}
+.card-metro svg{width:100%;height:auto;display:block;}
 
 /* ── METRONOM İĞNESİ ── */
 .needle-group{transform-origin:160px 14px;animation:swing 0.65s ease-in-out infinite alternate;}
@@ -218,7 +106,7 @@ body{background:#1e1408;width:100vw;min-height:100vh;font-family:'Bebas Neue',sa
 #slogan.blink-hard{animation:hardBlink 0.5s steps(1) infinite;}
 .indirim-txt{font-size:clamp(14px,3vw,40px);color:#fff;letter-spacing:8px;}
 .bottom-row{width:100%;display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px clamp(8px,2vw,20px);}
-.mode-badge{font-family:'Space Mono',monospace;font-size:clamp(7px,1.1vw,11px);letter-spacing:2px;padding:4px 12px;border:1.5px solid #fff;color:#fff;background:#000;transition:all 0.3s;}
+.mode-badge{font-family:'Space Mono',monospace;font-size:clamp(7px,1.1vw,11px);letter-spacing:2px;padding:4px 12px;border:1.5px solid #fff;color:#fff;background:#1e1408;transition:all 0.3s;}
 .mode-half{background:#FFD700;color:#000;border-color:#FFD700;}
 .step-grid{display:flex;gap:3px;width:100%;}
 .step-cell{flex:1;height:18px;background:#333;border-radius:2px;}
@@ -245,28 +133,18 @@ body{background:#1e1408;width:100vw;min-height:100vh;font-family:'Bebas Neue',sa
 <div class="banner">
   <div class="tick-flash" id="tf"></div>
 
-  <!-- Sol dikey SINIRLI STOK -->
-  <div class="side-ticker left">
-    <div class="side-ticker-inner">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-  </div>
-  <!-- Sağ dikey SINIRLI STOK -->
-  <div class="side-ticker right">
-    <div class="side-ticker-inner">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-  </div>
+  <div class="side-ticker left"><div class="side-ticker-inner">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div></div>
+  <div class="side-ticker right"><div class="side-ticker-inner">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div></div>
 
-  <!-- Üst başlık -->
   <div class="banner-top">
     <div class="halftime-title">HALFTIME</div>
-    <div class="banner-sub1">İNDİRİM GÜNLERİ</div>
+    <div class="banner-sub">İNDİRİM GÜNLERİ</div>
   </div>
 
-  <!-- Kart alanı -->
   <div class="banner-main">
     <div class="ticket-card">
-      <!-- Üst tırtık -->
       <div class="card-scallop-top"></div>
 
-      <!-- Yatay ticker band -->
       <div class="card-ticker-band">
         <div class="card-ticker-inner">
           <span class="card-ticker-txt">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </span>
@@ -274,26 +152,19 @@ body{background:#1e1408;width:100vw;min-height:100vh;font-family:'Bebas Neue',sa
         </div>
       </div>
 
-      <!-- Kart içeriği: sol ticker + body + sağ ticker -->
-      <div class="card-inner-row">
-        <!-- Sol dikey ticker -->
-        <div class="card-vticker">
-          <div class="card-vticker-inner">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-        </div>
+      <div class="card-inner">
+        <div class="card-vt"><div class="card-vt-inner">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div></div>
+
         <div class="card-body">
           <div class="card-main-text">SÜRPİZ ÜRÜNLERDE<br>%50'YE VARAN<br>İNDİRİM FIRSATLARI</div>
           <div class="card-metro">
-            <svg width="100%" height="100%" viewBox="0 0 320 290" preserveAspectRatio="xMidYMid meet">
-  <!-- Konsantrik halkalar (radar) -->
-  <circle cx="160" cy="280" r="108" fill="none" stroke="rgba(0,0,0,0.09)" stroke-width="1.2"/>
-  <circle cx="160" cy="280" r="80"  fill="none" stroke="rgba(0,0,0,0.09)" stroke-width="1.2"/>
-  <circle cx="160" cy="280" r="54"  fill="none" stroke="rgba(0,0,0,0.1)"  stroke-width="1.2"/>
-  <circle cx="160" cy="280" r="30"  fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1.2"/>
-  <!-- Ana salınım yayı -->
+            <svg width="100%" viewBox="0 0 320 270" preserveAspectRatio="xMidYMid meet">
+  <circle cx="160" cy="260" r="100" fill="none" stroke="rgba(0,0,0,0.09)" stroke-width="1.2"/>
+  <circle cx="160" cy="260" r="74"  fill="none" stroke="rgba(0,0,0,0.09)" stroke-width="1.2"/>
+  <circle cx="160" cy="260" r="50"  fill="none" stroke="rgba(0,0,0,0.1)"  stroke-width="1.2"/>
+  <circle cx="160" cy="260" r="28"  fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1.2"/>
   <path d="M74 132 A140 140 0 0 1 246 132" fill="none" stroke="rgba(0,0,0,0.28)" stroke-width="2"/>
-  <!-- Dış yay -->
   <path d="M48 120 A170 170 0 0 1 272 120" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
-  <!-- Yay üzerinde 7 küçük çember -->
   <circle cx="160" cy="152" r="4.5" fill="#e8ddb5" stroke="rgba(0,0,0,0.35)" stroke-width="1.8"/>
   <circle cx="130" cy="147" r="4.5" fill="#e8ddb5" stroke="rgba(0,0,0,0.3)"  stroke-width="1.8"/>
   <circle cx="190" cy="147" r="4.5" fill="#e8ddb5" stroke="rgba(0,0,0,0.3)"  stroke-width="1.8"/>
@@ -301,49 +172,42 @@ body{background:#1e1408;width:100vw;min-height:100vh;font-family:'Bebas Neue',sa
   <circle cx="217" cy="135" r="4.5" fill="#e8ddb5" stroke="rgba(0,0,0,0.25)" stroke-width="1.8"/>
   <circle cx="80"  cy="120" r="5"   fill="#e8ddb5" stroke="rgba(0,0,0,0.22)" stroke-width="1.8"/>
   <circle cx="240" cy="120" r="5"   fill="#e8ddb5" stroke="rgba(0,0,0,0.22)" stroke-width="1.8"/>
-  <!-- YARIM TEMPO, TAM FIRSAT -->
-  <text x="160" y="170" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="36" fill="#1a1008" letter-spacing="1">YARIM TEMPO,</text>
-  <text x="160" y="204" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="36" fill="#1a1008" letter-spacing="1">TAM FIRSAT</text>
-  <!-- Zuhal 50 Logo -->
-  <g transform="translate(160,244)">
-    <rect x="-58" y="-19" width="116" height="38" fill="#e8ddb5" stroke="#1a1008" stroke-width="1.8"/>
-    <line x1="-32" y1="-19" x2="-32" y2="19" stroke="#1a1008" stroke-width="1.2"/>
-    <text x="-55" y="12" font-family="'Bebas Neue',sans-serif" font-size="28" fill="#1a1008" font-style="italic">Z</text>
-    <line x1="-36" y1="-15" x2="-29" y2="17" stroke="#1a1008" stroke-width="1.5"/>
-    <text x="-28" y="-3" font-family="'Bebas Neue',sans-serif" font-size="9" fill="#1a1008" letter-spacing="1.5">ZUHAL</text>
-    <text x="-28" y="9" font-family="sans-serif" font-size="9" fill="#1a1008">★</text>
-    <text x="28" y="14" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="32" fill="#1a1008">50</text>
-    <text x="52" y="-4" text-anchor="middle" font-family="'Space Mono',monospace" font-size="5" fill="#1a1008" letter-spacing="0.3">EST.</text>
-    <text x="52" y="4" text-anchor="middle" font-family="'Space Mono',monospace" font-size="5" fill="#1a1008" letter-spacing="0.3">1976</text>
+  <text x="160" y="168" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="36" fill="#1a1008" letter-spacing="1">YARIM TEMPO,</text>
+  <text x="160" y="202" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="36" fill="#1a1008" letter-spacing="1">TAM FIRSAT</text>
+  <g transform="translate(160,236)">
+    <rect x="-56" y="-18" width="112" height="36" fill="#e8ddb5" stroke="#1a1008" stroke-width="1.8"/>
+    <line x1="-30" y1="-18" x2="-30" y2="18" stroke="#1a1008" stroke-width="1.2"/>
+    <text x="-52" y="12" font-family="'Bebas Neue',sans-serif" font-size="26" fill="#1a1008" font-style="italic">Z</text>
+    <line x1="-34" y1="-14" x2="-27" y2="16" stroke="#1a1008" stroke-width="1.5"/>
+    <text x="-26" y="-2" font-family="'Bebas Neue',sans-serif" font-size="9" fill="#1a1008" letter-spacing="1.5">ZUHAL</text>
+    <text x="-26" y="10" font-size="9" fill="#1a1008">★</text>
+    <text x="22" y="14" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="30" fill="#1a1008">50</text>
+    <text x="50" y="-3" text-anchor="middle" font-family="'Space Mono',monospace" font-size="5" fill="#1a1008">EST.</text>
+    <text x="50" y="5"  text-anchor="middle" font-family="'Space Mono',monospace" font-size="5" fill="#1a1008">1976</text>
   </g>
-  <!-- İğne grubu -->
   <g id="needle" class="needle-group">
     <polygon points="153,4 167,4 164,20 156,20" fill="#1a1008"/>
-    <line x1="160" y1="14" x2="160" y2="268" stroke="#1a1008" stroke-width="2.2" stroke-linecap="round"/>
-    <circle cx="160" cy="271" r="14" fill="#1a1008"/>
+    <line x1="160" y1="14" x2="160" y2="250" stroke="#1a1008" stroke-width="2.2" stroke-linecap="round"/>
+    <circle cx="160" cy="253" r="13" fill="#1a1008"/>
   </g>
 </svg>
           </div>
         </div>
-        <!-- Sağ dikey ticker -->
-        <div class="card-vticker card-vticker-r">
-          <div class="card-vticker-inner">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div>
-        </div>
+
+        <div class="card-vt card-vt-r"><div class="card-vt-inner">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div></div>
       </div>
 
-      <!-- Alt yatay ticker -->
-      <div class="card-ticker-band" style="border-bottom:none;border-top:1.5px solid rgba(0,0,0,0.15);">
+      <div class="card-ticker-band" style="border-bottom:none;border-top:1px solid rgba(0,0,0,0.12);">
         <div class="card-ticker-inner">
           <span class="card-ticker-txt">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </span>
           <span class="card-ticker-txt">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </span>
         </div>
       </div>
-      <!-- Alt tırtık -->
+
       <div class="card-scallop-bot"></div>
     </div>
   </div>
 
-  <!-- Alt ritim bölümü -->
   <div class="banner-bottom">
     <div class="pct-block" id="pctBlock">
       <div class="pct-line" id="pctLine1"></div>
@@ -376,7 +240,6 @@ body{background:#1e1408;width:100vw;min-height:100vh;font-family:'Bebas Neue',sa
     </div>
   </div>
 </div>
-
 <div style="display:none;">
   <button id="btnStart" onclick="start()">BAŞLAT</button>
   <button id="btnStop" onclick="stop()" disabled>DURDUR</button>
