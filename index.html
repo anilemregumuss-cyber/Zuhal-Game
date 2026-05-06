@@ -212,11 +212,9 @@ function drawStep(s,accent){
   lastDrawn=s;
   if(s%4===0){
     const fl=document.getElementById('tf');
-    fl.style.opacity=accent?'0.7':'0.25';
-    setTimeout(()=>fl.style.opacity='0',50);
+    if(fl){fl.style.opacity=accent?'0.7':'0.25';setTimeout(()=>fl.style.opacity='0',50);}
     const dot=document.getElementById('dot');
-    dot.classList.add('on');
-    setTimeout(()=>dot.classList.remove('on'),70);
+    if(dot){dot.classList.add('on');setTimeout(()=>dot.classList.remove('on'),70);}
   }
   animBars(accent);
 }
@@ -237,19 +235,18 @@ function updateUI(){
   const badge=document.getElementById('badge');
   const stxt=document.getElementById('stxt');
   const pct=document.getElementById('pctBlock');
+  const slogan=document.getElementById('slogan');
   if(isHalf){
-    badge.textContent='◐ HALFTİME — RİTİM 2X YAVAŞ';
-    badge.className='mode-badge mode-half';
-    stxt.textContent='METRONOMunuz: 100 BPM · RİTİM: HALFTIME';
-    pct.classList.add('blink-hard');
-    document.getElementById('slogan').classList.add('blink-hard');
+    if(badge){badge.textContent='◐ HALFTİME — RİTİM 2X YAVAŞ';badge.className='mode-badge mode-half';}
+    if(stxt) stxt.textContent='METRONOMunuz: 100 BPM · RİTİM: HALFTIME';
+    if(pct) pct.classList.add('blink-hard');
+    if(slogan) slogan.classList.add('blink-hard');
     var sur=document.getElementById('otSurprise'); if(sur) sur.classList.add('blink-half');
   } else {
-    badge.textContent='● NORMAL — 4/4';
-    badge.className='mode-badge';
-    stxt.textContent='NORMAL — 100 BPM';
-    pct.classList.remove('blink-hard');
-    document.getElementById('slogan').classList.remove('blink-hard');
+    if(badge){badge.textContent='● NORMAL — 4/4';badge.className='mode-badge';}
+    if(stxt) stxt.textContent='NORMAL — 100 BPM';
+    if(pct) pct.classList.remove('blink-hard');
+    if(slogan) slogan.classList.remove('blink-hard');
     var sur=document.getElementById('otSurprise'); if(sur) sur.classList.remove('blink-half');
   }
 }
@@ -486,10 +483,31 @@ var progressTimerW = null;
 var missTimerW     = null;
 var audioStartTime = 0;   // Date.now() bazlı (fallback)
 var audioStartOffset = 0; // wAudioCtx.currentTime bazlı (hassas)
-var wSourcePlaying = false; // source.start() çağrıldıktan sonra true
-var wSource        = null;  // AudioBufferSourceNode
-var wAudioCtx      = null;  // Oyun için ayrı AudioContext
-var wBuffer        = null;  // Decode edilmiş buffer (cache)
+var wSourcePlaying = false;
+var wSource        = null;
+var wAudioCtx      = null;
+var wBuffer        = null;
+
+// Banner arka plan sesi (global)
+var bannerAudioEl  = null;
+var bannerAudioOn  = false;
+
+function startBannerAudio() {
+  if (!bannerAudioEl) {
+    bannerAudioEl = new Audio('zuhal-muzik.wav');
+    bannerAudioEl.loop = true;
+    bannerAudioEl.volume = 0.85;
+  }
+  bannerAudioEl.play().catch(function(){});
+  bannerAudioOn = true;
+  startMetronomeIfBanner();
+}
+
+function stopBannerAudio() {
+  if (bannerAudioEl) { bannerAudioEl.pause(); bannerAudioEl.currentTime = 0; }
+  bannerAudioOn = false;
+  stop();
+}
 var wDecodePending = false;
 
 // Sayfa yüklenince buffer'ı decode et (arka planda)
@@ -1209,28 +1227,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 
-  // Banner ses durumu
-  var bannerAudioEl = null;
-  var bannerAudioOn = false;
-
-  function startBannerAudio() {
-    if (!bannerAudioEl) {
-      bannerAudioEl = new Audio('zuhal-muzik.wav');
-      bannerAudioEl.loop = true;
-      bannerAudioEl.volume = 0.85;
-    }
-    bannerAudioEl.play().catch(function(){});
-    bannerAudioOn = true;
-    startMetronomeIfBanner();
-  }
-
-  function stopBannerAudio() {
-    if (bannerAudioEl) { bannerAudioEl.pause(); bannerAudioEl.currentTime = 0; }
-    bannerAudioOn = false;
-    stop();
-  }
-
-  // Sadece ANA SAYFA (banner) için — dokunuşta aç/kapa
+  // Banner dokunuş toggle
   function bannerTouch(e) {
     var overlay = document.getElementById("gameOverlay");
     if (overlay && overlay.style.display !== "none") return;
