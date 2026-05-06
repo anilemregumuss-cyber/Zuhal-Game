@@ -1226,14 +1226,10 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 
-  // Banner dokunuş toggle — Android'de touchstart+click çift tetiklenmesini önle
-  var lastBannerToggle = 0;
+  // Banner dokunuş toggle
   function bannerTouch(e) {
     var overlay = document.getElementById("gameOverlay");
     if (overlay && overlay.style.display !== "none") return;
-    var now = Date.now();
-    if (now - lastBannerToggle < 600) return; // çift tetiklenmeyi engelle
-    lastBannerToggle = now;
     unlockAC();
     if (bannerAudioOn) {
       stopBannerAudio();
@@ -1241,8 +1237,13 @@ document.addEventListener("DOMContentLoaded", function() {
       startBannerAudio();
     }
   }
-  document.body.addEventListener("touchstart", bannerTouch, {passive:true});
-  document.body.addEventListener("click", bannerTouch);
+  // Touch cihazda SADECE touchstart, mouse'ta SADECE click — çift tetiklenme yok
+  var isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  if (isTouch) {
+    document.body.addEventListener("touchstart", bannerTouch, {passive:true});
+  } else {
+    document.body.addEventListener("click", bannerTouch);
+  }
 
   // Sayfa yüklenince arka planda decode başlat
   setTimeout(preDecodeAudio, 500);
