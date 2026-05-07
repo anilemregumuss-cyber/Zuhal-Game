@@ -963,7 +963,17 @@ function showWhitneyResult(result) {
   var isFinal = remaining <= 0;
 
   if (isFinal) {
-    // 2. (gerçek) oyun — doğrudan bu oyunun ödülü geçerli
+    // En iyi sonucu bul (tüm denemeler arasında)
+    var RANK = ["perfect","great","good","idareder","miss"];
+    var d0 = loadPlays();
+    var bestResult = result;
+    if (d0[playerName] && d0[playerName].plays) {
+      d0[playerName].plays.forEach(function(pl) {
+        if (RANK.indexOf(pl.result) < RANK.indexOf(bestResult)) bestResult = pl.result;
+      });
+    }
+    var p = prizeForResult(bestResult);
+
     document.getElementById("winEmoji").textContent = p.emoji;
     document.getElementById("winLabel").textContent = p.label;
     document.getElementById("winTitle").textContent = p.title;
