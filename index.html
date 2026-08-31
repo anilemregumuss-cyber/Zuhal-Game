@@ -1040,13 +1040,21 @@ function renderWinners(filter) {
   if (verifyEl) {
     if (!q || !looksLikeCode) {
       verifyEl.style.display = "none";
-    } else if (filtered.length > 0) {
+    } else if (filtered.length === 1) {
+      // Yalnızca TEK kayıt eşleşirse "geçerli" denir. Birden fazla eşleşmede
+      // hangisinin kastedildiği belli olmaz — yanlış kişiye ödül verilebilir.
       var hit = filtered[0];
       verifyEl.style.display = "block";
       verifyEl.style.background = "#0d2a12";
       verifyEl.style.borderColor = "#3ddc5b";
       verifyEl.innerHTML = "<div style='color:#3ddc5b;font-size:12px;font-weight:700;letter-spacing:2px;'>✅ GEÇERLİ KUPON</div>" +
         "<div style='color:#9f9;font-size:10px;margin-top:4px;'>" + escapeHtml(hit.name) + " — " + hit.prize + " (" + hit.time + ")</div>";
+    } else if (filtered.length > 1) {
+      verifyEl.style.display = "block";
+      verifyEl.style.background = "#2a2412";
+      verifyEl.style.borderColor = "#ffb74d";
+      verifyEl.innerHTML = "<div style='color:#ffb74d;font-size:12px;font-weight:700;letter-spacing:2px;'>… " + filtered.length + " EŞLEŞME</div>" +
+        "<div style='color:#ffd9a0;font-size:10px;margin-top:4px;'>Kodun tamamını yazın — hangi kupon olduğu belirsiz.</div>";
     } else {
       verifyEl.style.display = "block";
       verifyEl.style.background = "#2a0d0d";
