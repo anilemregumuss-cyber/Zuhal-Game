@@ -199,7 +199,9 @@ body{font-family:'Bebas Neue',sans-serif;}
     </div>
 
     <div id="winnersView">
-      <input id="winnerSearch" type="text" placeholder="İSİM ARA..." autocomplete="off" style="width:100%;box-sizing:border-box;background:#111;border:1px solid #333;border-radius:0;-webkit-appearance:none;appearance:none;color:#fff;font-family:'Space Mono',monospace;font-size:16px;letter-spacing:2px;padding:10px 12px;margin-bottom:10px;outline:none;" />
+      <input id="winnerSearch" type="text" placeholder="İSİM VEYA KUPON KODU ARA..." autocomplete="off" style="width:100%;box-sizing:border-box;background:#111;border:1px solid #333;border-radius:0;-webkit-appearance:none;appearance:none;color:#fff;font-family:'Space Mono',monospace;font-size:16px;letter-spacing:2px;padding:10px 12px;margin-bottom:10px;outline:none;" />
+      <div id="codeVerdict" style="display:none;border:1px solid #333;padding:10px 14px;margin-bottom:10px;font-family:'Space Mono',monospace;"></div>
+      <div id="storageWarn" style="display:none;border:1px solid #ff9800;background:#2a1e0d;color:#ffb74d;padding:10px 14px;margin-bottom:10px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;line-height:1.6;"></div>
       <div id="winnersCount" style="font-family:'Space Mono',monospace;font-size:8px;color:#555;letter-spacing:1px;margin-bottom:10px;"></div>
       <div id="winnersList" style="font-family:'Space Mono',monospace;font-size:9px;color:#ccc;letter-spacing:1px;display:flex;flex-direction:column;gap:8px;"></div>
     </div>
@@ -242,7 +244,19 @@ var WIN_IDAREDER  = 0.50;  // ±500ms → İdare eder → rastgele 3 ödül
 var STORE_CODE   = "AKS";
 var playerName   = "";
 var MAX_PLAYS_PER_DAY = 2;
-var STATS_PIN    = "5050"; // Kasa paneli erişim PIN'i
+// Kasa paneli PIN'i. Kaynak koda açık yazılmasın diye hash olarak tutulur.
+// DÜRÜST NOT: Bu gerçek güvenlik değil, gizlemedir — kod istemcide çalıştığı için
+// kararlı biri yine de aşabilir. Amaç, meraklı bir müşterinin sayfa kaynağına
+// bakıp PIN'i okumasını engellemek. PIN değiştirmek için: konsolda
+// pinHash("yeniPIN") çalıştırıp çıkan sayıyı aşağıya yaz.
+var STATS_PIN_HASH = 5737813;
+
+function pinHash(s) {
+  var h = 5381;
+  s = String(s);
+  for (var i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0;
+  return h % 9999991;
+}
 
 function escapeHtml(str) {
   return String(str)
@@ -265,7 +279,9 @@ function cleanOldData() {
       var k = localStorage.key(i);
       if (!k || !k.startsWith("zuhal_plays_")) continue;
       var d = new Date(k.replace("zuhal_plays_", ""));
-      if (!isNaN(d) && (today - d) > 2 * 86400000) localStorage.removeItem(k);
+      // 30 gün sakla. Eskiden 2 gündü; personel her gün XLS almazsa kayıtlar
+      // kalıcı olarak kayboluyordu. Kampanya süresini rahatça kapsasın.
+      if (!isNaN(d) && (today - d) > 30 * 86400000) localStorage.removeItem(k);
     }
   } catch(e) {}
 }
@@ -927,6 +943,19 @@ function refreshStatsAll() {
   renderStatsView();
   var se = document.getElementById("winnerSearch");
   renderWinners(se ? se.value : "");
+  renderStorageWarning();
+}
+
+// Depolama çalışmıyorsa kayıtlar yalnızca bellekte tutulur ve sayfa yenilenince
+// silinir. Bu sessizce olursa personel veri kaybettiğini fark etmez.
+function renderStorageWarning() {
+  var el = document.getElementById("storageWarn");
+  if (!el) return;
+  if (storageOK) { el.style.display = "none"; return; }
+  el.style.display = "block";
+  el.innerHTML = "⚠ <b>DEPOLAMA ÇALIŞMIYOR</b><br/>" +
+    "Kayıtlar sadece geçici bellekte. Sayfa yenilenirse SİLİNİR.<br/>" +
+    "Lütfen hemen ⬇ İNDİR ile yedek alın.";
 }
 
 function startStatsAutoRefresh() {
@@ -971,7 +1000,7 @@ function submitPin() {
   var inp = document.getElementById("pinInput");
   var err = document.getElementById("pinError");
   var val = inp ? inp.value.trim() : "";
-  if (val === STATS_PIN) {
+  if (pinHash(val) === STATS_PIN_HASH) {
     closePinModal();
     openStats();
   } else {
@@ -992,13 +1021,41 @@ function renderWinners(filter) {
   entries.sort(function(a,b) { return a.time < b.time ? 1 : (a.time > b.time ? -1 : 0); });
 
   var q = (filter || "").trim().toLocaleUpperCase("tr-TR");
-  var filtered = q ? entries.filter(function(e) { return e.name.toLocaleUpperCase("tr-TR").indexOf(q) !== -1; }) : entries;
+  // Hem ada hem kupon koduna göre ara — personel kasada kodu yazıp doğrulayabilsin
+  var filtered = q ? entries.filter(function(e) {
+    return e.name.toLocaleUpperCase("tr-TR").indexOf(q) !== -1 ||
+           e.code.toLocaleUpperCase("tr-TR").indexOf(q) !== -1;
+  }) : entries;
 
   var countEl = document.getElementById("winnersCount");
   if (countEl) countEl.textContent = filtered.length + " / " + entries.length + " KAZANAN";
 
   var listEl = document.getElementById("winnersList");
   if (!listEl) return;
+
+  // Kod doğrulama: müşteri kupon kodu gösterdiğinde personel kodu yazar.
+  // Kayıtlarda yoksa kod bu cihazda üretilmemiştir → uyarı verilir.
+  var looksLikeCode = /HT50|^[0-9]{4}$|-/.test(q);
+  var verifyEl = document.getElementById("codeVerdict");
+  if (verifyEl) {
+    if (!q || !looksLikeCode) {
+      verifyEl.style.display = "none";
+    } else if (filtered.length > 0) {
+      var hit = filtered[0];
+      verifyEl.style.display = "block";
+      verifyEl.style.background = "#0d2a12";
+      verifyEl.style.borderColor = "#3ddc5b";
+      verifyEl.innerHTML = "<div style='color:#3ddc5b;font-size:12px;font-weight:700;letter-spacing:2px;'>✅ GEÇERLİ KUPON</div>" +
+        "<div style='color:#9f9;font-size:10px;margin-top:4px;'>" + escapeHtml(hit.name) + " — " + hit.prize + " (" + hit.time + ")</div>";
+    } else {
+      verifyEl.style.display = "block";
+      verifyEl.style.background = "#2a0d0d";
+      verifyEl.style.borderColor = "#ff5555";
+      verifyEl.innerHTML = "<div style='color:#ff5555;font-size:12px;font-weight:700;letter-spacing:2px;'>⛔ KOD KAYITLARDA YOK</div>" +
+        "<div style='color:#f99;font-size:10px;margin-top:4px;'>Bu kod bu cihazda üretilmemiş. Ödül vermeden önce kontrol edin.</div>";
+    }
+  }
+
   if (filtered.length === 0) {
     listEl.innerHTML = "<div style='color:#555;'>" + (entries.length === 0 ? "Henüz kazanan yok." : "Sonuç bulunamadı.") + "</div>";
     return;
@@ -1319,6 +1376,9 @@ function markActivity() { lastActivityAt = Date.now(); }
 
 function isBusyNow() {
   if (gameRunning) return true; // parça çalıyor, zamanlama kritik
+  // Depolama bozuksa kayıtlar yalnızca bellekte; yenileme onları siler.
+  // Personel XLS ile yedek alana kadar sayfayı asla tazeleme.
+  if (!storageOK && Object.keys(memPlays).length > 0) return true;
   function open(id) {
     var el = document.getElementById(id);
     return el && el.style.display !== "none";
