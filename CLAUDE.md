@@ -17,21 +17,24 @@ Zuhal Müzik 50. Yıl — Rhythm Challenge. Müşteriler Whitney Houston parças
 ## Dosya Yapısı
 
 ```
-index.html                  ← Tek kaynak dosya (tüm CSS + JS + base64 MP3 burada)
-Zuhal_HALFTIM_v04.mp4       ← Ana sayfa banner videosu (autoplay, muted, loop)
+index.html                  ← Tek kaynak dosya (tüm CSS + JS burada, ses artık harici)
+Genel-Halftime.mp4          ← Ana sayfa banner videosu (autoplay, muted, loop)
 zuhal-muzik.wav             ← Banner arka plan müziği (dokunuşla aç/kapat)
+whitney-halftime.mp3        ← Oyun içi Whitney Houston parçası (fetch + Web Audio API decode)
 zuhal-fifty-year-black.jpg  ← Oyun ekranı logosu (filter:invert(1) ile beyaza çevrilmiş)
-ZuhalHalftimeoyunilksayfa.png ← Yedek banner görseli (artık kullanılmıyor)
 ```
+
+Repoda bu 5 dosya dışında hiçbir medya kullanılmıyor — yeni bir görsel/video eklerken önce `index.html` içinde gerçekten referans verildiğinden emin ol, aksi halde GitHub Pages deploy boyutu şişer.
 
 ## index.html Mimarisi
 
 Tüm uygulama tek HTML dosyasında, 3 katman:
 
 ### Sayfa 1 — Banner (`.banner`)
-- `<video class="banner-vid">` → `Zuhal_HALFTIM_v04.mp4` tam ekran
-- Sol/sağ dikey kayan şeritler (`.vs-l`, `.vs-r`) — SINIRLI STOK yazısı, CSS animasyonlu
+- `<video class="banner-vid">` → `Genel-Halftime.mp4` tam ekran
+- Sol/sağ dikey kayan şeritler (`.vs-l`, `.vs-r`) ve üst/alt yatay bantlar (`.hs-t`, `.hs-b`) — SINIRLI STOK yazısı, CSS animasyonlu
 - `#btnGame` → Oyun ekranını açar, banner sesini durdurur
+- `#btnKasaAccess` (sağ üstte, sabit/fixed, düşük opaklık) → Kasa PIN ekranını açar, sayfa durumundan bağımsız her zaman görünür
 
 ### Sayfa 2+3 — Oyun Ekranı (`#gameOverlay`, `z-index:9999`)
 - `#gameStart` → İsim girişi, ödül listesi, BAŞLA butonu
@@ -39,11 +42,17 @@ Tüm uygulama tek HTML dosyasında, 3 katman:
 - `#gameWin` → Sonuç ve ödül gösterimi
 - `#overlayLogoBar` → Zuhal 50. Yıl logosu (tüm oyun sayfalarında sabit, üstte)
 
+### Kasa Paneli (`#statsModal`, `#pinModal`)
+- Açılış: `#btnKasaAccess` butonuna veya `#overlayLogo`'ya 5 kez hızlı basınca PIN ekranı açılır (`openPinModal()`), doğru PIN (`STATS_PIN`, varsayılan `"5050"`) girilince panel açılır
+- İki sekme: **KAZANANLAR** (`renderWinners()` — isimle arama, sadece kodu üretilmiş/finalize olmuş oyunlar) ve **İSTATİSTİK** (`renderStatsView()` — günlük özet + oyuncu listesi)
+- Panel açıkken her 4 saniyede bir `refreshStatsAll()` ile otomatik yenilenir (`statsRefreshTimer`)
+- Oyuncu adı gibi kullanıcı girdisi ekrana basılırken **mutlaka `escapeHtml()`'den geçirilmeli** (XSS önlemi — bkz. Dikkat Edilmesi Gerekenler)
+
 ### Ses Mimarisi (kritik — karışık olmaması için ayrı tutulmuş)
 | Ses | Kaynak | Nasıl |
 |-----|--------|-------|
 | Banner müziği | `zuhal-muzik.wav` | `new Audio()` HTML element, dokunuşla toggle |
-| Oyun müziği | `MP3_B64` (base64 MP3 embedded) | Web Audio API `wBuffer`, `AudioBufferSourceNode` |
+| Oyun müziği | `whitney-halftime.mp3` (harici dosya, `fetch()` ile indirilir) | Web Audio API `wBuffer`, `AudioBufferSourceNode` — `fetchWhitneyArrayBuffer()` sonucu cache'lenir |
 | Metronom | Web Audio API oscillator | `PAT_NORMAL` / `PAT_HALF` pattern dizileri |
 
 **Önemli:** Banner sesi ve oyun sesi birbirinden tamamen bağımsız. `openGameOverlay()` → `stopBannerAudio()`, `closeGame()` → `startBannerAudio()`.
@@ -70,13 +79,14 @@ Tüm uygulama tek HTML dosyasında, 3 katman:
 - `unlockAC()` — AudioContext'i kullanıcı etkileşimiyle açar (browser politikası)
 - Tüm butonlarda `touch-action:manipulation`
 
-### İstatistik Paneli
-- `#overlayLogo`'ya 5 kez hızlı basınca gizli panel açılır (`openStats()`)
-- Günlük oyun kayıtları localStorage'dan XLS olarak indirilebilir
+### İstatistik / Kazananlar Paneli
+- Günlük oyun kayıtları localStorage'dan XLS olarak indirilebilir (`downloadStats()`)
 
 ## Dikkat Edilmesi Gerekenler
 
-- **`index.html` içindeki `MP3_B64`** çok büyük (~600KB base64). Dosyayı düzenlerken kaydetmemeye dikkat et — sadece gerekli satırları değiştir.
-- `.vs-t` scroll animasyonunda `translateX(-50%)` animasyon keyframe'lerin içinde olmalı — dışında olursa animasyon çalışmaz.
+- Kullanıcı girdisini (oyuncu adı vb.) `innerHTML` ile ekrana basarken **her zaman `escapeHtml()`** kullan — geçmişte Kazananlar/İstatistik panelinde XSS açığı olmuştu, düzeltildi.
+- `.vs-t` / `.hs-i` scroll animasyonlarında `translateX(-50%)` / `translateY(-50%)` animasyon keyframe'lerin içinde olmalı — dışında olursa animasyon çalışmaz.
 - `display:flex; align-items:center` kayan şerit containerına uygulanmamalı — text elementini ortalar ve scroll animasyonu bozulur.
-- Sayfa **5 dakikada bir** (`<meta http-equiv="refresh" content="300">`) yenilenir.
+- Sayfa **5 dakikada bir** (`<meta http-equiv="refresh" content="300">`) yenilenir — bu kasıtlı, sabit kiosk ekranının uzun süreli stabilitesi için. Sayfa müşteri telefonlarında da açılacaksa bu davranış gözden geçirilmeli.
+- `whitney-halftime.mp3` harici dosya olduğu için tarayıcı tarafından cache'lenir; her 5 dakikalık yenilemede tekrar indirilmez (base64 gömme dönemindeki performans sorunu buydu).
+- Yeni medya dosyası eklerken repoya bırakmadan önce `index.html` içinde gerçekten kullanıldığından emin ol (bkz. Dosya Yapısı notu) — geçmişte ~100MB kullanılmayan dosya birikmişti.
