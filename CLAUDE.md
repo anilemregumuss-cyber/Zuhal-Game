@@ -53,7 +53,10 @@ Tüm uygulama tek HTML dosyasında, 3 katman:
 |-----|--------|-------|
 | Banner müziği | `zuhal-muzik.wav` | `new Audio()` HTML element, dokunuşla toggle |
 | Oyun müziği | `whitney-halftime.mp3` (harici dosya, `fetch()` ile indirilir) | Web Audio API `wBuffer`, `AudioBufferSourceNode` — `fetchWhitneyArrayBuffer()` sonucu cache'lenir |
-| Metronom | Web Audio API oscillator | `PAT_NORMAL` / `PAT_HALF` pattern dizileri |
+
+Not: Eskiden ayrı bir Web Audio metronom motoru vardı (`start()`, `PAT_NORMAL`/`PAT_HALF`, step grid UI).
+Hiçbir yerden çağrılmadığı (tamamen ulaşılamaz olduğu) ve boşuna bir `AudioContext` tuttuğu için
+kaldırıldı — iOS eşzamanlı AudioContext sayısını sınırlar. Gerekirse git geçmişinden geri alınabilir.
 
 **Önemli:** Banner sesi ve oyun sesi birbirinden tamamen bağımsız. `openGameOverlay()` → `stopBannerAudio()`, `closeGame()` → `startBannerAudio()`.
 
@@ -66,11 +69,6 @@ Tüm uygulama tek HTML dosyasında, 3 katman:
 **Hak sistemi:**
 - `MAX_PLAYS_PER_DAY = 2` — `localStorage`'da oyuncu adına göre takip
 - 2 denemenin **en iyisi** kazanır (1. daha iyiyse, 1.'nin ödülü verilir)
-
-**Metronom:**
-- 100 BPM, 4/4 — `PAT_NORMAL` (2 ölçü) → `PAT_HALF` halftime (2 ölçü) döngüsü
-- Web Audio API scheduler: `schedule()` → `rafLoop()` → `drawStep()`
-- `start()` / `stop()` null-safe yazılmıştır (oyun ekranında bazı metronom UI elementleri yoktur)
 
 **Ödüller:** `whitneyPrizes` objesi, `makeCode()` → `HT50-{KOD}-{DDMM}-{4rakam}` formatında kod üretir
 
@@ -87,6 +85,7 @@ Tüm uygulama tek HTML dosyasında, 3 katman:
 - Kullanıcı girdisini (oyuncu adı vb.) `innerHTML` ile ekrana basarken **her zaman `escapeHtml()`** kullan — geçmişte Kazananlar/İstatistik panelinde XSS açığı olmuştu, düzeltildi.
 - `.vs-t` / `.hs-i` scroll animasyonlarında `translateX(-50%)` / `translateY(-50%)` animasyon keyframe'lerin içinde olmalı — dışında olursa animasyon çalışmaz.
 - `display:flex; align-items:center` kayan şerit containerına uygulanmamalı — text elementini ortalar ve scroll animasyonu bozulur.
-- Sayfa **5 dakikada bir** (`<meta http-equiv="refresh" content="300">`) yenilenir — bu kasıtlı, sabit kiosk ekranının uzun süreli stabilitesi için. Sayfa müşteri telefonlarında da açılacaksa bu davranış gözden geçirilmeli.
+- Sayfa 5 dakikada bir yenilenir ama **`meta http-equiv="refresh"` ile DEĞİL** — `scheduleIdleReload()` ile. Meta refresh oyunun ortasında sayfayı sıfırlayıp oyuncunun hakkını yakıyordu. Yeni mantık: oyun çalarken (`gameRunning`) veya personel panelde aktifken asla yenilemez; ekran 60 sn hareketsiz kalırsa terk edilmiş sayıp yeniler. Yenileme koşullarını değiştirirken `isBusyNow()`'a bak.
+- XLS indirme iOS'ta `<a download>` ile çalışmaz; `downloadStats()` önce Web Share API'yi (`shareFile()`) dener, sonra klasik indirmeye düşer. Bu sırayı bozma.
 - `whitney-halftime.mp3` harici dosya olduğu için tarayıcı tarafından cache'lenir; her 5 dakikalık yenilemede tekrar indirilmez (base64 gömme dönemindeki performans sorunu buydu).
 - Yeni medya dosyası eklerken repoya bırakmadan önce `index.html` içinde gerçekten kullanıldığından emin ol (bkz. Dosya Yapısı notu) — geçmişte ~100MB kullanılmayan dosya birikmişti.

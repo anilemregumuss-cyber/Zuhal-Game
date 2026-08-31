@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta http-equiv="refresh" content="300">
+<!-- Otomatik yenileme meta ile DEĞİL, JS ile yapılır (scheduleIdleReload):
+     meta refresh oyunun tam ortasında sayfayı sıfırlayıp oyuncunun hakkını yakıyordu. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -51,17 +52,9 @@ body{font-family:'Bebas Neue',sans-serif;}
 /* bottom: çentikli iPhone'larda home-indicator şeridiyle çakışmasın diye güvenli alan eklenir */
 #btnGame{position:absolute;bottom:52px;bottom:calc(52px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);z-index:10;padding:16px 80px;background:#FFD700;color:#000;border:none;font-family:'Space Mono',monospace;font-size:16px;font-weight:700;letter-spacing:5px;cursor:pointer;touch-action:manipulation;box-shadow:0 4px 24px rgba(0,0,0,0.5);white-space:nowrap;}
 
-/* Halftime blink sınıfı (JS tetikler) */
-.blink-half-active{animation:blinkHalf 0.3s steps(1) infinite;}
-@keyframes blinkHalf{0%,49%{opacity:1;}50%,100%{opacity:0.05;}}
-
-/* Oyun için gerekli keyframe'ler */
+/* Oyun ekranındaki dönen halkalar */
 @keyframes ring-spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
 @keyframes ring-spin-rev{from{transform:rotate(0deg);}to{transform:rotate(-360deg);}}
-@keyframes fade-in{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
-@keyframes hardBlink{0%,49%{opacity:1;}50%,100%{opacity:0.08;}}
-@keyframes pctBlink{from{color:#fff;text-shadow:none;}to{color:#FFD700;text-shadow:0 0 20px rgba(255,200,0,0.7);}}
-@keyframes lineBlink{from{opacity:1;}to{opacity:0.15;}}
 </style>
 </head>
 <body>
@@ -84,225 +77,6 @@ body{font-family:'Bebas Neue',sans-serif;}
 
 <button id="btnGame">▶ OYNA</button>
 </div>
-<div style="display:none;">
-  <button id="btnStart" onclick="start()">BAŞLAT</button>
-  <button id="btnStop" onclick="stop()" disabled>DURDUR</button>
-  <span id="dot"></span>
-  <span id="stxt">HAZIR</span>
-  <div id="mtxt">ÖLÇÜ: 0</div>
-</div>
-
-<script>
-const AC  = new (window.AudioContext || window.webkitAudioContext)();
-const MST = AC.createDynamicsCompressor();
-MST.threshold.value=-8; MST.knee.value=2; MST.ratio.value=16;
-MST.attack.value=0.001; MST.release.value=0.06;
-MST.connect(AC.destination);
-
-const BPM=100, S16=60/BPM/4, AHEAD=0.15, TICK=25;
-const BARS_NORMAL=2, BARS_HALF=2;
-
-let playing=false, isHalf=false;
-let step=0, measure=0, barInPhase=0;
-let nextTime=0, timerId=null, lastDrawn=-1;
-const Q=[];
-
-const PAT_NORMAL=[
-  {k:1,s:0,h:1,o:0},{k:0,s:0,h:1,o:0},{k:0,s:0,h:1,o:0},{k:0,s:0,h:1,o:0},
-  {k:0,s:1,h:1,o:0},{k:0,s:0,h:1,o:0},{k:0,s:0,h:1,o:1},{k:0,s:0,h:0,o:0},
-  {k:1,s:0,h:1,o:0},{k:0,s:0,h:1,o:0},{k:0,s:0,h:1,o:0},{k:0,s:0,h:1,o:0},
-  {k:0,s:1,h:1,o:0},{k:0,s:0,h:1,o:0},{k:0,s:0,h:1,o:0},{k:0,s:0,h:1,o:0},
-];
-const PAT_HALF=[
-  {k:1,s:0,h:1,o:0},{k:0,s:0,h:0,o:0},{k:0,s:0,h:1,o:0},{k:0,s:0,h:0,o:0},
-  {k:0,s:0,h:1,o:0},{k:0,s:0,h:0,o:0},{k:0,s:0,h:1,o:0},{k:0,s:0,h:0,o:0},
-  {k:0,s:1,h:1,o:0},{k:0,s:0,h:0,o:0},{k:0,s:0,h:1,o:0},{k:0,s:0,h:0,o:0},
-  {k:0,s:0,h:1,o:0},{k:0,s:0,h:0,o:0},{k:0,s:0,h:1,o:0},{k:0,s:0,h:0,o:0},
-];
-
-function playKick(t){
-  const o1=AC.createOscillator(),g1=AC.createGain();
-  o1.type='sine'; o1.frequency.setValueAtTime(150,t);
-  o1.frequency.exponentialRampToValueAtTime(40,t+0.25);
-  g1.gain.setValueAtTime(0,t); g1.gain.linearRampToValueAtTime(1.3,t+0.003);
-  g1.gain.exponentialRampToValueAtTime(0.001,t+0.35);
-  o1.connect(g1); g1.connect(MST); o1.start(t); o1.stop(t+0.4);
-  const o2=AC.createOscillator(),g2=AC.createGain();
-  o2.type='triangle'; o2.frequency.setValueAtTime(340,t);
-  o2.frequency.exponentialRampToValueAtTime(60,t+0.05);
-  g2.gain.setValueAtTime(0,t); g2.gain.linearRampToValueAtTime(0.8,t+0.002);
-  g2.gain.exponentialRampToValueAtTime(0.001,t+0.07);
-  o2.connect(g2); g2.connect(MST); o2.start(t); o2.stop(t+0.09);
-  const o3=AC.createOscillator(),g3=AC.createGain();
-  o3.type='square'; o3.frequency.setValueAtTime(700,t);
-  g3.gain.setValueAtTime(0.4,t); g3.gain.exponentialRampToValueAtTime(0.001,t+0.008);
-  o3.connect(g3); g3.connect(MST); o3.start(t); o3.stop(t+0.01);
-}
-
-function playSnare(t){
-  const o=AC.createOscillator(),go=AC.createGain();
-  o.type='triangle'; o.frequency.setValueAtTime(200,t);
-  o.frequency.exponentialRampToValueAtTime(120,t+0.07);
-  go.gain.setValueAtTime(0,t); go.gain.linearRampToValueAtTime(0.7,t+0.002);
-  go.gain.exponentialRampToValueAtTime(0.001,t+0.12);
-  o.connect(go); go.connect(MST); o.start(t); o.stop(t+0.15);
-  const len=Math.floor(AC.sampleRate*0.18);
-  const buf=AC.createBuffer(1,len,AC.sampleRate);
-  const d=buf.getChannelData(0);
-  for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,1.1);
-  const src=AC.createBufferSource(); src.buffer=buf;
-  const bp=AC.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=4000; bp.Q.value=0.5;
-  const gn=AC.createGain();
-  gn.gain.setValueAtTime(0,t); gn.gain.linearRampToValueAtTime(1.0,t+0.002);
-  gn.gain.exponentialRampToValueAtTime(0.001,t+0.18);
-  src.connect(bp); bp.connect(gn); gn.connect(MST); src.start(t);
-}
-
-function playHihat(t,open){
-  const dur=open?0.12:0.045;
-  const len=Math.floor(AC.sampleRate*dur);
-  const buf=AC.createBuffer(1,len,AC.sampleRate);
-  const d=buf.getChannelData(0);
-  for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*(1-i/len);
-  const src=AC.createBufferSource(); src.buffer=buf;
-  const hp=AC.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=8000; hp.Q.value=1;
-  const gn=AC.createGain();
-  gn.gain.setValueAtTime(open?0.32:0.18,t);
-  gn.gain.exponentialRampToValueAtTime(0.001,t+dur);
-  src.connect(hp); hp.connect(gn); gn.connect(MST); src.start(t);
-}
-
-function playClick(t,accent){
-  const o=AC.createOscillator(),g=AC.createGain();
-  o.type='sine'; o.frequency.value=accent?1000:800;
-  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(accent?0.6:0.35,t+0.002);
-  g.gain.exponentialRampToValueAtTime(0.001,t+0.05);
-  o.connect(g); g.connect(MST); o.start(t); o.stop(t+0.06);
-}
-
-function schedule(){
-  if(!playing) return;
-  while(nextTime < AC.currentTime+AHEAD){
-    const pat=isHalf?PAT_HALF:PAT_NORMAL;
-    const p=pat[step];
-    const t=nextTime;
-    const isDownbeat=(step===0);
-    if(step%4===0) playClick(t,isDownbeat);
-    if(p.k) playKick(t);
-    if(p.s) playSnare(t);
-    if(p.h) playHihat(t,p.o);
-    Q.push({time:t, step:step, accent:isDownbeat});
-    if(step===15){
-      measure++;
-      barInPhase++;
-      const sw = isHalf ? barInPhase>=BARS_HALF : barInPhase>=BARS_NORMAL;
-      Q.push({time:t+S16, step:-1, measure:measure, doSwitch:sw});
-      if(sw) barInPhase=0;
-    }
-    step=(step+1)%16;
-    nextTime+=S16;
-  }
-  timerId=setTimeout(schedule,TICK);
-}
-
-function rafLoop(){
-  if(!playing) return;
-  const now=AC.currentTime;
-  while(Q.length && Q[0].time<=now){
-    const ev=Q.shift();
-    if(ev.step===-1){
-      document.getElementById('mtxt').textContent='ÖLÇÜ: '+ev.measure;
-      if(ev.doSwitch){
-        isHalf=!isHalf;
-        updateUI();
-      }
-    } else {
-      drawStep(ev.step,ev.accent);
-    }
-  }
-  requestAnimationFrame(rafLoop);
-}
-
-function drawStep(s,accent){
-  if(lastDrawn>=0){const p=document.getElementById('s'+lastDrawn);if(p)p.classList.remove('on');}
-  const c=document.getElementById('s'+s);if(c)c.classList.add('on');
-  lastDrawn=s;
-  if(s%4===0){
-    const fl=document.getElementById('tf');
-    if(fl){fl.style.opacity=accent?'0.7':'0.25';setTimeout(()=>fl.style.opacity='0',50);}
-    const dot=document.getElementById('dot');
-    if(dot){dot.classList.add('on');setTimeout(()=>dot.classList.remove('on'),70);}
-  }
-  animBars(accent);
-}
-
-function animBars(strong){
-  for(let i=0;i<16;i++){
-    const b=document.getElementById('b'+i);if(!b)continue;
-    b.style.height=(strong?Math.random()*20+8:Math.random()*9+3)+'px';
-    b.style.opacity=strong?'0.85':'0.3';
-  }
-  setTimeout(()=>{
-    const rest=[9,6,13,5,16,6,10,8,14,5,10,7,18,6,12,8];
-    for(let i=0;i<16;i++){const b=document.getElementById('b'+i);if(b){b.style.height=rest[i]+'px';b.style.opacity='0.15';}}
-  },130);
-}
-
-function updateUI(){
-  const badge=document.getElementById('badge');
-  const stxt=document.getElementById('stxt');
-  const pct=document.getElementById('pctBlock');
-  const slogan=document.getElementById('slogan');
-  if(isHalf){
-    if(badge){badge.textContent='◐ HALFTİME — RİTİM 2X YAVAŞ';badge.className='mode-badge mode-half';}
-    if(stxt) stxt.textContent='METRONOMunuz: 100 BPM · RİTİM: HALFTIME';
-    if(pct) pct.classList.add('blink-hard');
-    if(slogan) slogan.classList.add('blink-hard');
-    var sur=document.getElementById('otSurprise'); if(sur) sur.classList.add('blink-half');
-  } else {
-    if(badge){badge.textContent='● NORMAL — 4/4';badge.className='mode-badge';}
-    if(stxt) stxt.textContent='NORMAL — 100 BPM';
-    if(pct) pct.classList.remove('blink-hard');
-    if(slogan) slogan.classList.remove('blink-hard');
-    var sur=document.getElementById('otSurprise'); if(sur) sur.classList.remove('blink-half');
-  }
-}
-
-function start(){
-  if(playing) return;
-  if(AC.state==='suspended') AC.resume();
-  try { MST.connect(AC.destination); } catch(e) {}
-  playing=true; isHalf=false; step=0; measure=0; barInPhase=0;
-  lastDrawn=-1; Q.length=0;
-  nextTime=AC.currentTime+0.05;
-  var bs=document.getElementById('btnStart'); if(bs) bs.disabled=true;
-  var bst=document.getElementById('btnStop'); if(bst) bst.disabled=false;
-  var stxt=document.getElementById('stxt'); if(stxt) stxt.textContent='NORMAL — 100 BPM';
-  var dot=document.getElementById('dot'); if(dot) dot.classList.add('on');
-  var pb=document.getElementById('pctBlock'); if(pb) pb.classList.remove('blink-hard');
-  var sl=document.getElementById('slogan'); if(sl) sl.classList.remove('blink-hard');
-  schedule();
-  requestAnimationFrame(rafLoop);
-}
-
-function stop(){
-  playing=false; clearTimeout(timerId); Q.length=0;
-  isHalf=false; step=0; measure=0; barInPhase=0;
-  if(AC && AC.state==='running') AC.suspend().catch(function(){});
-  var bs=document.getElementById('btnStart'); if(bs) bs.disabled=false;
-  var bst=document.getElementById('btnStop'); if(bst) bst.disabled=true;
-  var stxt=document.getElementById('stxt'); if(stxt) stxt.textContent='DURDURULDU';
-  var dot=document.getElementById('dot'); if(dot) dot.classList.remove('on');
-  var mtxt=document.getElementById('mtxt'); if(mtxt) mtxt.textContent='ÖLÇÜ: 0';
-  var badge=document.getElementById('badge'); if(badge){badge.textContent='● NORMAL — 4/4';badge.className='mode-badge';}
-  var pb=document.getElementById('pctBlock'); if(pb) pb.classList.remove('blink-hard');
-  var sl=document.getElementById('slogan'); if(sl) sl.classList.remove('blink-hard');
-  for(let i=0;i<16;i++){const s=document.getElementById('s'+i);if(s)s.classList.remove('on');}
-  const rest=[9,6,13,5,16,6,10,8,14,5,10,7,18,6,12,8];
-  for(let i=0;i<16;i++){const b=document.getElementById('b'+i);if(b){b.style.height=rest[i]+'px';b.style.opacity='0.15';}}
-  lastDrawn=-1;
-}
-</script>
 
 
 <!-- OYUN EKRANI -->
@@ -623,30 +397,10 @@ function preDecodeAudio() {
   }
 }
 
+// Kullanıcı hareketiyle çağrılır: oyun parçasını arka planda indirip decode etmeye başlar.
+// (Eskiden ayrıca metronom AudioContext'ini açıyordu; metronom motoru kaldırıldı.)
 function unlockAC() {
-  // Sadece oyun kapalıyken metronom AC'yi aç
-  var overlay = document.getElementById("gameOverlay");
-  var gameOpen = overlay && overlay.style.display !== "none";
-  if (!gameOpen && AC && AC.state === 'suspended') { AC.resume().catch(function(){}); }
   preDecodeAudio();
-}
-
-function startMetronomeIfBanner() {
-  // Sadece ana sayfa görünürken metronom başlat
-  var overlay = document.getElementById("gameOverlay");
-  if (overlay && overlay.style.display !== "none") return; // oyun açık
-  if (!playing) {
-    if (AC.state === 'suspended') {
-      AC.resume().then(function() { start(); });
-    } else {
-      start();
-    }
-  }
-}
-
-function startAudioOnTouch() {
-  unlockAC();
-  startMetronomeIfBanner();
 }
 
 var whitneyPrizes = {
@@ -694,31 +448,6 @@ function stopWAudio() {
 function openGameOverlay() {
   // Banner sesini durdur
   if (typeof stopBannerAudio === 'function') stopBannerAudio();
-  if (playing) stop();
-  playing = false;
-  clearTimeout(timerId);
-  Q.length = 0;
-  // AudioContext'i durdur — tüm ses kesilsin
-  try { if(AC && AC.state==='running') AC.suspend(); } catch(e) {}
-
-  // Step grid temizle
-  for (var i = 0; i < 16; i++) {
-    var s = document.getElementById('s'+i);
-    if (s) s.classList.remove('on');
-  }
-  // Beat barları sıfırla
-  var rest = [9,6,13,5,16,6,10,8,14,5,10,7,18,6,12,8];
-  for (var i = 0; i < 16; i++) {
-    var b = document.getElementById('b'+i);
-    if (b) { b.style.height = rest[i]+'px'; b.style.opacity = '0.15'; }
-  }
-  // Badge ve slogan sıfırla
-  var badge = document.getElementById('badge');
-  if (badge) { badge.textContent = '● NORMAL — 4/4'; badge.className = 'mode-badge'; }
-  var pct = document.getElementById('pctBlock');
-  if (pct) { pct.classList.remove('blink-hard'); }
-  var slogan = document.getElementById('slogan');
-  if (slogan) slogan.classList.remove('blink-hard');
 
   stopWAudio();
   clearTimeout(missTimerW);
@@ -1385,14 +1114,39 @@ function downloadStats() {
     rows + "</table></body></html>";
 
   var blob = new Blob([html], { type: "application/vnd.ms-excel;charset=utf-8;" });
+  var fileName = "zuhal-ritim-" + d.getFullYear() + String(d.getMonth()+1).padStart(2,"0") + String(d.getDate()).padStart(2,"0") + ".xls";
+
+  // iOS Safari <a download> özniteliğini yok sayar; dosya indirilmek yerine ham
+  // HTML olarak açılır. Bu yüzden önce paylaş sayfası (AirDrop/Mail/Dosyalar)
+  // denenir, o da yoksa klasik indirmeye düşülür.
+  if (shareFile(blob, fileName)) return;
+  triggerDownload(blob, fileName);
+}
+
+function shareFile(blob, fileName) {
+  try {
+    if (typeof File !== "function" || !navigator.canShare || !navigator.share) return false;
+    var file = new File([blob], fileName, { type: blob.type });
+    if (!navigator.canShare({ files: [file] })) return false;
+    navigator.share({ files: [file], title: fileName }).catch(function() {});
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function triggerDownload(blob, fileName) {
   var url = URL.createObjectURL(blob);
   var a = document.createElement("a");
+  var canDownload = ("download" in HTMLAnchorElement.prototype);
   a.href = url;
-  a.download = "zuhal-ritim-" + d.getFullYear() + String(d.getMonth()+1).padStart(2,"0") + String(d.getDate()).padStart(2,"0") + ".xls";
+  if (canDownload) a.download = fileName;
+  else a.target = "_blank"; // indirme desteklenmiyorsa hiç değilse yeni sekmede aç
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  // iOS yeni sekmede açarken URL'i hemen iptal edersek sayfa boş kalır
+  setTimeout(function() { URL.revokeObjectURL(url); }, canDownload ? 0 : 30000);
 }
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -1549,7 +1303,44 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   initMIDI();
+  scheduleIdleReload();
 });
+
+// ── Boşta yenileme (eski <meta http-equiv="refresh"> yerine) ──────────────────
+// Kiosk uzun süre açık kaldığında sayfayı tazelemek gerekiyor, ama meta refresh
+// bunu oyunun ortasında da yapıp oyuncunun hakkını yakıyordu. Bu sürüm:
+//   • Oyun çalarken veya personel kasa panelindeyken ASLA yenilemez
+//   • Ekran terk edilmişse (60 sn hareketsiz) yeniler — kiosk yine sıfırlanır
+var RELOAD_AFTER_MS = 300000; // 5 dk — eski meta refresh ile aynı
+var IDLE_BEFORE_MS  = 60000;  // ekranın terk edilmiş sayılması için gereken sessizlik
+var lastActivityAt  = Date.now();
+
+function markActivity() { lastActivityAt = Date.now(); }
+
+function isBusyNow() {
+  if (gameRunning) return true; // parça çalıyor, zamanlama kritik
+  function open(id) {
+    var el = document.getElementById(id);
+    return el && el.style.display !== "none";
+  }
+  // Oyun/panel açıkken sadece kullanıcı gerçekten çekildiyse yenile
+  if (open("gameOverlay") || open("statsModal") || open("pinModal")) {
+    return (Date.now() - lastActivityAt) < IDLE_BEFORE_MS;
+  }
+  return false;
+}
+
+function scheduleIdleReload() {
+  ["pointerdown", "touchstart", "keydown", "input"].forEach(function(evt) {
+    document.addEventListener(evt, markActivity, true);
+  });
+  var dueAt = Date.now() + RELOAD_AFTER_MS;
+  setInterval(function() {
+    if (Date.now() < dueAt) return;
+    if (isBusyNow()) return; // meşgul — bu turu atla, bir sonrakinde tekrar bak
+    location.reload();
+  }, 10000);
+}
 
 </script>
 </body>
