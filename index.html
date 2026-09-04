@@ -1378,9 +1378,21 @@ document.addEventListener("DOMContentLoaded", function() {
 //   • Ekran terk edilmişse (60 sn hareketsiz) yeniler — kiosk yine sıfırlanır
 var RELOAD_AFTER_MS = 300000; // 5 dk — eski meta refresh ile aynı
 var IDLE_BEFORE_MS  = 60000;  // ekranın terk edilmiş sayılması için gereken sessizlik
+var PANEL_IDLE_MS   = 600000; // 10 dk — kasa paneli unutulursa kendiliğinden kapansın
 var lastActivityAt  = Date.now();
 
 function markActivity() { lastActivityAt = Date.now(); }
+
+// Kasa paneli açıkken sayfa yenilenmiyor (bkz. isBusyNow). Personel KAPAT'a
+// basmayı unutursa kazanan isimleri ve kupon kodları mağaza ekranında müşterilere
+// açıkta kalırdı. Uzun sessizlikte paneli kapatıp banner'a dönüyoruz.
+function autoClosePanels() {
+  if (Date.now() - lastActivityAt < PANEL_IDLE_MS) return;
+  var pm = document.getElementById("pinModal");
+  if (pm && pm.style.display !== "none") closePinModal();
+  var sm = document.getElementById("statsModal");
+  if (sm && sm.style.display !== "none") closeStats();
+}
 
 function isBusyNow() {
   if (gameRunning) return true; // parça çalıyor, zamanlama kritik
@@ -1408,6 +1420,7 @@ function scheduleIdleReload() {
   });
   var dueAt = Date.now() + RELOAD_AFTER_MS;
   setInterval(function() {
+    autoClosePanels(); // yenileme vakti gelmemiş olsa da paneli kontrol et
     if (Date.now() < dueAt) return;
     if (isBusyNow()) return; // meşgul — bu turu atla, bir sonrakinde tekrar bak
     location.reload();
