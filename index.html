@@ -1311,45 +1311,82 @@ document.addEventListener("DOMContentLoaded", function() {
   setTimeout(preDecodeAudio, 500);
 
   // ===== WEB MIDI API — SPD ONE KICK =====
-  var midiConnected = false;
+  // Sahada bağlantı ara ara kopuyordu. Sebep: USB pad'in portu sessizce
+  // "closed" duruma düşebiliyor (sürücü uykusu, USB hub, kablo oynaması).
+  // O anda onmidimessage atanmış olduğu için ekranda "bağlı" yazıyor ama
+  // tek bir vuruş bile gelmiyor. Ayrıca ilk requestMIDIAccess başarısız
+  // olursa eski kod bir daha hiç denemiyordu.
+  // Çözüm: durumu her seferinde GERÇEK port listesinden hesapla, kapanmış
+  // portu yeniden aç, erişim hiç alınamadıysa periyodik tekrar dene.
+  var midiAccess       = null;
+  var MIDI_WATCH_MS    = 5000;   // portları tarama sıklığı
+  var MIDI_RETRY_MS    = 30000;  // erişim alınamadıysa tekrar deneme aralığı
+  var midiLastRequestAt = 0;
 
-  function initMIDI() {
+  function midiHandler(msg) {
+    var cmd = msg.data[0], velocity = msg.data[2];
+    if (cmd >= 144 && cmd <= 159 && velocity > 0) {
+      var overlay = document.getElementById("gameOverlay");
+      if (overlay && overlay.style.display !== "none") {
+        unlockAC();
+        handleHit();
+      }
+    }
+  }
+
+  function attachInput(port) {
+    if (!port || port.type !== "input") return;
+    port.onmidimessage = null;   // hotplug'da çift listener'ı önle
+    port.onmidimessage = midiHandler;
+    // onmidimessage portu üstü kapalı açar; açılamazsa sessizce ölmesin diye
+    // open()'ı da çağırıyoruz. Hata yutuluyor, bir sonraki tarama tekrar dener.
+    if (port.connection !== "open" && port.open) {
+      try { var p = port.open(); if (p && p.catch) p.catch(function(){}); } catch(e) {}
+    }
+  }
+
+  // Tek doğruluk kaynağı: ekrandaki yazı her zaman portların anlık halinden üretilir
+  function midiWatchdog() {
+    if (!midiAccess) {
+      if (!gameRunning && (Date.now() - midiLastRequestAt) > MIDI_RETRY_MS) requestMidiAccess();
+      return;
+    }
+    var acikPort = null, canliPort = 0;
+    midiAccess.inputs.forEach(function(port) {
+      if (port.state === "disconnected") return;  // fiziksel olarak yok
+      canliPort++;
+      if (port.connection === "closed") attachInput(port);  // sessizce kopmuş, geri aç
+      if (port.connection === "open" && !acikPort) acikPort = port;
+    });
+    if (acikPort)        updateMIDIStatus(true, acikPort.name);
+    else if (canliPort)  updateMIDIStatus(false, "bağlanıyor...");
+    else                 updateMIDIStatus(false, "");
+  }
+
+  function requestMidiAccess() {
     if (!navigator.requestMIDIAccess) {
       updateMIDIStatus(false, "desteklenmiyor");
       return;
     }
-    // Tek shared handler — duplicate listener sorununu engeller
-    function midiHandler(msg) {
-      var cmd = msg.data[0], velocity = msg.data[2];
-      if (cmd >= 144 && cmd <= 159 && velocity > 0) {
-        var overlay = document.getElementById("gameOverlay");
-        if (overlay && overlay.style.display !== "none") {
-          unlockAC();
-          handleHit();
-        }
-      }
-    }
-    function attachInput(port) {
-      port.onmidimessage = null;    // önce temizle — hotplug çift listener'ı önle
-      port.onmidimessage = midiHandler;
-      midiConnected = true;
-      updateMIDIStatus(true, port.name);
-    }
+    midiLastRequestAt = Date.now();
     navigator.requestMIDIAccess({ sysex: false }).then(function(midi) {
+      midiAccess = midi;
       midi.inputs.forEach(attachInput);
       midi.onstatechange = function(e) {
-        if (e.port.type !== "input") return;
-        if (e.port.state === "connected") {
-          attachInput(e.port);
-        } else {
-          e.port.onmidimessage = null;
-          midiConnected = false;
-          updateMIDIStatus(false, "");
-        }
+        if (!e.port || e.port.type !== "input") return;
+        if (e.port.state === "connected") attachInput(e.port);
+        midiWatchdog();
       };
+      midiWatchdog();
     }).catch(function() {
+      midiAccess = null;
       updateMIDIStatus(false, "izin verilmedi");
     });
+  }
+
+  function initMIDI() {
+    requestMidiAccess();
+    setInterval(midiWatchdog, MIDI_WATCH_MS);
   }
 
   function updateMIDIStatus(connected, name) {
