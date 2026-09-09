@@ -72,7 +72,15 @@ kaldırıldı — iOS eşzamanlı AudioContext sayısını sınırlar. Gerekirse
 
 **Timing:**
 - `TOM_HIT_TIME = 12.18` — Whitney Houston parçasında snare'in tam zamanı (saniye)
-- `WIN_PERFECT = 0.05` (±50ms), `WIN_GREAT = 0.13`, `WIN_GOOD = 0.28`, `WIN_IDAREDER = 0.50`
+- `WIN_PERFECT = 0.05` (50ms), `WIN_GREAT = 0.13`, `WIN_GOOD = 0.28`, `WIN_IDAREDER = 0.50`
+- **Geç vuruş koruması** (`LATE_GRACE_MS = 150`, `LATE_REACTION_MS = 500`): tomdan sonra
+  vuran müşteri sesi duyup tepki vermiş olabilir. İnsanın sese tepki süresi tabanı ~150ms,
+  bu yüzden 150ms'ye kadar geç vuruşlar normal merdivenle değerlendirilir (MÜKEMMEL dahil);
+  150-500ms arası en iyi İDARE EDER ile sınırlı; 500msüstü ÇALIŞMAYA DEVAM.
+  Erken taraf serbest — erken vurmak gerçek tahmindir. Karar tek yerde:
+  `resultForOffset(offsetSec)` (negatif = erken, pozitif = geç).
+  Eski sürümde geç vuruş 20ms'de kesiliyordu; bu 25ms geç vurana bez çanta,
+  480ms erken vurana Akademi dersi verdiği için ters sonuç üretiyordu.
 
 **Hak sistemi:**
 - `MAX_PLAYS_PER_DAY = 2` — `localStorage`'da oyuncu adına göre takip

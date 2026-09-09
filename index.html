@@ -232,10 +232,19 @@ body{font-family:'Bebas Neue',sans-serif;}
 
 <script>
 var TOM_HIT_TIME = 12.18; // Gerçek onset: 12.189s (waveform analizi)
-var WIN_PERFECT   = 0.05;  // ±50ms  → Mükemmel → %15 indirim
-var WIN_GREAT     = 0.13;  // ±130ms → Harika   → %10 indirim
-var WIN_GOOD      = 0.28;  // ±280ms → İyi      → 2 saat prova
-var WIN_IDAREDER  = 0.50;  // ±500ms → İdare eder → rastgele 3 ödül
+var WIN_PERFECT   = 0.05;  // 50ms  → MÜKEMMEL   → Roland RH-5 kulaklık
+var WIN_GREAT     = 0.13;  // 130ms → HARİKA     → %15 indirim
+var WIN_GOOD      = 0.28;  // 280ms → İYİ        → %10 indirim
+var WIN_IDAREDER  = 0.50;  // 500ms → İDARE EDER → Akademi 1 ders
+
+// GEÇ VURUŞ KORUMASI — tomdan sonra vuran müşteri sesi DUYUP tepki vermiş
+// olabilir; bu tahmin değil kopyadır. İnsanın sese tepki süresi tabanı ~150ms:
+//   • 150ms'ye kadar geç  → tepki olamaz, normal merdiven geçerli (MÜKEMMEL dahil)
+//   • 150-500ms geç       → duymuş olabilir, en iyi İDARE EDER ile sınırlı
+//   • 500ms'den fazla geç → ÇALIŞMAYA DEVAM
+// Erken taraf serbest bırakılır çünkü erken vurmak gerçek tahmindir (risklidir).
+var LATE_GRACE_MS    = 150;
+var LATE_REACTION_MS = 500;
 // Dışarısı → Çalışmaya devam → Bez çanta
 // BACKUP: TOM_HIT_TIME=11.95, WIN_PERFECT=0.03, WIN_GREAT=0.08, WIN_GOOD=0.18
 var STORE_CODE   = "AKS";
@@ -744,6 +753,25 @@ function playTomSound() {
   } catch(e) {}
 }
 
+// Vuruş sapmasından sonucu hesaplar. offsetSec negatif = erken, pozitif = geç.
+// Karar tek yerde toplansın ve test edilebilsin diye ayrı fonksiyon.
+function resultForOffset(offsetSec) {
+  var diff = Math.abs(offsetSec);
+  var base;
+  if      (diff <= WIN_PERFECT)   base = "perfect";
+  else if (diff <= WIN_GREAT)     base = "great";
+  else if (diff <= WIN_GOOD)      base = "good";
+  else if (diff <= WIN_IDAREDER)  base = "idareder";
+  else                            base = "miss";
+
+  if (offsetSec <= 0) return base;          // erken veya tam zamanında — merdiven geçerli
+
+  var lateMs = offsetSec * 1000;
+  if (lateMs <= LATE_GRACE_MS)    return base;         // tepki süresinin altı → gerçek tahmin
+  if (lateMs <= LATE_REACTION_MS) return "idareder";   // duymuş olabilir → en iyi Akademi
+  return "miss";
+}
+
 function handleHit() {
   if (!gameRunning || hitMade) return;
   // Ses henüz başlamamışsa (MIDI erken geldi) vuruşu reddet
@@ -764,14 +792,8 @@ function handleHit() {
   } else {
     elapsed = (Date.now() - audioStartTime) / 1000;
   }
-  var diff = Math.abs(elapsed - TOM_HIT_TIME);
-
-  var result;
-  if      (diff <= WIN_PERFECT)   result = "perfect";
-  else if (diff <= WIN_GREAT)     result = "great";
-  else if (diff <= WIN_GOOD)      result = "good";
-  else if (diff <= WIN_IDAREDER)  result = "idareder";
-  else                            result = "miss";
+  var diff   = Math.abs(elapsed - TOM_HIT_TIME);
+  var result = resultForOffset(elapsed - TOM_HIT_TIME);
 
   debugLog("⏱ elapsed:" + elapsed.toFixed(3) + "s | diff:" + Math.round(diff*1000) + "ms | hedef:" + TOM_HIT_TIME + "s → " + result.toUpperCase());
 
@@ -786,13 +808,12 @@ function handleHit() {
     }, 150);
   }
 
-  // Tom anından SONRA vuruş
+  // Tom anından SONRA vuruş — sonuç resultForOffset içinde zaten hesaplandı.
+  // Müşteri tomu duymuş olduğu için parçayı uzatmaya gerek yok.
   if (elapsed > TOM_HIT_TIME) {
-    var lateMs = (elapsed - TOM_HIT_TIME) * 1000;
     gameRunning = false;
     stopWAudio();
-    // 0-20ms geç → %10 indirim, 20ms+ → bez çanta
-    showWhitneyResult(lateMs <= 20 ? "great" : "miss");
+    showWhitneyResult(result);
     return;
   }
 
