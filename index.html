@@ -773,7 +773,33 @@ function handleHit() {
 
 // Not: İDARE EDER eskiden 3 ödülden rastgele seçiliyordu (idarederPrizes dizisi).
 // Artık tek ödül (Akademi 1 Ders) olduğu için dizi kaldırıldı; whitneyPrizes tek kaynak.
+// Kulaklık fiziksel ve sınırlı stok: günde en fazla MAX_HEADPHONES_PER_DAY adet.
+// Sınır dolduktan sonra MÜKEMMEL vuran müşteri boş kalmasın diye bir alt ödüle
+// (%15 indirim) düşürülür; vuruşu yine "MÜKEMMEL" olarak kutlanır.
+// Kayıtta sonuç "perfect" kalır — istatistik bozulmaz, sadece ödül değişir.
+var MAX_HEADPHONES_PER_DAY = 3;
+var HEADPHONE_CODE = "RH5KL";
+
+var perfectSoldOutPrize = { emoji:"🏆", label:"MÜKEMMEL!", title:"%15 İNDİRİM",
+  desc:"Tam zamanında vurdun!\nBugünün kulaklıkları tükendi —\nbunun yerine %15 indirim kazandın!", code:"IND15", type:"code" };
+
+// Bugün kaç kulaklık kuponu üretildiğini sayar (yalnızca kesinleşmiş oyunlarda kod olur)
+function headphonesIssuedToday() {
+  var data = loadPlays();
+  var n = 0;
+  Object.keys(data).forEach(function(name) {
+    var plays = data[name] && data[name].plays ? data[name].plays : [];
+    plays.forEach(function(pl) {
+      if (pl.code && pl.code.indexOf("-" + HEADPHONE_CODE + "-") !== -1) n++;
+    });
+  });
+  return n;
+}
+
 function prizeForResult(r) {
+  if (r === "perfect" && headphonesIssuedToday() >= MAX_HEADPHONES_PER_DAY) {
+    return perfectSoldOutPrize;
+  }
   return whitneyPrizes[r] || whitneyPrizes["miss"];
 }
 

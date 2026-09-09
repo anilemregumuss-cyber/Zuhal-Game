@@ -72,6 +72,15 @@ kaldırıldı — iOS eşzamanlı AudioContext sayısını sınırlar. Gerekirse
 
 **Ödüller:** `whitneyPrizes` objesi, `makeCode()` → `HT50-{KOD}-{DDMM}-{4rakam}` formatında kod üretir
 
+**Ödül merdiveni:** MÜKEMMEL → Roland RH-5 Kulaklık (`RH5KL`), HARİKA → %15 (`IND15`),
+İYİ → %10 (`IND10`), İDARE EDER → Akademi 1 Ders (`AKDRS`), ÇALIŞMAYA DEVAM → Bez Çanta (`CANTA`).
+
+**Kulaklık stok sınırı:** `MAX_HEADPHONES_PER_DAY = 3`. `headphonesIssuedToday()` bugünün
+kayıtlarında `-RH5KL-` içeren kupon kodlarını sayar; sınır dolunca `prizeForResult("perfect")`
+`perfectSoldOutPrize`'ı (%15 indirim, etiket yine MÜKEMMEL!) döndürür. Kayıttaki `result`
+"perfect" olarak kalır — istatistik bozulmaz. Sayı günlük anahtardan geldiği için her gün sıfırlanır.
+Personel kasa panelinde `RH5KL` arayıp gün içinde kaç kulaklık verildiğini görebilir.
+
 ### Android / Dokunmatik Ekran
 - Touch cihazlarda sadece `touchstart`, mouse'ta sadece `click` kullanılır (çift tetik önlemi)
 - `unlockAC()` — AudioContext'i kullanıcı etkileşimiyle açar (browser politikası)
