@@ -62,7 +62,7 @@ body{font-family:'Bebas Neue',sans-serif;}
 <button id="btnKasaAccess" aria-label="Kasa Paneli" style="position:fixed;top:calc(6.9vw + 10px + env(safe-area-inset-top,0px));right:calc(10px + env(safe-area-inset-right,0px));z-index:10001;background:#000;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.3);font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;padding:6px 10px;cursor:pointer;touch-action:manipulation;">KASA</button>
 
 <div class="banner">
-  <video class="banner-vid" src="Genel-Halftime-v2.mp4" autoplay muted loop playsinline webkit-playsinline></video>
+  <video class="banner-vid" src="Genel-Halftime-v3.mp4" autoplay muted loop playsinline webkit-playsinline></video>
 
   <!-- Sol şerit: PNG sol koyu kenara örter, yukarı akar -->
   <div class="vs vs-l"><div class="vs-t">SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • SINIRLI STOK • </div></div>
@@ -328,10 +328,17 @@ function recordPlay(name, result, prizeTitle, code) {
   savePlays(data);
 }
 
+// Hata ayıklama panosu müşteriye GÖRÜNMEZ. Sebep: ekrana hedef vuruş
+// zamanını (TOM_HIT_TIME) yazıyor — gören biri saniyeyi sayarak MÜKEMMEL
+// vurabilir ve kulaklık stoku boşa gider.
+// Kalibrasyon için adres satırına ?debug=1 eklenir; 5 dakikalık otomatik
+// yenilemede sorgu dizesi korunduğu için açık kalır.
+var DEBUG_VISIBLE = /[?&]debug=1/.test(location.search);
+
 function debugLog(msg) {
   var el = document.getElementById("debugLog");
   if (!el) return;
-  if (msg) {
+  if (msg && DEBUG_VISIBLE) {
     el.textContent = msg;
     el.style.display = "block";
   } else {
