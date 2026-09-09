@@ -541,6 +541,42 @@ function clearNameError() {
   if (inp) inp.style.borderColor = "#444";
 }
 
+// ===== SALLAMA İSİM FİLTRESİ =====
+// Amaç: "asd asd", "a b", "1234 5678" gibi uğraşılmış olmayan girişleri engellemek.
+// Önemli denge: gerçek müşteriyi geri çevirmek, sahte ismi geçirmekten daha
+// kötü. Bu yüzden kurallar yalnızca KESİN çöp olan girdileri yakalar;
+// şüpheli durumda girişe izin verilir.
+var NAME_LETTERS = "A-Za-zÇĞİIÖŞÜçğıiöşüÂÎÛâîû";
+var NAME_VOWELS  = "AEIİOÖUÜaeıioöuüÂÎÛâîû";
+var NAME_RE      = new RegExp("^[" + NAME_LETTERS + " '\-]+$");
+var VOWEL_RE     = new RegExp("[" + NAME_VOWELS + "]");
+var JUNK_NAMES   = ["TEST","DENEME","ASD","ASDF","QWE","QWER","ZXC","SDF","ABC","XXX",
+                    "AD","SOYAD","ADSOYAD","İSİM","ISIM","NAME","ANONİM","ANONIM","KULLANICI"];
+
+// Türkçe büyük harf: toUpperCase() "i" harfini "I" yapar ("İbrahim" → "IBRAHİM").
+// Kasa araması toLocaleUpperCase("tr-TR") kullandığı için kayıt da aynısını kullanmalı,
+// yoksa isim aramada bulunamaz.
+function normalizeName(raw) {
+  return String(raw).replace(/\s+/g, " ").trim().toLocaleUpperCase("tr-TR");
+}
+
+// Sorun varsa personel/müşteriye gösterilecek mesajı, yoksa "" döndürür
+function nameProblem(raw) {
+  var name  = String(raw).replace(/\s+/g, " ").trim();
+  var words = name ? name.split(" ") : [];
+  if (words.length < 2 || name.length < 4) return "! AD VE SOYAD GEREKLİ";
+  if (!NAME_RE.test(name))                 return "! SADECE HARF KULLAN";
+  for (var i = 0; i < words.length; i++) {
+    var w  = words[i];
+    var wu = w.toLocaleUpperCase("tr-TR");
+    if (w.length < 2 || w.length > 20) return "! GEÇERLİ AD SOYAD YAZ";
+    if (!VOWEL_RE.test(w))             return "! GEÇERLİ AD SOYAD YAZ";  // sesli harfi yok → uydurma
+    if (/(.)\1\1/.test(w))            return "! GEÇERLİ AD SOYAD YAZ";  // aaa, bbbb
+    if (JUNK_NAMES.indexOf(wu) !== -1) return "! GEÇERLİ AD SOYAD YAZ";
+  }
+  return "";
+}
+
 function _launchGame() {
   hitMade = false;
   gameRunning = true;
@@ -616,13 +652,13 @@ function startWhitneyGame() {
   if (gameRunning) return;
   clearNameError();
   var nameInput = document.getElementById("playerNameInput");
-  var rawName = nameInput ? nameInput.value.trim() : "";
-  var parts = rawName.trim().split(/\s+/);
-  if (parts.length < 2 || parts[1].length < 1) {
-    showNameError("! AD VE SOYAD GEREKLİ");
+  var rawName = nameInput ? nameInput.value : "";
+  var problem = nameProblem(rawName);
+  if (problem) {
+    showNameError(problem);
     return;
   }
-  playerName = rawName.toUpperCase();
+  playerName = normalizeName(rawName);
   var playCount = getPlayCount(playerName);
   if (playCount >= MAX_PLAYS_PER_DAY) {
     showNameError("! BUGÜN " + MAX_PLAYS_PER_DAY + " KEZ OYNADIN — YARIN GEL");
