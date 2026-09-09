@@ -18,7 +18,7 @@ Zuhal Müzik 50. Yıl — Rhythm Challenge. Müşteriler Whitney Houston parças
 
 ```
 index.html                  ← Tek kaynak dosya (tüm CSS + JS burada, ses artık harici)
-Genel-Halftime.mp4          ← Ana sayfa banner videosu (autoplay, muted, loop)
+Genel-Halftime-v2.mp4       ← Ana sayfa banner videosu (autoplay, muted, loop) — dikey 480x848, 9.6 sn
 zuhal-muzik.wav             ← Banner arka plan müziği (dokunuşla aç/kapat)
 whitney-halftime.mp3        ← Oyun içi Whitney Houston parçası (fetch + Web Audio API decode)
 zuhal-fifty-year-black.jpg  ← Oyun ekranı logosu (filter:invert(1) ile beyaza çevrilmiş)
@@ -31,7 +31,7 @@ Repoda bu 5 dosya dışında hiçbir medya kullanılmıyor — yeni bir görsel/
 Tüm uygulama tek HTML dosyasında, 3 katman:
 
 ### Sayfa 1 — Banner (`.banner`)
-- `<video class="banner-vid">` → `Genel-Halftime.mp4` tam ekran
+- `<video class="banner-vid">` → `Genel-Halftime-v2.mp4` tam ekran
 - Sol/sağ dikey kayan şeritler (`.vs-l`, `.vs-r`) ve üst/alt yatay bantlar (`.hs-t`, `.hs-b`) — SINIRLI STOK yazısı, CSS animasyonlu
 - `#btnGame` → Oyun ekranını açar, banner sesini durdurur
 - `#btnKasaAccess` (sağ üstte, sabit/fixed, düşük opaklık) → Kasa PIN ekranını açar, sayfa durumundan bağımsız her zaman görünür
