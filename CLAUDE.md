@@ -24,6 +24,14 @@ whitney-halftime.mp3        ← Oyun içi Whitney Houston parçası (fetch + Web
 zuhal-fifty-year-black.jpg  ← Oyun ekranı logosu (filter:invert(1) ile beyaza çevrilmiş)
 ```
 
+**Kasıtlı olarak tutulan eski banner videoları** (hiçbir yerden referans verilmiyor,
+ama SILME — kampanyaya geri dönülürse tekrar kullanılacak, sahibi öyle karar verdi):
+
+```
+Genel-Halftime.mp4          ← v1, yatay 832x464, 1.1 MB
+Genel-Halftime-v2.mp4       ← v2, dikey 480x848 (WhatsApp sıkıştırmalı), 1.55 MB
+```
+
 Repoda bu 5 dosya dışında hiçbir medya kullanılmıyor — yeni bir görsel/video eklerken önce `index.html` içinde gerçekten referans verildiğinden emin ol, aksi halde GitHub Pages deploy boyutu şişer.
 
 ## index.html Mimarisi
