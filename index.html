@@ -863,7 +863,9 @@ function showWhitneyResult(result) {
     var p = prizeForResult(bestResult);
 
     document.getElementById("winEmoji").textContent = p.emoji;
-    document.getElementById("winLabel").textContent = p.label;
+    var sonLabel = document.getElementById("winLabel");
+    sonLabel.textContent = p.label;
+    sonLabel.style.display = "block";   // ara oyunda gizlenmiş olabilir
     document.getElementById("winTitle").textContent = p.title;
     document.getElementById("winDesc").textContent  = p.desc;
 
@@ -891,10 +893,16 @@ function showWhitneyResult(result) {
     document.getElementById("winTitle").style.display     = "block";
     document.getElementById("winDesc").style.display      = "block";
   } else {
-    // Ara oyun — ödülü henüz gösterme
+    // Ara oyun — ödülü henüz gösterme.
+    // Sonuç etiketi de GÖSTERİLMEZ: "ÇALIŞMAYA DEVAM!" gören müşteri
+    // kaybettiğini sanıp 2. hakkını kullanmadan gidiyordu. Yerine nötr davul
+    // emojisi + "hakkını kullandın" mesajı gösterilir.
+    // NOT: 1. deneme yine SAYILIR (iki denemenin en iyisi geçerli), bu yüzden
+    // "alıştırma/deneme turu" demiyoruz — yanlış bilgi olurdu.
     var playsDone = MAX_PLAYS_PER_DAY - remaining;
-    document.getElementById("winEmoji").textContent = p.emoji;
-    document.getElementById("winLabel").textContent = p.label;
+    document.getElementById("winEmoji").textContent = "🥁";
+    var araLabel = document.getElementById("winLabel");
+    if (araLabel) { araLabel.textContent = ""; araLabel.style.display = "none"; }
     document.getElementById("codeBox").style.display      = "none";
     document.getElementById("cantaBox").style.display     = "none";
     document.getElementById("firstPlayMsg").style.display = "block";
@@ -903,13 +911,13 @@ function showWhitneyResult(result) {
     document.getElementById("winDesc").style.display      = "none";
     var labelEl = document.getElementById("firstPlayLabel");
     var descEl  = document.getElementById("firstPlayDesc");
-    if (labelEl) labelEl.textContent = playsDone + ". DENEME TAMAMLANDI";
+    if (labelEl) labelEl.textContent = playsDone + ". HAKKINI KULLANDIN";
     if (descEl) {
-      if (remaining === 1) {
-        descEl.innerHTML = "Ödülün <span style='color:#FFD700;font-weight:700;'>" + MAX_PLAYS_PER_DAY + ". oyununda</span> kesinleşiyor.<br/>Son şansını kullan!";
-      } else {
-        descEl.innerHTML = "Ödülün <span style='color:#FFD700;font-weight:700;'>" + MAX_PLAYS_PER_DAY + ". oyununda</span> kesinleşiyor.<br/>Tekrar oyna — " + remaining + " hakkın kaldı!";
-      }
+      var kalanMsj = (remaining === 1)
+        ? "Şimdi yakala — son hakkın!"
+        : "Tekrar oyna — " + remaining + " hakkın kaldı!";
+      descEl.innerHTML = "Tom vuruşunu duydun. " + kalanMsj +
+        "<br/><span style='color:#FFD700;font-weight:700;'>" + MAX_PLAYS_PER_DAY + " denemenin en iyisi</span> geçerli.";
     }
   }
 
