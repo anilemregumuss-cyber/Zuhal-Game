@@ -237,13 +237,16 @@ var WIN_GREAT     = 0.13;  // 130ms → HARİKA     → %15 indirim
 var WIN_GOOD      = 0.28;  // 280ms → İYİ        → %10 indirim
 var WIN_IDAREDER  = 0.50;  // 500ms → İDARE EDER → Akademi 1 ders
 
-// GEÇ VURUŞ KORUMASI — tomdan sonra vuran müşteri sesi DUYUP tepki vermiş
-// olabilir; bu tahmin değil kopyadır. İnsanın sese tepki süresi tabanı ~150ms:
-//   • 150ms'ye kadar geç  → tepki olamaz, normal merdiven geçerli (MÜKEMMEL dahil)
-//   • 150-500ms geç       → duymuş olabilir, en iyi İDARE EDER ile sınırlı
-//   • 500ms'den fazla geç → ÇALIŞMAYA DEVAM
-// Erken taraf serbest bırakılır çünkü erken vurmak gerçek tahmindir (risklidir).
-var LATE_GRACE_MS    = 150;
+// GEÇ VURUŞ KORUMASI — tomdan SONRA vurmak tahmin değildir; müşteri sesi
+// duyup tepki vermiş olabilir. Sahada test edildi: 150ms'lik pay ile tomdan
+// sonra vurup kulaklık kazanılabiliyordu — fazla kolaydı.
+// Kural: geç vuruşun EN İYİ ödülü İYİ (%10). MÜKEMMEL (kulaklık) ve
+// HARİKA (%15) yalnızca tomdan ÖNCE vurarak, yani gerçekten tahmin ederek
+// kazanılır.
+//   • 0-150ms geç    → İYİ (%10 indirim)
+//   • 150-500ms geç  → İDARE EDER (Akademi 1 ders)
+//   • 500ms+ geç     → ÇALIŞMAYA DEVAM (bez çanta)
+var LATE_GOOD_MS     = 150;
 var LATE_REACTION_MS = 500;
 // Dışarısı → Çalışmaya devam → Bez çanta
 // BACKUP: TOM_HIT_TIME=11.95, WIN_PERFECT=0.03, WIN_GREAT=0.08, WIN_GOOD=0.18
@@ -766,9 +769,10 @@ function resultForOffset(offsetSec) {
 
   if (offsetSec <= 0) return base;          // erken veya tam zamanında — merdiven geçerli
 
+  // Tomdan SONRA: MÜKEMMEL ve HARİKA verilmez, en iyi ödül İYİ (%10)
   var lateMs = offsetSec * 1000;
-  if (lateMs <= LATE_GRACE_MS)    return base;         // tepki süresinin altı → gerçek tahmin
-  if (lateMs <= LATE_REACTION_MS) return "idareder";   // duymuş olabilir → en iyi Akademi
+  if (lateMs <= LATE_GOOD_MS)     return "good";
+  if (lateMs <= LATE_REACTION_MS) return "idareder";
   return "miss";
 }
 
