@@ -905,11 +905,18 @@ function showWhitneyResult(result) {
       document.getElementById("cantaBox").style.display = "flex";
     }
 
-    // Kayıttaki son oyunu kod ile güncelle
+    // Kayıttaki son oyunu KESİNLEŞEN ödülle güncelle.
+    // Önemli: recordPlay o denemenin kendi sonucunu yazmıştı, ama geçerli ödül
+    // iki denemenin EN İYİSİ'ne göre belirleniyor. Eskiden yalnızca kod
+    // güncelleniyordu; bu yüzden kasa panelinde "HARİKA — %15 İNDİRİM" yazıp
+    // kodu RH5KL (kulaklık) olan kayıtlar oluşuyordu — personel yanlış ödül verebilirdi.
+    // result alanı DEĞİŞTİRİLMEZ: istatistik her denemenin gerçek sonucunu saymalı.
     var d2 = loadPlays();
     if (d2[playerName] && d2[playerName].plays.length > 0) {
       var last = d2[playerName].plays.length - 1;
-      d2[playerName].plays[last].code = prizeCode;
+      d2[playerName].plays[last].code       = prizeCode;
+      d2[playerName].plays[last].prize      = p.title;       // kesinleşen ödül
+      d2[playerName].plays[last].finalResult = bestResult;   // kasada gösterilecek sonuç
       savePlays(d2);
     }
 
@@ -1100,7 +1107,8 @@ function renderWinners(filter) {
   var entries = [];
   names.forEach(function(n) {
     data[n].plays.forEach(function(pl) {
-      if (pl.code) entries.push({ name:n, time:pl.time, result:pl.result, prize:pl.prize, code:pl.code });
+      // finalResult: iki denemenin en iyisi (eski kayıtlarda yok → result'a düşer)
+      if (pl.code) entries.push({ name:n, time:pl.time, result:(pl.finalResult || pl.result), prize:pl.prize, code:pl.code });
     });
   });
   entries.sort(function(a,b) { return a.time < b.time ? 1 : (a.time > b.time ? -1 : 0); });

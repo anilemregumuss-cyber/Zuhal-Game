@@ -87,6 +87,12 @@ kaldırıldı — iOS eşzamanlı AudioContext sayısını sınırlar. Gerekirse
 **Hak sistemi:**
 - `MAX_PLAYS_PER_DAY = 2` — `localStorage`'da oyuncu adına göre takip
 - 2 denemenin **en iyisi** kazanır (1. daha iyiyse, 1.'nin ödülü verilir)
+- Kesinleşen ödül son oyun kaydına yazılır: `code`, `prize` ve `finalResult`.
+  `result` alanı o denemenin KENDİ sonucudur ve değiştirilmez (istatistik için).
+  Kazananlar listesi `finalResult || result` gösterir — eski kayıtlarda alan yok.
+  **Geçmiş hata:** eskiden yalnızca `code` güncelleniyordu; 1. denemede MÜKEMMEL,
+  2. denemede HARİKA vuran oyuncunun kaydı "HARİKA — %15 İNDİRİM" yazıp kodu
+  `RH5KL` (kulaklık) oluyordu → kasada yanlış ödül verilebilirdi.
 
 **Ödüller:** `whitneyPrizes` objesi, `makeCode()` → `HT50-{KOD}-{DDMM}-{4rakam}` formatında kod üretir
 
