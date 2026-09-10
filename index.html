@@ -198,7 +198,10 @@ body{font-family:'Bebas Neue',sans-serif;}
   <div style="width:100%;max-width:480px;">
     <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:5px;color:#FFD700;margin-bottom:6px;">ZUHAL · HALFTIME 50</div>
     <div style="font-family:'Space Mono',monospace;font-size:16px;letter-spacing:4px;color:#fff;margin-bottom:4px;">KASA PANELİ</div>
-    <div id="statsDate" style="font-family:'Space Mono',monospace;font-size:9px;color:#555;letter-spacing:2px;margin-bottom:20px;"></div>
+    <div id="statsDate" style="font-family:'Space Mono',monospace;font-size:9px;color:#555;letter-spacing:2px;margin-bottom:6px;"></div>
+    <!-- Ses gecikmesi ölçümü: oyunun zamanlamasının doğru olup olmadığını anlamak için.
+         PIN arkasında olduğu için müşteri görmez. Kalibrasyon bitince kaldırılabilir. -->
+    <div id="latencyInfo" style="font-family:'Space Mono',monospace;font-size:9px;color:#666;letter-spacing:1px;margin-bottom:20px;"></div>
 
     <div style="display:flex;gap:8px;margin-bottom:20px;">
       <button id="btnTabWinners" style="flex:1;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;padding:10px 0;cursor:pointer;border:1px solid #FFD700;background:#FFD700;color:#000;font-weight:700;">🏆 KAZANANLAR</button>
@@ -1106,11 +1109,29 @@ function renderStatsView() {
 
 var statsRefreshTimer = null;
 
+// Ses çıkış gecikmesi: hoparlörden duyulan an ile sistemin saati arasındaki fark.
+// Büyükse oyun "duyduğun anda vur" yerine "duymadan önce tahmin et"e kayar.
+// wAudioCtx yalnızca bir oyun oynandıktan sonra var olur.
+function renderLatencyInfo() {
+  var el = document.getElementById("latencyInfo");
+  if (!el) return;
+  if (!wAudioCtx) {
+    el.textContent = "SES GECİKMESİ: ölçülmedi — önce bir oyun oynayın";
+    el.style.color = "#666";
+    return;
+  }
+  var cikis  = Math.round((wAudioCtx.outputLatency || 0) * 1000);
+  var tampon = Math.round((wAudioCtx.baseLatency || 0) * 1000);
+  el.textContent = "SES GECİKMESİ: çıkış " + cikis + " ms / tampon " + tampon + " ms";
+  el.style.color = (cikis > 20) ? "#ffb74d" : "#4caf50";
+}
+
 function refreshStatsAll() {
   renderStatsView();
   var se = document.getElementById("winnerSearch");
   renderWinners(se ? se.value : "");
   renderStorageWarning();
+  renderLatencyInfo();
 }
 
 // Depolama çalışmıyorsa kayıtlar yalnızca bellekte tutulur ve sayfa yenilenince
