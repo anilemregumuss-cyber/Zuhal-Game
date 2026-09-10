@@ -224,6 +224,7 @@ body{font-family:'Bebas Neue',sans-serif;}
 
     <div style="margin-top:32px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
       <button id="btnStatsDownload" style="background:transparent;color:#FFD700;border:1px solid #FFD700;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;padding:10px 20px;cursor:pointer;">⬇ İNDİR</button>
+      <button id="btnStatsReload" style="background:transparent;color:#8ab4f8;border:1px solid #8ab4f8;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;padding:10px 20px;cursor:pointer;">⟳ YENİLE</button>
       <button id="btnStatsClose" style="background:#FFD700;color:#000;border:none;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;padding:10px 20px;cursor:pointer;font-weight:700;">KAPAT</button>
     </div>
   </div>
@@ -1164,6 +1165,22 @@ function openStats() {
   startStatsAutoRefresh();
 }
 
+// Kiosk tam ekranda olduğu için Chrome'un yenile butonu görünmüyor; personel
+// yeni sürümü çekmek için tam ekrandan çıkmak zorunda kalıyordu.
+// Sorgu dizesi değiştirildiği için tarayıcı önbelleği atlanır ve gerçekten
+// yeni dosya inar. replace() kullanılır — geri tuşu geçmişi şişmesin.
+function reloadPageFresh() {
+  var sor = (typeof confirm === "function")
+    ? confirm("Sayfa yenilensin mi? Kayıtlar silinmez.")
+    : true;
+  if (!sor) return;
+  try {
+    location.replace(location.origin + location.pathname + "?r=" + Date.now());
+  } catch (e) {
+    location.reload();
+  }
+}
+
 function closeStats() {
   document.getElementById("statsModal").style.display = "none";
   stopStatsAutoRefresh();
@@ -1453,6 +1470,7 @@ document.addEventListener("DOMContentLoaded", function() {
   addBtn("btnTekrarOyna", startGameDirectly);
   addBtn("btnStatsClose", closeStats);
   addBtn("btnStatsDownload", downloadStats);
+  addBtn("btnStatsReload", reloadPageFresh);
   addBtn("btnTabWinners", function() { switchStatsTab("winners"); });
   addBtn("btnTabStats", function() { switchStatsTab("stats"); });
   addBtn("btnKasaAccess", openPinModal);
