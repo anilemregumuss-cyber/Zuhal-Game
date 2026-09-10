@@ -303,11 +303,27 @@ var storageOK = true;
 
 function loadPlays() {
   if (!storageOK) return memPlays[todayKey()] || {};
+
+  var raw;
   try {
-    return JSON.parse(localStorage.getItem(todayKey()) || "{}");
-  } catch(e) {
+    raw = localStorage.getItem(todayKey());
+  } catch (e) {
+    // Depolama gerçekten çalışmıyor (gizli sekme, kapalı çerez) → bellek yedeğine geç
     storageOK = false;
     return memPlays[todayKey()] || {};
+  }
+  if (!raw) return {};
+
+  try {
+    return JSON.parse(raw);
+  } catch (e) {
+    // Veri BOZUK ama depolama çalışıyor. Eskiden burada storageOK=false yapılıyordu;
+    // o zaman günün geri kalanı yalnızca bellekte kalıyor ve 5 dakikalık yenilemede
+    // üretilmiş kuponlar kayboluyordu → kasada "KOD KAYITLARDA YOK".
+    // Bozuk veriyi yedek anahtara taşıyıp temiz sayfa ile devam ediyoruz.
+    try { localStorage.setItem(todayKey() + "_bozuk_" + Date.now(), raw); } catch (e2) {}
+    try { localStorage.removeItem(todayKey()); } catch (e3) {}
+    return {};
   }
 }
 
