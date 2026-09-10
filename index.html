@@ -595,6 +595,24 @@ var JUNK_NAMES   = ["TEST","DENEME","ASD","ASDF","QWE","QWER","ZXC","SDF","ABC",
 // Türkçe büyük harf: toUpperCase() "i" harfini "I" yapar ("İbrahim" → "IBRAHİM").
 // Kasa araması toLocaleUpperCase("tr-TR") kullandığı için kayıt da aynısını kullanmalı,
 // yoksa isim aramada bulunamaz.
+// Kasada personel Türkçe karakter yazmayabilir: "ozturk" yazıp "ÖZTÜRK"ü,
+// "isil" yazıp "IŞIL"ı bulamazsa müşteriyi "kayıtlarda yok" sanar ve ödülü vermez.
+// Bu yüzden arama karşılaştırmasında Türkçe harfleri ASCII karşılığına indiriyoruz.
+// İ/I/ı/i'nin hepsi "I" olur — noktalı/noktasız ayrımı tamamen ortadan kalkar.
+function foldTr(str) {
+  return String(str)
+    .replace(/[çÇ]/g, "c")
+    .replace(/[ğĞ]/g, "g")
+    .replace(/[ıİIi]/g, "i")
+    .replace(/[öÖ]/g, "o")
+    .replace(/[şŞ]/g, "s")
+    .replace(/[üÜ]/g, "u")
+    .replace(/[âÂ]/g, "a")
+    .replace(/[îÎ]/g, "i")
+    .replace(/[ûÛ]/g, "u")
+    .toUpperCase();
+}
+
 function normalizeName(raw) {
   return String(raw).replace(/\s+/g, " ").trim().toLocaleUpperCase("tr-TR");
 }
@@ -1149,11 +1167,12 @@ function renderWinners(filter) {
   });
   entries.sort(function(a,b) { return a.time < b.time ? 1 : (a.time > b.time ? -1 : 0); });
 
-  var q = (filter || "").trim().toLocaleUpperCase("tr-TR");
-  // Hem ada hem kupon koduna göre ara — personel kasada kodu yazıp doğrulayabilsin
+  // Hem ada hem kupon koduna göre ara — personel kasada kodu yazıp doğrulayabilsin.
+  // foldTr sayesinde "ozturk" da "ÖZTÜRK"ü bulur (bkz. foldTr açıklaması).
+  var q = foldTr((filter || "").trim());
   var filtered = q ? entries.filter(function(e) {
-    return e.name.toLocaleUpperCase("tr-TR").indexOf(q) !== -1 ||
-           e.code.toLocaleUpperCase("tr-TR").indexOf(q) !== -1;
+    return foldTr(e.name).indexOf(q) !== -1 ||
+           foldTr(e.code).indexOf(q) !== -1;
   }) : entries;
 
   var countEl = document.getElementById("winnersCount");
