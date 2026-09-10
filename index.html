@@ -3,6 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- Kiosk: ana ekrana eklenince (PWA) adres çubuğu olmadan tam ekran açılır.
+     Kiosk tarayıcı uygulamalarına gerek kalmaz — Chrome motoru korunduğu için
+     USB MIDI (SPD::One) çalışmaya devam eder. -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <!-- Otomatik yenileme meta ile DEĞİL, JS ile yapılır (scheduleIdleReload):
      meta refresh oyunun tam ortasında sayfayı sıfırlayıp oyuncunun hakkını yakıyordu. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1548,7 +1558,48 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 
-  function initMIDI() {
+  // ===== TAM EKRAN (KIOSK) =====
+// Kioskta Chrome'un adres çubuğu ekranın üstünü, Android gezinme çubuğu altını
+// yiyordu. Fullscreen API yalnızca kullanıcı hareketi İÇİNDE çağrılabilir, bu
+// yüzden ilk dokunuşa bağlıyoruz. Ana ekrandan (PWA) açıldıysa sayfa zaten tam
+// ekran gelir ve bu kod hiçbir şey yapmaz.
+function isFullscreenNow() {
+  return !!(document.fullscreenElement || document.webkitFullscreenElement ||
+            document.mozFullScreenElement || document.msFullscreenElement);
+}
+
+function isStandaloneApp() {
+  try {
+    if (navigator.standalone === true) return true;
+    if (!window.matchMedia) return false;
+    return window.matchMedia("(display-mode: fullscreen)").matches ||
+           window.matchMedia("(display-mode: standalone)").matches;
+  } catch (e) { return false; }
+}
+
+function requestKioskFullscreen() {
+  if (isFullscreenNow() || isStandaloneApp()) return;
+  var el = document.documentElement;
+  var fn = el.requestFullscreen || el.webkitRequestFullscreen ||
+           el.mozRequestFullScreen || el.msRequestFullscreen;
+  if (!fn) return;
+  try {
+    // navigationUI:"hide" Android'de gezinme çubuğunu da gizler
+    var pr = fn.call(el, { navigationUI: "hide" });
+    if (pr && pr["catch"]) pr["catch"](function(){});
+  } catch (e) {
+    try { fn.call(el); } catch (e2) {}
+  }
+}
+
+function initKioskFullscreen() {
+  // bindTap ile aynı mantık: eski cihazlarda pointerdown yok, touchstart'a düşer.
+  // Tek olay tipi bağlanır — ikisi birden bağlanırsa aynı dokunuşta iki kez çağrılır.
+  var evt = HAS_POINTER ? "pointerdown" : "touchstart";
+  document.addEventListener(evt, requestKioskFullscreen, true);
+}
+
+function initMIDI() {
     requestMidiAccess();
     setInterval(midiWatchdog, MIDI_WATCH_MS);
   }
@@ -1568,6 +1619,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
 
+  initKioskFullscreen();
   initMIDI();
   scheduleIdleReload();
 });

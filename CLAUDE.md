@@ -32,6 +32,18 @@ Genel-Halftime.mp4          ← v1, yatay 832x464, 1.1 MB
 Genel-Halftime-v2.mp4       ← v2, dikey 480x848 (WhatsApp sıkıştırmalı), 1.55 MB
 ```
 
+**Kiosk / PWA dosyaları:**
+
+```
+manifest.json               ← display:fullscreen — ana ekrana eklenince adres çubuğusuz açılır
+icon-192.png / icon-512.png ← PWA ikonları (kodın ürettiği sarı davul markı, maskable uyumlu)
+```
+
+Kiosk tarayıcı uygulaması KULLANMA — Chrome motorundan çıkıldığında veya WebView'da
+MIDI izin diyaloğu karşılanmadığında SPD::One görünmez olur. Tam ekran için
+`manifest.json` (ana ekrana ekle) + `initKioskFullscreen()` (ilk dokunuşta
+Fullscreen API, `navigationUI:"hide"`) kullanılır.
+
 Repoda bu 5 dosya dışında hiçbir medya kullanılmıyor — yeni bir görsel/video eklerken önce `index.html` içinde gerçekten referans verildiğinden emin ol, aksi halde GitHub Pages deploy boyutu şişer.
 
 ## index.html Mimarisi
