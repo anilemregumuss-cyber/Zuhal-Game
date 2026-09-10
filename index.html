@@ -884,16 +884,11 @@ function handleHit() {
     }, 150);
   }
 
-  // Tom anından SONRA vuruş — sonuç resultForOffset içinde zaten hesaplandı.
-  // Müşteri tomu duymuş olduğu için parçayı uzatmaya gerek yok.
-  if (elapsed > TOM_HIT_TIME) {
-    gameRunning = false;
-    stopWAudio();
-    showWhitneyResult(result);
-    return;
-  }
-
-  // Erken vuruş: parça 3 sn daha çalsın — kullanıcı nerede vurduğunu duysun
+  // Vuruştan sonra parça HER DURUMDA 3 sn daha çalar — oyuncu tomun tam yerini
+  // duysun ve ne kadar yakın vurduğunu anlasın. Erken vuruşta tom henüz çalmamıştır;
+  // geç vuruşta ise müzik aniden kesilince oyuncu karşılaştırma yapamaz.
+  // (Bir süre geç vuruşta müzik anında kesiliyordu — sahada "ne kadar yakın
+  // vurduğumu anlamıyorum" geri bildirimi geldiği için ikisi eşitlendi.)
   setTimeout(function() {
     gameRunning = false;
     stopWAudio();
