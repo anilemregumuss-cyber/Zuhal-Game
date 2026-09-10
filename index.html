@@ -442,12 +442,40 @@ var whitneyPrizes = {
 };
 
 
+// Bugün üretilmiş tüm kupon kodlarını döndürür
+function usedCodesToday() {
+  var kullanilan = {};
+  var data = loadPlays();
+  Object.keys(data).forEach(function(n) {
+    var plays = data[n] && data[n].plays ? data[n].plays : [];
+    plays.forEach(function(pl) { if (pl.code) kullanilan[pl.code] = true; });
+  });
+  return kullanilan;
+}
+
+// Aynı gün + aynı ödül için yalnızca 10.000 kombinasyon var. Doğum günü
+// paradoksu yüzünden aynı ödülü kazanan 80 kişilik bir günde ~%27 ihtimalle
+// İKİ MÜŞTERİYE AYNI KOD çıkar. O zaman kasada "2 EŞLEŞME" uyarısı çıkar ve
+// kupon HIÇBİR ŞEKİLDE doğrulanamaz (müşteri tam kodu yazsa bile). Bu yüzden
+// üretilen kod mevcut kayıtlarla karşılaştırılır.
 function makeCode(prizeCode) {
-  var r = "";
-  for (var i=0;i<4;i++) r += Math.floor(Math.random()*10);
   var d = new Date();
-  return "HT50-" + prizeCode + "-" +
-    String(d.getDate()).padStart(2,"0") + String(d.getMonth()+1).padStart(2,"0") + "-" + r;
+  var tarih = String(d.getDate()).padStart(2,"0") + String(d.getMonth()+1).padStart(2,"0");
+  var onek = "HT50-" + prizeCode + "-" + tarih + "-";
+  var kullanilan = usedCodesToday();
+
+  for (var deneme = 0; deneme < 50; deneme++) {
+    var r = "";
+    for (var i = 0; i < 4; i++) r += Math.floor(Math.random() * 10);
+    if (!kullanilan[onek + r]) return onek + r;
+  }
+  // 50 rastgele deneme yetmediyse sırayla tara — boş bir numara varsa kesin bulur
+  for (var n = 0; n < 10000; n++) {
+    var aday = onek + String(n).padStart(4, "0");
+    if (!kullanilan[aday]) return aday;
+  }
+  // 10.000 kodun hepsi dolu (gerçekte imkansız) — zaman damgasıyla ayır
+  return onek + String(Date.now() % 10000).padStart(4, "0") + "-" + String(Date.now()).slice(-3);
 }
 
 function wShowPanel(id) {
@@ -911,14 +939,22 @@ function showWhitneyResult(result) {
     // güncelleniyordu; bu yüzden kasa panelinde "HARİKA — %15 İNDİRİM" yazıp
     // kodu RH5KL (kulaklık) olan kayıtlar oluşuyordu — personel yanlış ödül verebilirdi.
     // result alanı DEĞİŞTİRİLMEZ: istatistik her denemenin gerçek sonucunu saymalı.
+    // Gece yarısı gün anahtarı değişirse (todayKey) bu okuma BOŞ gelir; o durumda
+    // kayıt hiç yazılmaz ve müşterinin elindeki kupon kasada "KAYITLARDA YOK"
+    // çıkardı. Kayıt yoksa yeniden oluşturuyoruz — kupon her halükarda kayda geçer.
     var d2 = loadPlays();
-    if (d2[playerName] && d2[playerName].plays.length > 0) {
-      var last = d2[playerName].plays.length - 1;
-      d2[playerName].plays[last].code       = prizeCode;
-      d2[playerName].plays[last].prize      = p.title;       // kesinleşen ödül
-      d2[playerName].plays[last].finalResult = bestResult;   // kasada gösterilecek sonuç
-      savePlays(d2);
+    if (!d2[playerName] || !d2[playerName].plays || d2[playerName].plays.length === 0) {
+      var simdi = new Date();
+      d2[playerName] = { plays: [{
+        time: String(simdi.getHours()).padStart(2,"0") + ":" + String(simdi.getMinutes()).padStart(2,"0"),
+        result: bestResult, prize: p.title, code: ""
+      }] };
     }
+    var last = d2[playerName].plays.length - 1;
+    d2[playerName].plays[last].code        = prizeCode;
+    d2[playerName].plays[last].prize       = p.title;       // kesinleşen ödül
+    d2[playerName].plays[last].finalResult = bestResult;    // kasada gösterilecek sonuç
+    savePlays(d2);
 
     document.getElementById("firstPlayMsg").style.display = "none";
     document.getElementById("socialBox").style.display    = "block";
