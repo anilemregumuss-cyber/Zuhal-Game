@@ -98,22 +98,21 @@ kaldırıldı — iOS eşzamanlı AudioContext sayısını sınırlar. Gerekirse
   o pencereye girmek imkansız. Tepkiyle vuran en iyi %10 alır (test edildi).
   Geçmiş: 20 ms, 150 ms ve "1 ms geç = kulaklık yok" kuralları denendi; üçü de
   ya ters sonuç üretti ya da tam zamanında vuran müşteriyi cezalandırdı.
-- **Zamanlama kalibrasyonu** (`inputLatencyMs`, kasa paneli > ⏱ ZAMANLAMA):
-  Çıkış gecikmesi `outputLatency` ile telafi edilir ama GİRİŞ gecikmesi
-  (dokunmatik panelin parmağı bildirmesi, Android'de 50-120 ms) ölçülemez.
-  Personel tom sesine 3 kez vurur, sapmanın MEDYANI `localStorage`'a yazılır ve
-  `totalLatencySec()` ile her vuruşta çıkarılır. Kalibrasyon yapılmazsa 0 kullanılır.
-  Yeni bir cihaza kurulunca MUTLAKA bir kez çalıştırılmalı.
-- `MAX_PLAYS_PER_DAY = 2` — `localStorage`'da oyuncu adına göre takip
-- 2 denemenin **en iyisi** kazanır (1. daha iyiyse, 1.'nin ödülü verilir)
-- Kesinleşen ödül son oyun kaydına AYRI alanlarla yazılır: `code`, `finalResult`, `finalPrize`.
-  `result`/`prize` o denemenin KENDİ değerleridir, üzerine yazılmaz (istatistik için).
-  Kazananlar listesi ve istatistik oyuncu satırı `finalResult || result` + `finalPrize || prize`
-  gösterir — eski kayıtlarda alanlar yok, geriye dönük uyumlu. İstatistik çubukları ise
-  her zaman `pl.result` sayar, yani sayılar gerçek denemeleri yansıtır.
-  **Geçmiş hata:** eskiden yalnızca `code` güncelleniyordu; 1. denemede MÜKEMMEL,
-  2. denemede HARİKA vuran oyuncunun kaydı "HARİKA — %15 İNDİRİM" yazıp kodu
-  `RH5KL` (kulaklık) oluyordu → kasada yanlış ödül verilebilirdi.
+- **Zamanlama kalibrasyonu** (kasa paneli > ⏱ ZAMANLAMA):
+  Ses ÇIKIŞ gecikmesi `outputLatency` ile otomatik telafi edilir. GİRİŞ gecikmesi
+  (dokunmatik panel 50-120 ms, USB MIDI ~5-10 ms) ölçülemez, kalibre edilir.
+    - **Metronom tabanlıdır** (8 tık, 600 ms aralık). Parçadaki tom tek bir kez
+      çaldığı için ona tahmin ederek vurulamaz; kişi TEPKİ verir (~150 ms) ve o
+      süre telafiye gömülürse oyunun anti-tepki mantığı tamamen çöker.
+      Düzenli tempoda ise ritme kilitlenip önceden vurulabilir.
+    - İlk 2 vuruş ısınma sayılıp atılır, kalanın MEDYANI alınır.
+    - **150 ms üzeri sonuç reddedilir** — o değer cihaz gecikmesi değil tepki süresidir.
+    - **Cihaza göre AYRI saklanır**: `inputLatencyTouchMs` / `inputLatencyMidiMs`.
+      Ekranla kalibre edip pad'le oynanırsa ~90 ms fazla telafi uygulanır ve geç vuran
+      "tam zamanında" görünür. Karışık ölçüm reddedilir.
+    - `localStorage`'da tutulur, yani **her cihazda ayrı yapılmalı** (PC'de yapılanı kiosk görmez).
+  `totalLatencySec(kaynak)` her vuruşta doğru değeri çıkarır; `handleHit(kaynak)`
+  çağrılırken kaynak "midi" veya "touch" olarak geçilir.
 
 **Ödüller:** `whitneyPrizes` objesi, `makeCode()` → `HT50-{KOD}-{DDMM}-{4rakam}` formatında kod üretir
 
