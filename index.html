@@ -246,22 +246,17 @@ body{font-family:'Bebas Neue',sans-serif;}
 
 <script>
 var TOM_HIT_TIME = 12.18; // Gerçek onset: 12.189s (waveform analizi)
-var WIN_PERFECT   = 0.05;  // 50ms  → MÜKEMMEL   → Roland RH-5 kulaklık
+var WIN_PERFECT   = 0.03;  // 30ms  → MÜKEMMEL   → Roland RH-5 kulaklık (daraltıldı: 50→30)
 var WIN_GREAT     = 0.13;  // 130ms → HARİKA     → %15 indirim
 var WIN_GOOD      = 0.28;  // 280ms → İYİ        → %10 indirim
 var WIN_IDAREDER  = 0.50;  // 500ms → İDARE EDER → Akademi 1 ders
 
-// GEÇ VURUŞ KORUMASI — tomdan SONRA vurmak tahmin değildir; müşteri sesi
-// duyup tepki vermiş olabilir. Sahada test edildi: 150ms'lik pay ile tomdan
-// sonra vurup kulaklık kazanılabiliyordu — fazla kolaydı.
-// Kural: geç vuruşun EN İYİ ödülü İYİ (%10). MÜKEMMEL (kulaklık) ve
-// HARİKA (%15) yalnızca tomdan ÖNCE vurarak, yani gerçekten tahmin ederek
-// kazanılır.
-//   • 0-150ms geç    → İYİ (%10 indirim)
-//   • 150-500ms geç  → İDARE EDER (Akademi 1 ders)
-//   • 500ms+ geç     → ÇALIŞMAYA DEVAM (bez çanta)
-var LATE_GOOD_MS     = 150;
-var LATE_REACTION_MS = 500;
+// GEÇ VURUŞ KURALI — tomdan SONRA vurmak tahmin değildir; müşteri sesi duyup
+// tepki vermiş olabilir. Bu yüzden geç vuruşta KULAKLIK asla verilmez; en iyi
+// ödül %15 olur. Bunun dışında mesafe merdiveni aynen işler.
+// Neden sabit %15 değil: sabit verseydik 140ms geç vuran %15, 140ms erken vuran
+// %10 alırdı — daha kötü vuruş daha iyi ödül demek olurdu. Merdiven korunarak
+// erken/geç simetrik tutuluyor, yalnızca en üst basamak geç tarafta kapalı.
 // Dışarısı → Çalışmaya devam → Bez çanta
 // BACKUP: TOM_HIT_TIME=11.95, WIN_PERFECT=0.03, WIN_GREAT=0.08, WIN_GOOD=0.18
 var STORE_CODE   = "AKS";
@@ -880,13 +875,10 @@ function resultForOffset(offsetSec) {
   else if (diff <= WIN_IDAREDER)  base = "idareder";
   else                            base = "miss";
 
-  if (offsetSec <= 0) return base;          // erken veya tam zamanında — merdiven geçerli
+  if (offsetSec <= 0) return base;   // erken veya tam anında — merdiven aynen geçerli
 
-  // Tomdan SONRA: MÜKEMMEL ve HARİKA verilmez, en iyi ödül İYİ (%10)
-  var lateMs = offsetSec * 1000;
-  if (lateMs <= LATE_GOOD_MS)     return "good";
-  if (lateMs <= LATE_REACTION_MS) return "idareder";
-  return "miss";
+  // Tomdan SONRA: kulaklık kapalı, bir basamak aşağı (%15). Gerisi aynı.
+  return (base === "perfect") ? "great" : base;
 }
 
 function handleHit() {

@@ -92,18 +92,13 @@ kaldırıldı — iOS eşzamanlı AudioContext sayısını sınırlar. Gerekirse
   asla alamaz. Gecikme kasa panelinde görünür (`renderLatencyInfo`), ölçüm oyun
   sırasında alınıp `localStorage`'da saklanır (`captureAudioLatency`) — oyun bitince
   AudioContext kapandığı için sonradan okunamaz.
-- **Geç vuruş koruması** (`LATE_GOOD_MS = 150`, `LATE_REACTION_MS = 500`): tomdan SONRA
-  vurmak tahmin değildir — müşteri sesi duyup tepki vermiş olabilir. Bu yüzden geç
-  vuruşun EN İYİ ödülü İYİ (%10). MÜKEMMEL (kulaklık) ve HARİKA (%15) yalnızca
-  tomdan ÖNCE vurarak kazanılır.
-    - 0-150ms geç → İYİ, 150-500ms → İDARE EDER, 500ms+ → ÇALIŞMAYA DEVAM
-  Karar tek yerde: `resultForOffset(offsetSec)` (negatif = erken, pozitif = geç).
-  Geçmiş: ilk sürüm geç vuruşu 20ms'de kesiyordu (25ms geç vurana bez çanta,
-  480ms erken vurana Akademi dersi — ters sonuç). Sonra 150ms'ye kadar tam merdiven
-  denendi ama sahada tomdan sonra vurup kulaklık kazanılabildiği görüldü; şimdiki
-  hal ikisinin ortası.
-
-**Hak sistemi:**
+- **Geç vuruş kuralı**: tomdan SONRA vurmak tahmin değildir (müşteri duyup tepki
+  vermiş olabilir), bu yüzden geç vuruşta MÜKEMMEL/kulaklık **asla** verilmez —
+  en iyi ödül %15. Bunun dışında mesafe merdiveni erken/geç simetrik işler:
+  `resultForOffset()` sadece `perfect` → `great` dönüştürür.
+  Sabit "geç = %15" verilmedi çünkü o zaman 140ms geç vuran %15, 140ms erken vuran
+  %10 alırdı (daha kötü vuruş daha iyi ödül). Geçmişte 20ms ve 150ms'lik sabit
+  kesme noktaları denendi, ikisi de ters sonuç üretti.
 - `MAX_PLAYS_PER_DAY = 2` — `localStorage`'da oyuncu adına göre takip
 - 2 denemenin **en iyisi** kazanır (1. daha iyiyse, 1.'nin ödülü verilir)
 - Kesinleşen ödül son oyun kaydına yazılır: `code`, `prize` ve `finalResult`.
