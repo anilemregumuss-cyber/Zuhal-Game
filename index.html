@@ -917,6 +917,19 @@ function saveCalibration(ms, kaynak) {
   }
 }
 
+// OLAY YAŞI: tarayıcı olayı hemen işlemeyebilir — ses çözümleme, çizim veya başka
+// bir iş sıradaysa dinleyici 5-30 ms geç çalışır ve vuruş olduğundan geç ölçülür.
+// event.timeStamp olayın GERÇEKTE oluştuğu anı verir; aradaki farkı çıkarıyoruz.
+// Bu, kalibrasyona gerek kalmadan ölçümü daha kararlı yapar.
+function eventAgeSec(evt) {
+  if (!evt || typeof evt.timeStamp !== "number" || !window.performance || !performance.now) return 0;
+  var ts = evt.timeStamp;
+  if (ts > 1e12) return 0;                    // epoch tabanlı eski tarayıcı — güvenme
+  var yas = (performance.now() - ts) / 1000;
+  if (!(yas >= 0) || yas > 0.5) return 0;     // saçma değer — yok say
+  return yas;
+}
+
 // Vuruş anında toplam telafi (saniye): ses çıkışı + o giriş türünün gecikmesi
 function totalLatencySec(kaynak) {
   var cikis = 0;
@@ -944,7 +957,7 @@ function resultForOffset(offsetSec) {
   return base;
 }
 
-function handleHit(kaynak) {   // kaynak: "midi" veya "touch" (varsayılan)
+function handleHit(kaynak, evt) {   // kaynak: "midi" | "touch"; evt: olayın gerçek anı için
   if (!gameRunning || hitMade) return;
   // Ses henüz başlamamışsa (MIDI erken geldi) vuruşu reddet
   if (!wSourcePlaying) { hitMade = false; return; }
@@ -964,7 +977,7 @@ function handleHit(kaynak) {   // kaynak: "midi" veya "touch" (varsayılan)
   // tomu duyduğu anda vuran müşteri "48 ms geç" sayılır ve MÜKEMMEL'i asla
   // alamaz; oyun farkinda olmadan "duymadan önce vur" oyununa döner.
   // Çıkararak ölçümü oyuncunun DUYDUĞU zamana hizalıyoruz.
-  var gecikmeSn = totalLatencySec(kaynak);   // ses çıkışı + bu giriş türünün gecikmesi
+  var gecikmeSn = totalLatencySec(kaynak) + eventAgeSec(evt);   // ses çıkışı + giriş + olay gecikmesi
 
   var elapsed;
   if (wAudioCtx) {
@@ -1380,10 +1393,11 @@ function calibStartRound() {
 }
 
 // Vuruşu en yakın tıka eşler, sapmayı ms olarak kaydeder
-function calibHit(kaynak) {
+function calibHit(kaynak, evt) {
   if (!calibActive || !calibArmed || !calibCtx) return;
   var cikis = calibCtx.outputLatency || (lastOutputLatencyMs ? lastOutputLatencyMs / 1000 : 0);
-  var simdi = calibCtx.currentTime - cikis;
+  // Oyundakiyle AYNI düzeltmeler uygulanmalı, yoksa kalibrasyon yanlış pay ölçer
+  var simdi = calibCtx.currentTime - cikis - eventAgeSec(evt);
 
   var enYakin = null, enKucuk = 1e9;
   for (var i = 0; i < calibClickTimes.length; i++) {
@@ -1760,7 +1774,7 @@ document.addEventListener("DOMContentLoaded", function() {
   addBtn("btnStatsReload", reloadPageFresh);
   addBtn("btnStatsCalib", openCalib);
   addBtn("btnCalibStart", calibStartRound);
-  addBtn("btnCalibHit",   function () { calibHit("touch"); });
+  addBtn("btnCalibHit",   function (e) { calibHit("touch", e); });
   addBtn("btnCalibReset", calibReset);
   addBtn("btnCalibClose", closeCalib);
   addBtn("btnTabWinners", function() { switchStatsTab("winners"); });
@@ -1781,7 +1795,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // btnVur zamanlama kritik: HAS_POINTER olan cihazda bindTap yine pointerdown kullanır,
   // yani mevcut kioskta vuruş gecikmesi değişmez.
-  bindTap(document.getElementById("btnVur"), function () { handleHit("touch"); });
+  bindTap(document.getElementById("btnVur"), function (e) { handleHit("touch", e); });
 
   bindTap(document.getElementById("btnGame"), function() {
     unlockAC();
@@ -1827,11 +1841,11 @@ document.addEventListener("DOMContentLoaded", function() {
     var cmd = msg.data[0], velocity = msg.data[2];
     if (cmd >= 144 && cmd <= 159 && velocity > 0) {
       // Kalibrasyon açıksa pad vuruşu oraya gider (personel ekrana değil pad'e vurabilsin)
-      if (calibActive) { calibHit("midi"); return; }
+      if (calibActive) { calibHit("midi", msg); return; }
       var overlay = document.getElementById("gameOverlay");
       if (overlay && overlay.style.display !== "none") {
         unlockAC();
-        handleHit("midi");
+        handleHit("midi", msg);
       }
     }
   }

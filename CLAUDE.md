@@ -98,6 +98,12 @@ kaldırıldı — iOS eşzamanlı AudioContext sayısını sınırlar. Gerekirse
   o pencereye girmek imkansız. Tepkiyle vuran en iyi %10 alır (test edildi).
   Geçmiş: 20 ms, 150 ms ve "1 ms geç = kulaklık yok" kuralları denendi; üçü de
   ya ters sonuç üretti ya da tam zamanında vuran müşteriyi cezalandırdı.
+- **Olay yaşı telafisi** (`eventAgeSec`): tarayıcı olayı hemen işlemeyebilir; ses
+  çözümleme veya çizim sıradaysa dinleyici 5-30 ms geç çalışır ve vuruş olduğundan
+  geç ölçülür. `event.timeStamp` olayın gerçek anını verdiği için aradaki fark
+  çıkarılır. `handleHit(kaynak, evt)` ve `calibHit(kaynak, evt)` aynı düzeltmeyi
+  uygular — kalibrasyon oyunla aynı ölçümü yapmalı. Epoch tabanlı veya saçma
+  timeStamp değerleri (>0.5 sn, negatif) yok sayılır.
 - **Zamanlama kalibrasyonu** (kasa paneli > ⏱ ZAMANLAMA):
   Ses ÇIKIŞ gecikmesi `outputLatency` ile otomatik telafi edilir. GİRİŞ gecikmesi
   (dokunmatik panel 50-120 ms, USB MIDI ~5-10 ms) ölçülemez, kalibre edilir.
