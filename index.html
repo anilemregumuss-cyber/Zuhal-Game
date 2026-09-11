@@ -516,7 +516,40 @@ function wShowPanel(id) {
   document.getElementById(id).style.display = "flex";
 }
 
+// Ses çıkış gecikmesi ölçümü.
+// ÖNEMLİ: oyun bitince stopWAudio() AudioContext'i kapatıyor, dolayısıyla kasa
+// paneli açıldığında okunacak bir context kalmıyordu ("ölçülmedi" yazıyordu).
+// Bu yüzden ölçümü oyun SIRASINDA yakalıyor ve saklıyoruz.
+var LATENCY_KEY = "zuhal_audio_latency";
+var lastOutputLatencyMs = null;
+var lastBaseLatencyMs   = null;
+
+function captureAudioLatency() {
+  if (!wAudioCtx) return;
+  try {
+    var cikis  = Math.round((wAudioCtx.outputLatency || 0) * 1000);
+    var tampon = Math.round((wAudioCtx.baseLatency   || 0) * 1000);
+    // outputLatency context yeni açıldığında 0 gelebilir; sıfırı üzerine yazdırma
+    if (cikis > 0 || lastOutputLatencyMs === null) lastOutputLatencyMs = cikis;
+    if (tampon > 0 || lastBaseLatencyMs === null)  lastBaseLatencyMs  = tampon;
+    localStorage.setItem(LATENCY_KEY, lastOutputLatencyMs + "/" + lastBaseLatencyMs);
+  } catch (e) {}
+}
+
+function loadStoredLatency() {
+  if (lastOutputLatencyMs !== null) return true;
+  try {
+    var v = localStorage.getItem(LATENCY_KEY);
+    if (!v) return false;
+    var p2 = v.split("/");
+    lastOutputLatencyMs = parseInt(p2[0], 10);
+    lastBaseLatencyMs   = parseInt(p2[1], 10);
+    return !isNaN(lastOutputLatencyMs);
+  } catch (e) { return false; }
+}
+
 function stopWAudio() {
+  captureAudioLatency();   // context kapanmadan son kez oku
   wSourcePlaying = false;
   if (wSource) {
     try { wSource.stop(); } catch(e) {}
@@ -572,6 +605,8 @@ function playBufferAndStart() {
   audioStartTime   = Date.now();
   wSource.start(0);
   wSourcePlaying = true;
+  captureAudioLatency();
+  setTimeout(captureAudioLatency, 1000);   // outputLatency başlangıçta 0 gelebilir
 
   var statusEl = document.getElementById("gameStatusTxt");
   if (statusEl) statusEl.textContent = "DİNLE VE BEKLE...";
@@ -709,6 +744,8 @@ function _launchGame() {
           audioStartTime   = Date.now();
           wSource.start(0);
           wSourcePlaying = true;
+          captureAudioLatency();
+          setTimeout(captureAudioLatency, 1000);
           if (statusEl) statusEl.textContent = "DİNLE VE BEKLE...";
 
           var totalMs = (TOM_HIT_TIME + 1.5) * 1000;
@@ -1116,13 +1153,14 @@ var statsRefreshTimer = null;
 function renderLatencyInfo() {
   var el = document.getElementById("latencyInfo");
   if (!el) return;
-  if (!wAudioCtx) {
+  captureAudioLatency();          // oyun henüz sürüyorsa taze değeri al
+  if (!loadStoredLatency()) {
     el.textContent = "SES GECİKMESİ: ölçülmedi — önce bir oyun oynayın";
     el.style.color = "#666";
     return;
   }
-  var cikis  = Math.round((wAudioCtx.outputLatency || 0) * 1000);
-  var tampon = Math.round((wAudioCtx.baseLatency || 0) * 1000);
+  var cikis  = lastOutputLatencyMs;
+  var tampon = lastBaseLatencyMs;
   el.textContent = "SES GECİKMESİ: çıkış " + cikis + " ms / tampon " + tampon + " ms";
   el.style.color = (cikis > 20) ? "#ffb74d" : "#4caf50";
 }
