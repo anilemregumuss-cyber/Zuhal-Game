@@ -903,11 +903,21 @@ function handleHit() {
   playTomSound();
 
   // Web Audio API currentTime ile hassas ölçüm (fallback: Date.now())
+  // SES ÇIKIŞ GECİKMESİ TELAFİSİ — kritik.
+  // currentTime sesin İŞLENDİĞİ anı verir, HOPARLÖRDEN ÇIKTIĞI anı değil.
+  // Aradaki fark outputLatency (sahada ölçüldü: 48 ms). Telafi edilmezse
+  // tomu duyduğu anda vuran müşteri "48 ms geç" sayılır ve MÜKEMMEL'i asla
+  // alamaz; oyun farkinda olmadan "duymadan önce vur" oyununa döner.
+  // Çıkararak ölçümü oyuncunun DUYDUĞU zamana hizalıyoruz.
+  var gecikmeSn = 0;
+  if (wAudioCtx && wAudioCtx.outputLatency) gecikmeSn = wAudioCtx.outputLatency;
+  else if (lastOutputLatencyMs) gecikmeSn = lastOutputLatencyMs / 1000;
+
   var elapsed;
   if (wAudioCtx) {
-    elapsed = wAudioCtx.currentTime - audioStartOffset;
+    elapsed = wAudioCtx.currentTime - audioStartOffset - gecikmeSn;
   } else {
-    elapsed = (Date.now() - audioStartTime) / 1000;
+    elapsed = (Date.now() - audioStartTime) / 1000 - gecikmeSn;
   }
   var diff   = Math.abs(elapsed - TOM_HIT_TIME);
   var result = resultForOffset(elapsed - TOM_HIT_TIME);

@@ -85,6 +85,13 @@ kaldırıldı — iOS eşzamanlı AudioContext sayısını sınırlar. Gerekirse
 **Timing:**
 - `TOM_HIT_TIME = 12.18` — Whitney Houston parçasında snare'in tam zamanı (saniye)
 - `WIN_PERFECT = 0.05` (50ms), `WIN_GREAT = 0.13`, `WIN_GOOD = 0.28`, `WIN_IDAREDER = 0.50`
+- **Ses çıkış gecikmesi telafisi** (kritik): `wAudioCtx.currentTime` sesin İŞLENDİĞİ
+  anı verir, hoparlörden ÇIKTIĞI anı değil. Aradaki fark `outputLatency`
+  (sahada Android kioskta 48 ms ölçüldü). `handleHit()` bu değeri `elapsed`ten
+  çıkarır; yoksa tomu duyduğu anda vuran müşteri "48 ms geç" sayılır ve MÜKEMMEL'i
+  asla alamaz. Gecikme kasa panelinde görünür (`renderLatencyInfo`), ölçüm oyun
+  sırasında alınıp `localStorage`'da saklanır (`captureAudioLatency`) — oyun bitince
+  AudioContext kapandığı için sonradan okunamaz.
 - **Geç vuruş koruması** (`LATE_GOOD_MS = 150`, `LATE_REACTION_MS = 500`): tomdan SONRA
   vurmak tahmin değildir — müşteri sesi duyup tepki vermiş olabilir. Bu yüzden geç
   vuruşun EN İYİ ödülü İYİ (%10). MÜKEMMEL (kulaklık) ve HARİKA (%15) yalnızca
