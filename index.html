@@ -224,8 +224,25 @@ body{font-family:'Bebas Neue',sans-serif;}
 
     <div style="margin-top:32px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
       <button id="btnStatsDownload" style="background:transparent;color:#FFD700;border:1px solid #FFD700;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;padding:10px 20px;cursor:pointer;">⬇ İNDİR</button>
+      <button id="btnStatsCalib" style="background:transparent;color:#FFD700;border:1px solid #FFD700;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;padding:10px 20px;cursor:pointer;">⏱ ZAMANLAMA</button>
       <button id="btnStatsReload" style="background:transparent;color:#8ab4f8;border:1px solid #8ab4f8;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;padding:10px 20px;cursor:pointer;">⟳ YENİLE</button>
       <button id="btnStatsClose" style="background:#FFD700;color:#000;border:none;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;padding:10px 20px;cursor:pointer;font-weight:700;">KAPAT</button>
+    </div>
+  </div>
+</div>
+
+<!-- ZAMANLAMA AYARI (KALİBRASYON) — kasa panelinden açılır -->
+<div id="calibModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.97);z-index:10002;flex-direction:column;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;text-align:center;">
+  <div style="width:100%;max-width:420px;">
+    <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:4px;color:#FFD700;margin-bottom:8px;">ZAMANLAMA AYARI</div>
+    <div id="calibDesc" style="font-family:'Space Mono',monospace;font-size:10px;color:#aaa;line-height:2;margin-bottom:20px;"></div>
+    <div id="calibBig" style="font-family:'Space Mono',monospace;font-size:40px;font-weight:700;color:#fff;line-height:1.2;margin-bottom:10px;">—</div>
+    <div id="calibList" style="font-family:'Space Mono',monospace;font-size:10px;color:#777;letter-spacing:1px;line-height:1.8;margin-bottom:20px;min-height:40px;"></div>
+    <button id="btnCalibHit" style="display:none;width:100%;padding:28px 0;background:#FFD700;color:#000;border:none;font-family:'Space Mono',monospace;font-size:16px;font-weight:700;letter-spacing:6px;cursor:pointer;touch-action:manipulation;margin-bottom:14px;">VUR</button>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button id="btnCalibStart" style="background:#FFD700;color:#000;border:none;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;padding:12px 18px;cursor:pointer;font-weight:700;">BAŞLA</button>
+      <button id="btnCalibReset" style="background:transparent;color:#888;border:1px solid #333;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;padding:12px 18px;cursor:pointer;">SIFIRLA</button>
+      <button id="btnCalibClose" style="background:transparent;color:#888;border:1px solid #333;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;padding:12px 18px;cursor:pointer;">KAPAT</button>
     </div>
   </div>
 </div>
@@ -866,6 +883,35 @@ function playTomSound() {
 
 // Vuruş sapmasından sonucu hesaplar. offsetSec negatif = erken, pozitif = geç.
 // Karar tek yerde toplansın ve test edilebilsin diye ayrı fonksiyon.
+// ===== ZAMANLAMA KALİBRASYONU =====
+// Ses ÇIKIŞ gecikmesini outputLatency ile telafi ediyoruz. Ama bir de GİRİŞ
+// gecikmesi var: dokunmatik panelin parmağı algılayıp tarayıcıya bildirmesi
+// Android'de 50-120 ms sürebiliyor ve bu değer ölçülemiyor — yalnızca kalibre
+// edilebilir. Sahada "tom sesiyle vuruş sesim çakıştığı halde %10/%15 aldım"
+// geri bildirimi tam olarak bu telafi edilmeyen gecikmeden geliyordu.
+var CALIB_KEY = "zuhal_input_latency";
+var inputLatencyMs = 0;
+
+function loadCalibration() {
+  try {
+    var v = parseInt(localStorage.getItem(CALIB_KEY), 10);
+    if (!isNaN(v) && v > -500 && v < 500) inputLatencyMs = v;
+  } catch (e) {}
+}
+
+function saveCalibration(ms) {
+  inputLatencyMs = ms;
+  try { localStorage.setItem(CALIB_KEY, String(ms)); } catch (e) {}
+}
+
+// Vuruş anında toplam telafi (saniye): çıkış + giriş
+function totalLatencySec() {
+  var cikis = 0;
+  if (wAudioCtx && wAudioCtx.outputLatency) cikis = wAudioCtx.outputLatency;
+  else if (lastOutputLatencyMs) cikis = lastOutputLatencyMs / 1000;
+  return cikis + (inputLatencyMs / 1000);
+}
+
 function resultForOffset(offsetSec) {
   var diff = Math.abs(offsetSec);
   var base;
@@ -875,10 +921,13 @@ function resultForOffset(offsetSec) {
   else if (diff <= WIN_IDAREDER)  base = "idareder";
   else                            base = "miss";
 
-  if (offsetSec <= 0) return base;   // erken veya tam anında — merdiven aynen geçerli
-
-  // Tomdan SONRA: kulaklık kapalı, bir basamak aşağı (%15). Gerisi aynı.
-  return (base === "perfect") ? "great" : base;
+  // Merdiven erken/geç simetriktir. "Geç vuranlara kulaklık yok" kuralını ayrıca
+  // yazmaya gerek yok çünkü kulaklık penceresi zaten ±30 ms: insanın sese tepki
+  // süresi en iyi ihtimalle ~150 ms olduğu için tomu DUYUP vurarak bu pencereye
+  // girmek fiziksel olarak imkansız. Tepkiyle vuran en iyi %10 alabilir.
+  // Önceki sürümde 1 ms geç vuran bile kulaklıktan düşüyordu; sahada "vuruş sesim
+  // tom sesiyle çakıştığı halde %15 aldım" geri bildirimi bundan geliyordu.
+  return base;
 }
 
 function handleHit() {
@@ -901,9 +950,7 @@ function handleHit() {
   // tomu duyduğu anda vuran müşteri "48 ms geç" sayılır ve MÜKEMMEL'i asla
   // alamaz; oyun farkinda olmadan "duymadan önce vur" oyununa döner.
   // Çıkararak ölçümü oyuncunun DUYDUĞU zamana hizalıyoruz.
-  var gecikmeSn = 0;
-  if (wAudioCtx && wAudioCtx.outputLatency) gecikmeSn = wAudioCtx.outputLatency;
-  else if (lastOutputLatencyMs) gecikmeSn = lastOutputLatencyMs / 1000;
+  var gecikmeSn = totalLatencySec();   // çıkış gecikmesi + kalibre edilmiş giriş gecikmesi
 
   var elapsed;
   if (wAudioCtx) {
@@ -1168,7 +1215,8 @@ function renderLatencyInfo() {
   }
   var cikis  = lastOutputLatencyMs;
   var tampon = lastBaseLatencyMs;
-  el.textContent = "SES GECİKMESİ: çıkış " + cikis + " ms / tampon " + tampon + " ms";
+  el.textContent = "SES GECİKMESİ: çıkış " + cikis + " ms / tampon " + tampon +
+                   " ms  •  ZAMANLAMA AYARI: " + inputLatencyMs + " ms";
   el.style.color = (cikis > 20) ? "#ffb74d" : "#4caf50";
 }
 
@@ -1224,6 +1272,131 @@ function reloadPageFresh() {
   } catch (e) {
     location.reload();
   }
+}
+
+// ---- Kalibrasyon akışı ----
+// Parça 9.5 sn'den başlatılır (tom 12.18'de, yani ~2.7 sn sonra gelir) — her tur kısa.
+// Personel tom sesini duyduğu anda vurur; ölçülen sapmanın medyanı giriş gecikmesi
+// olarak kaydedilir. Medyan kullanılır çünkü tek bir kötü vuruş ortalamayı bozar.
+var CALIB_START_SEC = 9.5;
+var CALIB_ROUNDS    = 3;
+var calibActive = false, calibArmed = false;
+var calibCtx = null, calibSource = null, calibStartOffset = 0;
+var calibHits = [], calibTimer = null;
+
+function calibSet(buyuk, aciklama, liste) {
+  var b = document.getElementById("calibBig");
+  var d = document.getElementById("calibDesc");
+  var l = document.getElementById("calibList");
+  if (b && buyuk !== null) b.textContent = buyuk;
+  if (d && aciklama !== null) d.innerHTML = aciklama;
+  if (l && liste !== null) l.innerHTML = liste;
+}
+
+function openCalib() {
+  closeStats();
+  loadCalibration();
+  calibActive = true; calibArmed = false; calibHits = [];
+  if (typeof stopBannerAudio === "function") stopBannerAudio();
+  preDecodeAudio();
+  document.getElementById("calibModal").style.display = "flex";
+  document.getElementById("btnCalibHit").style.display = "none";
+  document.getElementById("btnCalibStart").style.display = "inline-block";
+  calibSet("—",
+    "Parça çalacak. <b style='color:#FFD700'>Tom sesini duyduğun anda</b> VUR'a bas (veya pad'e vur).<br/>" +
+    CALIB_ROUNDS + " kez tekrarlanır.<br/>Şu anki ayar: <b style='color:#FFD700'>" + inputLatencyMs + " ms</b>",
+    "");
+}
+
+function calibStopAudio() {
+  if (calibSource) { try { calibSource.stop(); } catch (e) {} try { calibSource.disconnect(); } catch (e) {} calibSource = null; }
+  if (calibCtx) { try { calibCtx.close(); } catch (e) {} calibCtx = null; }
+  clearTimeout(calibTimer); calibTimer = null;
+}
+
+function closeCalib() {
+  calibActive = false; calibArmed = false;
+  calibStopAudio();
+  document.getElementById("calibModal").style.display = "none";
+  if (typeof startBannerAudio === "function") setTimeout(startBannerAudio, 300);
+}
+
+function calibStartRound() {
+  if (!wBuffer) {
+    calibSet("—", "Parça henüz yüklenmedi. Birkaç saniye sonra tekrar deneyin.", "");
+    return;
+  }
+  calibStopAudio();
+  calibCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (calibCtx.state === "suspended" && calibCtx.resume) calibCtx.resume();
+  calibSource = calibCtx.createBufferSource();
+  calibSource.buffer = wBuffer;
+  calibSource.connect(calibCtx.destination);
+  calibStartOffset = calibCtx.currentTime;
+  calibSource.start(0, CALIB_START_SEC);
+  calibArmed = true;
+
+  document.getElementById("btnCalibHit").style.display = "block";
+  document.getElementById("btnCalibStart").style.display = "none";
+  calibSet("●", "Dinle... tom sesini duyduğun anda vur!", calibListeHtml());
+
+  // Tom geçtikten 3 sn sonra hiç vurulmadıysa turu iptal et
+  calibTimer = setTimeout(function () {
+    if (!calibArmed) return;
+    calibArmed = false; calibStopAudio();
+    document.getElementById("btnCalibHit").style.display = "none";
+    document.getElementById("btnCalibStart").style.display = "inline-block";
+    calibSet("—", "Vuruş algılanmadı. BAŞLA ile tekrar deneyin.", calibListeHtml());
+  }, (TOM_HIT_TIME - CALIB_START_SEC + 3) * 1000);
+}
+
+function calibListeHtml() {
+  if (!calibHits.length) return "";
+  var parcalar = calibHits.map(function (v, i) {
+    return (i + 1) + ". vuruş: " + (v > 0 ? "+" : "") + Math.round(v) + " ms";
+  });
+  return parcalar.join("<br/>");
+}
+
+function calibHit() {
+  if (!calibActive || !calibArmed || !calibCtx) return;
+  calibArmed = false;
+  clearTimeout(calibTimer);
+
+  var cikis = calibCtx.outputLatency || (lastOutputLatencyMs ? lastOutputLatencyMs / 1000 : 0);
+  var sarkiKonumu = CALIB_START_SEC + (calibCtx.currentTime - calibStartOffset) - cikis;
+  var sapmaMs = (sarkiKonumu - TOM_HIT_TIME) * 1000;
+  calibHits.push(sapmaMs);
+  calibStopAudio();
+
+  document.getElementById("btnCalibHit").style.display = "none";
+  if (calibHits.length >= CALIB_ROUNDS) { calibFinish(); return; }
+  document.getElementById("btnCalibStart").style.display = "inline-block";
+  calibSet((sapmaMs > 0 ? "+" : "") + Math.round(sapmaMs) + " ms",
+    "Kaydedildi. " + (CALIB_ROUNDS - calibHits.length) + " vuruş kaldı — BAŞLA'ya bas.",
+    calibListeHtml());
+}
+
+function calibFinish() {
+  var sirali = calibHits.slice().sort(function (a, b) { return a - b; });
+  var medyan = Math.round(sirali[Math.floor(sirali.length / 2)]);
+  saveCalibration(medyan);
+  calibStopAudio();
+  document.getElementById("btnCalibHit").style.display = "none";
+  document.getElementById("btnCalibStart").style.display = "inline-block";
+  calibSet((medyan > 0 ? "+" : "") + medyan + " ms",
+    "<b style='color:#4caf50'>Ayar kaydedildi.</b><br/>Oyun artık bu gecikmeyi telafi edecek.<br/>Tekrar ölçmek için BAŞLA'ya bas.",
+    calibListeHtml());
+  calibHits = [];
+}
+
+function calibReset() {
+  saveCalibration(0);
+  calibHits = [];
+  calibStopAudio();
+  document.getElementById("btnCalibHit").style.display = "none";
+  document.getElementById("btnCalibStart").style.display = "inline-block";
+  calibSet("0 ms", "Ayar sıfırlandı — telafi uygulanmıyor.", "");
 }
 
 function closeStats() {
@@ -1516,6 +1689,11 @@ document.addEventListener("DOMContentLoaded", function() {
   addBtn("btnStatsClose", closeStats);
   addBtn("btnStatsDownload", downloadStats);
   addBtn("btnStatsReload", reloadPageFresh);
+  addBtn("btnStatsCalib", openCalib);
+  addBtn("btnCalibStart", calibStartRound);
+  addBtn("btnCalibHit",   calibHit);
+  addBtn("btnCalibReset", calibReset);
+  addBtn("btnCalibClose", closeCalib);
   addBtn("btnTabWinners", function() { switchStatsTab("winners"); });
   addBtn("btnTabStats", function() { switchStatsTab("stats"); });
   addBtn("btnKasaAccess", openPinModal);
@@ -1579,6 +1757,8 @@ document.addEventListener("DOMContentLoaded", function() {
   function midiHandler(msg) {
     var cmd = msg.data[0], velocity = msg.data[2];
     if (cmd >= 144 && cmd <= 159 && velocity > 0) {
+      // Kalibrasyon açıksa pad vuruşu oraya gider (personel ekrana değil pad'e vurabilsin)
+      if (calibActive) { calibHit(); return; }
       var overlay = document.getElementById("gameOverlay");
       if (overlay && overlay.style.display !== "none") {
         unlockAC();
@@ -1698,6 +1878,7 @@ function initMIDI() {
     }
   }
 
+  loadCalibration();
   initKioskFullscreen();
   initMIDI();
   scheduleIdleReload();

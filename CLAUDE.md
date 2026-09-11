@@ -92,13 +92,18 @@ kaldırıldı — iOS eşzamanlı AudioContext sayısını sınırlar. Gerekirse
   asla alamaz. Gecikme kasa panelinde görünür (`renderLatencyInfo`), ölçüm oyun
   sırasında alınıp `localStorage`'da saklanır (`captureAudioLatency`) — oyun bitince
   AudioContext kapandığı için sonradan okunamaz.
-- **Geç vuruş kuralı**: tomdan SONRA vurmak tahmin değildir (müşteri duyup tepki
-  vermiş olabilir), bu yüzden geç vuruşta MÜKEMMEL/kulaklık **asla** verilmez —
-  en iyi ödül %15. Bunun dışında mesafe merdiveni erken/geç simetrik işler:
-  `resultForOffset()` sadece `perfect` → `great` dönüştürür.
-  Sabit "geç = %15" verilmedi çünkü o zaman 140ms geç vuran %15, 140ms erken vuran
-  %10 alırdı (daha kötü vuruş daha iyi ödül). Geçmişte 20ms ve 150ms'lik sabit
-  kesme noktaları denendi, ikisi de ters sonuç üretti.
+- **Puanlama tamamen simetrik**: `resultForOffset()` yalnızca |sapma|'ya bakar.
+  "Geç vurana kulaklık yok" diye ayrı bir kural YOK — gerek de yok: kulaklık
+  penceresi ±30 ms ve insanın sese tepki süresi ~150 ms, yani tomu DUYUP vurarak
+  o pencereye girmek imkansız. Tepkiyle vuran en iyi %10 alır (test edildi).
+  Geçmiş: 20 ms, 150 ms ve "1 ms geç = kulaklık yok" kuralları denendi; üçü de
+  ya ters sonuç üretti ya da tam zamanında vuran müşteriyi cezalandırdı.
+- **Zamanlama kalibrasyonu** (`inputLatencyMs`, kasa paneli > ⏱ ZAMANLAMA):
+  Çıkış gecikmesi `outputLatency` ile telafi edilir ama GİRİŞ gecikmesi
+  (dokunmatik panelin parmağı bildirmesi, Android'de 50-120 ms) ölçülemez.
+  Personel tom sesine 3 kez vurur, sapmanın MEDYANI `localStorage`'a yazılır ve
+  `totalLatencySec()` ile her vuruşta çıkarılır. Kalibrasyon yapılmazsa 0 kullanılır.
+  Yeni bir cihaza kurulunca MUTLAKA bir kez çalıştırılmalı.
 - `MAX_PLAYS_PER_DAY = 2` — `localStorage`'da oyuncu adına göre takip
 - 2 denemenin **en iyisi** kazanır (1. daha iyiyse, 1.'nin ödülü verilir)
 - Kesinleşen ödül son oyun kaydına AYRI alanlarla yazılır: `code`, `finalResult`, `finalPrize`.
