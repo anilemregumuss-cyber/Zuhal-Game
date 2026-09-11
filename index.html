@@ -1034,8 +1034,11 @@ function showWhitneyResult(result) {
     }
     var last = d2[playerName].plays.length - 1;
     d2[playerName].plays[last].code        = prizeCode;
-    d2[playerName].plays[last].prize       = p.title;       // kesinleşen ödül
-    d2[playerName].plays[last].finalResult = bestResult;    // kasada gösterilecek sonuç
+    // Kesinleşen ödül AYRI alanlara yazılır; denemenin kendi result/prize değerleri
+    // korunur. Üzerine yazılınca "İDARE EDER — %15 İNDİRİM" gibi kendi içinde
+    // çelişen satırlar oluşuyordu (sahada görüldü).
+    d2[playerName].plays[last].finalResult = bestResult;
+    d2[playerName].plays[last].finalPrize  = p.title;
     savePlays(d2);
 
     document.getElementById("firstPlayMsg").style.display = "none";
@@ -1135,8 +1138,10 @@ function renderStatsView() {
       var header = "<div style='color:#FFD700;letter-spacing:2px;font-size:10px;'>" + escapeHtml(n) + "</div>";
       var plays = data[n].plays.map(function(pl) {
         return "<div style='color:#666;padding-left:8px;'>[" + pl.time + "] " +
-          "<span style='color:#ccc'>" + (RESULT_LABELS[pl.result]||pl.result) + "</span> — " +
-          "<span style='color:#aaa'>" + pl.prize + "</span>" +
+          // Kuponu olan satır KESİNLEŞEN ödülü gösterir — kupon koduyla çelişmesin.
+          // İstatistik çubukları yine pl.result kullanır, sayılar bozulmaz.
+          "<span style='color:#ccc'>" + (RESULT_LABELS[pl.finalResult || pl.result] || pl.finalResult || pl.result) + "</span> — " +
+          "<span style='color:#aaa'>" + (pl.finalPrize || pl.prize) + "</span>" +
           (pl.code ? " <span style='color:#555;font-size:8px;'>" + pl.code + "</span>" : "") +
           "</div>";
       }).join("");
@@ -1261,7 +1266,7 @@ function renderWinners(filter) {
   names.forEach(function(n) {
     data[n].plays.forEach(function(pl) {
       // finalResult: iki denemenin en iyisi (eski kayıtlarda yok → result'a düşer)
-      if (pl.code) entries.push({ name:n, time:pl.time, result:(pl.finalResult || pl.result), prize:pl.prize, code:pl.code });
+      if (pl.code) entries.push({ name:n, time:pl.time, result:(pl.finalResult || pl.result), prize:(pl.finalPrize || pl.prize), code:pl.code });
     });
   });
   entries.sort(function(a,b) { return a.time < b.time ? 1 : (a.time > b.time ? -1 : 0); });
@@ -1394,8 +1399,8 @@ function downloadStats() {
         xlCell(n, false, bg) +
         xlCell(i+1, false, bg) +
         xlCell(pl.time, false, bg) +
-        xlCell(RESULT_LABELS[pl.result]||pl.result, true, bg) +
-        xlCell(pl.prize, false, bg) +
+        xlCell(RESULT_LABELS[pl.finalResult || pl.result] || pl.finalResult || pl.result, true, bg) +
+        xlCell(pl.finalPrize || pl.prize, false, bg) +
         xlCell(pl.code||"-", false, bg) +
       "</tr>";
     });

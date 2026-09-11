@@ -101,9 +101,11 @@ kaldırıldı — iOS eşzamanlı AudioContext sayısını sınırlar. Gerekirse
   kesme noktaları denendi, ikisi de ters sonuç üretti.
 - `MAX_PLAYS_PER_DAY = 2` — `localStorage`'da oyuncu adına göre takip
 - 2 denemenin **en iyisi** kazanır (1. daha iyiyse, 1.'nin ödülü verilir)
-- Kesinleşen ödül son oyun kaydına yazılır: `code`, `prize` ve `finalResult`.
-  `result` alanı o denemenin KENDİ sonucudur ve değiştirilmez (istatistik için).
-  Kazananlar listesi `finalResult || result` gösterir — eski kayıtlarda alan yok.
+- Kesinleşen ödül son oyun kaydına AYRI alanlarla yazılır: `code`, `finalResult`, `finalPrize`.
+  `result`/`prize` o denemenin KENDİ değerleridir, üzerine yazılmaz (istatistik için).
+  Kazananlar listesi ve istatistik oyuncu satırı `finalResult || result` + `finalPrize || prize`
+  gösterir — eski kayıtlarda alanlar yok, geriye dönük uyumlu. İstatistik çubukları ise
+  her zaman `pl.result` sayar, yani sayılar gerçek denemeleri yansıtır.
   **Geçmiş hata:** eskiden yalnızca `code` güncelleniyordu; 1. denemede MÜKEMMEL,
   2. denemede HARİKA vuran oyuncunun kaydı "HARİKA — %15 İNDİRİM" yazıp kodu
   `RH5KL` (kulaklık) oluyordu → kasada yanlış ödül verilebilirdi.
