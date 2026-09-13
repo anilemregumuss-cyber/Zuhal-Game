@@ -114,16 +114,16 @@ body{font-family:'Bebas Neue',sans-serif;}
           <div><div style="color:#fff;letter-spacing:2px;">HARİKA</div><div style="color:#fff;font-size:9px;margin-top:2px;">%15 İndirim</div></div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
-          <span style="font-size:18px;">🎵</span>
-          <div><div style="color:#fff;letter-spacing:2px;">İYİ</div><div style="color:#fff;font-size:9px;margin-top:2px;">%10 İndirim</div></div>
+          <span style="font-size:18px;">🎁</span>
+          <div><div style="color:#fff;letter-spacing:2px;">İYİ</div><div style="color:#fff;font-size:9px;margin-top:2px;">Zuhal Bez Çanta</div></div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
           <span style="font-size:18px;">🎓</span>
           <div><div style="color:#fff;letter-spacing:2px;">İDARE EDER</div><div style="color:#fff;font-size:9px;margin-top:2px;">Akademi 1 Ders Ücretsiz</div></div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
-          <span style="font-size:18px;">🎁</span>
-          <div><div style="color:#fff;letter-spacing:2px;">ÇALIŞMAYA DEVAM</div><div style="color:#fff;font-size:9px;margin-top:2px;">Zuhal Bez Çanta</div></div>
+          <span style="font-size:18px;">🥁</span>
+          <div><div style="color:#666;letter-spacing:2px;">ÇALIŞMAYA DEVAM</div><div style="color:#666;font-size:9px;margin-top:2px;">Hediye yok — tekrar dene</div></div>
         </div>
       </div>
     </div>
@@ -210,6 +210,8 @@ body{font-family:'Bebas Neue',sans-serif;}
       <select id="statsDay" style="flex:1;background:#111;border:1px solid #333;color:#fff;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;padding:8px 10px;outline:none;-webkit-appearance:none;appearance:none;border-radius:0;"></select>
     </div>
     <div id="dayWarn" style="display:none;border:1px solid #ffb74d;background:#2a2412;color:#ffb74d;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;line-height:1.6;padding:8px 12px;margin-bottom:14px;"></div>
+    <!-- Fiziksel hediye stok takibi — personel gün içinde kaç adet kaldığını görsün -->
+    <div id="stockInfo" style="display:none;border:1px solid #222;color:#aaa;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;line-height:1.8;padding:8px 12px;margin-bottom:14px;"></div>
 
     <div style="display:flex;gap:8px;margin-bottom:20px;">
       <button id="btnTabWinners" style="flex:1;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;padding:10px 0;cursor:pointer;border:1px solid #FFD700;background:#FFD700;color:#000;font-weight:700;">🏆 KAZANANLAR</button>
@@ -273,16 +275,12 @@ body{font-family:'Bebas Neue',sans-serif;}
 var TOM_HIT_TIME = 12.18; // Gerçek onset: 12.189s (waveform analizi)
 var WIN_PERFECT   = 0.03;  // 30ms  → MÜKEMMEL   → Roland RH-5 kulaklık (daraltıldı: 50→30)
 var WIN_GREAT     = 0.13;  // 130ms → HARİKA     → %15 indirim
-var WIN_GOOD      = 0.28;  // 280ms → İYİ        → %10 indirim
+var WIN_GOOD      = 0.28;  // 280ms → İYİ        → Zuhal bez çanta
 var WIN_IDAREDER  = 0.50;  // 500ms → İDARE EDER → Akademi 1 ders
-
-// GEÇ VURUŞ KURALI — tomdan SONRA vurmak tahmin değildir; müşteri sesi duyup
-// tepki vermiş olabilir. Bu yüzden geç vuruşta KULAKLIK asla verilmez; en iyi
-// ödül %15 olur. Bunun dışında mesafe merdiveni aynen işler.
-// Neden sabit %15 değil: sabit verseydik 140ms geç vuran %15, 140ms erken vuran
-// %10 alırdı — daha kötü vuruş daha iyi ödül demek olurdu. Merdiven korunarak
-// erken/geç simetrik tutuluyor, yalnızca en üst basamak geç tarafta kapalı.
-// Dışarısı → Çalışmaya devam → Bez çanta
+// Dışarısı (>500ms)     → ÇALIŞMAYA DEVAM → HEDİYE YOK
+// Bez çanta eskiden burada, yani KAÇIRDI'daydı: gelişigüzel vuran herkes çanta
+// alıyordu, stok eridi ve ödülün değeri kalmadı. Çanta İYİ'ye çekildi, kaçıran
+// artık hediye almıyor. %10 indirim merdivenden tamamen kalktı.
 // BACKUP: TOM_HIT_TIME=11.95, WIN_PERFECT=0.03, WIN_GREAT=0.08, WIN_GOOD=0.18
 var STORE_CODE   = "AKS";
 var playerName   = "";
@@ -525,12 +523,16 @@ var whitneyPrizes = {
     desc:"Tam zamanında vurdun!\nRoland RH-5 kulaklık kazandın!", code:"RH5KL", type:"code" },
   great:     { emoji:"🎯", label:"HARİKA!",           title:"%15 İNDİRİM",
     desc:"Bir sonraki alışverişinde\n%15 indirim kazandın!", code:"IND15", type:"code" },
-  good:      { emoji:"🎵", label:"İYİ!",              title:"%10 İNDİRİM",
-    desc:"Bir sonraki alışverişinde\n%10 indirim kazandın!", code:"IND10", type:"code" },
+  good:      { emoji:"🎁", label:"İYİ!",              title:"ZUHAL BEZ ÇANTA",
+    desc:"Zuhal'in 50. yılına özel\nbez çantayı kazandın!", code:"CANTA", type:"code" },
   idareder:  { emoji:"🎓", label:"İDARE EDER!",       title:"AKADEMİ 1 DERS",
     desc:"Zuhal Akademi'de\n1 ücretsiz deneme dersi kazandın!", code:"AKDRS", type:"code" },
-  miss:      { emoji:"🎁", label:"ÇALIŞMAYA DEVAM!", title:"ZUHAL BEZ ÇANTA",
-    desc:"Zuhal'in 50. yılına özel\nbez çantayı kazandın!", code:"CANTA", type:"code" }
+  // KAÇIRDI artık HEDİYESİZ. Eskiden bez çanta buradaydı: gelişigüzel vuran
+  // herkes çanta alıyordu, stok eridi ve ödülün değeri kalmadı.
+  // type:"none" → kupon kodu üretilmez, kod kutusu gösterilmez, kayıtta kod boş
+  // kalır; bu kişi KAZANANLAR listesinde de çıkmaz (liste kodu olanları gösterir).
+  miss:      { emoji:"🥁", label:"ÇALIŞMAYA DEVAM!", title:"BU SEFER OLMADI",
+    desc:"Vuruşun hedeften uzaktı.\nRitmi yakalamak için çalışmaya devam!", code:"", type:"none" }
 };
 
 
@@ -1076,22 +1078,40 @@ var HEADPHONE_CODE = "RH5KL";
 var perfectSoldOutPrize = { emoji:"🏆", label:"MÜKEMMEL!", title:"%15 İNDİRİM",
   desc:"Tam zamanında vurdun!\nBugünün kulaklıkları tükendi —\nbunun yerine %15 indirim kazandın!", code:"IND15", type:"code" };
 
-// Bugün kaç kulaklık kuponu üretildiğini sayar (yalnızca kesinleşmiş oyunlarda kod olur)
-function headphonesIssuedToday() {
+// Bez çanta da fiziksel ve sınırlı: günde en fazla MAX_CANTA_PER_DAY adet.
+// Sınır dolunca İYİ vuran müşteri Akademi 1 Ders'e yönlendirilir (kulaklığa ASLA
+// yükseltilmez — o ayrı ve daha dar bir stok). Vuruşu yine "İYİ!" olarak kutlanır,
+// kayıtta sonuç "good" kalır; istatistik bozulmaz.
+var MAX_CANTA_PER_DAY = 50;
+var CANTA_CODE = "CANTA";
+
+var goodSoldOutPrize = { emoji:"🎓", label:"İYİ!", title:"AKADEMİ 1 DERS",
+  desc:"Bugünün bez çantaları tükendi —\nbunun yerine Zuhal Akademi'de\n1 ücretsiz deneme dersi kazandın!", code:"AKDRS", type:"code" };
+
+// Belirli bir ödülden bugün kaç KUPON üretildiğini sayar.
+// Deneme değil KUPON sayılır: müşteri 2 deneme yapar ama kod yalnızca oyun
+// kesinleşince tek bir denemeye yazılır. Yani bu sayı = verilen hediye adedi.
+function couponsIssuedToday(prizeCode) {
   var data = loadPlays();
   var n = 0;
   Object.keys(data).forEach(function(name) {
     var plays = data[name] && data[name].plays ? data[name].plays : [];
     plays.forEach(function(pl) {
-      if (pl.code && pl.code.indexOf("-" + HEADPHONE_CODE + "-") !== -1) n++;
+      if (pl.code && pl.code.indexOf("-" + prizeCode + "-") !== -1) n++;
     });
   });
   return n;
 }
 
+function headphonesIssuedToday() { return couponsIssuedToday(HEADPHONE_CODE); }
+function cantaIssuedToday()      { return couponsIssuedToday(CANTA_CODE); }
+
 function prizeForResult(r) {
   if (r === "perfect" && headphonesIssuedToday() >= MAX_HEADPHONES_PER_DAY) {
     return perfectSoldOutPrize;
+  }
+  if (r === "good" && cantaIssuedToday() >= MAX_CANTA_PER_DAY) {
+    return goodSoldOutPrize;
   }
   return whitneyPrizes[r] || whitneyPrizes["miss"];
 }
@@ -1133,6 +1153,10 @@ function showWhitneyResult(result) {
       prizeCode = makeCode(p.code);
       document.getElementById("prizeCode").textContent = prizeCode;
       document.getElementById("codeBox").style.display  = "flex";
+      document.getElementById("cantaBox").style.display = "none";
+    } else if (p.type === "none") {
+      // Hediyesiz sonuç: ne kupon kodu ne de "hediyeni al" kutusu gösterilir.
+      document.getElementById("codeBox").style.display  = "none";
       document.getElementById("cantaBox").style.display = "none";
     } else {
       document.getElementById("codeBox").style.display  = "none";
@@ -1330,8 +1354,26 @@ function renderDayWarning() {
     " görüntüleniyor.<br/>Kupon doğrulamak için günü BUGÜN'e alın.";
 }
 
+// Personel gün içinde kaç fiziksel hediye verildiğini görsün — stok takibi için.
+// Yalnızca BUGÜN için anlamlı; geçmiş gün seçiliyken gizlenir.
+function renderStockInfo() {
+  var el = document.getElementById("stockInfo");
+  if (!el) return;
+  if (selectedDayKey() !== todayKey()) { el.style.display = "none"; return; }
+  var k = headphonesIssuedToday(), c = cantaIssuedToday();
+  var kKalan = Math.max(0, MAX_HEADPHONES_PER_DAY - k);
+  var cKalan = Math.max(0, MAX_CANTA_PER_DAY - c);
+  el.style.display = "block";
+  el.innerHTML =
+    "🏆 KULAKLIK: <b style='color:" + (kKalan ? "#4caf50" : "#ff6b6b") + "'>" + kKalan + "</b>" +
+    " / " + MAX_HEADPHONES_PER_DAY + " kaldı &nbsp;•&nbsp; " +
+    "🎁 BEZ ÇANTA: <b style='color:" + (cKalan ? "#4caf50" : "#ff6b6b") + "'>" + cKalan + "</b>" +
+    " / " + MAX_CANTA_PER_DAY + " kaldı";
+}
+
 function refreshStatsAll() {
   renderStatsView();
+  renderStockInfo();
   var se = document.getElementById("winnerSearch");
   renderWinners(se ? se.value : "");
   renderStorageWarning();

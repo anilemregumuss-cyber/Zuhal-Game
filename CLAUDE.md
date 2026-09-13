@@ -95,7 +95,7 @@ kaldırıldı — iOS eşzamanlı AudioContext sayısını sınırlar. Gerekirse
 - **Puanlama tamamen simetrik**: `resultForOffset()` yalnızca |sapma|'ya bakar.
   "Geç vurana kulaklık yok" diye ayrı bir kural YOK — gerek de yok: kulaklık
   penceresi ±30 ms ve insanın sese tepki süresi ~150 ms, yani tomu DUYUP vurarak
-  o pencereye girmek imkansız. Tepkiyle vuran en iyi %10 alır (test edildi).
+  o pencereye girmek imkansız. Tepkiyle vuran en iyi bez çanta alır (test edildi).
   Geçmiş: 20 ms, 150 ms ve "1 ms geç = kulaklık yok" kuralları denendi; üçü de
   ya ters sonuç üretti ya da tam zamanında vuran müşteriyi cezalandırdı.
 - **Olay yaşı telafisi** (`eventAgeSec`): tarayıcı olayı hemen işlemeyebilir; ses
@@ -123,13 +123,31 @@ kaldırıldı — iOS eşzamanlı AudioContext sayısını sınırlar. Gerekirse
 **Ödüller:** `whitneyPrizes` objesi, `makeCode()` → `HT50-{KOD}-{DDMM}-{4rakam}` formatında kod üretir
 
 **Ödül merdiveni:** MÜKEMMEL → Roland RH-5 Kulaklık (`RH5KL`), HARİKA → %15 (`IND15`),
-İYİ → %10 (`IND10`), İDARE EDER → Akademi 1 Ders (`AKDRS`), ÇALIŞMAYA DEVAM → Bez Çanta (`CANTA`).
+İYİ → Zuhal Bez Çanta (`CANTA`), İDARE EDER → Akademi 1 Ders (`AKDRS`),
+ÇALIŞMAYA DEVAM → **HEDİYE YOK** (`type:"none"`, kupon üretilmez).
 
-**Kulaklık stok sınırı:** `MAX_HEADPHONES_PER_DAY = 3`. `headphonesIssuedToday()` bugünün
-kayıtlarında `-RH5KL-` içeren kupon kodlarını sayar; sınır dolunca `prizeForResult("perfect")`
-`perfectSoldOutPrize`'ı (%15 indirim, etiket yine MÜKEMMEL!) döndürür. Kayıttaki `result`
-"perfect" olarak kalır — istatistik bozulmaz. Sayı günlük anahtardan geldiği için her gün sıfırlanır.
-Personel kasa panelinde `RH5KL` arayıp gün içinde kaç kulaklık verildiğini görebilir.
+Geçmiş: bez çanta eskiden ÇALIŞMAYA DEVAM'daydı ve `%10` (`IND10`) İYİ'deydi. Gelişigüzel
+vuran herkes çanta aldığı için stok eridi ve ödülün değeri kalmadı; çanta İYİ'ye çekildi,
+kaçıran hediyesiz bırakıldı, `%10` merdivenden tamamen kalktı. İDARE EDER'deki Akademi
+dersi bilerek duruyor (kullanılmayan ama akademiye yönlendiren bir hediye).
+
+**`type:"none"` sözleşmesi:** kupon kodu üretilmez, `codeBox`/`cantaBox` gösterilmez,
+kayıtta `code` boş kalır. Bu kişi KAZANANLAR listesinde çıkmaz (liste yalnızca `pl.code`
+olanları listeler) ama İSTATİSTİK'te sayılır. Yeni hediyesiz bir basamak eklenirse
+`showWhitneyResult()` içindeki üç kollu `if (p.type === "code") / else if ("none") / else`
+dalını bozma.
+
+**Fiziksel hediye stok sınırları:** `MAX_HEADPHONES_PER_DAY = 3`, `MAX_CANTA_PER_DAY = 50`.
+Ortak sayaç `couponsIssuedToday(prizeCode)` bugünün kayıtlarında `-KOD-` içeren **kuponları**
+sayar — denemeleri değil. Bu ayrım kritik: müşteri 2 deneme yapar ama kod yalnızca oyun
+kesinleşince tek bir denemeye yazılır, yani sayı = verilen hediye adedi.
+- Kulaklık dolunca `prizeForResult("perfect")` → `perfectSoldOutPrize` (%15, etiket yine MÜKEMMEL!)
+- Çanta dolunca `prizeForResult("good")` → `goodSoldOutPrize` (Akademi 1 Ders, etiket yine İYİ!).
+  **Kulaklığa ASLA yükseltilmez** — o ayrı ve çok daha dar bir stok.
+
+Kayıttaki `result` her iki durumda da değişmez ("perfect"/"good" kalır) — istatistik bozulmaz.
+Sayılar günlük anahtardan geldiği için her gün sıfırlanır. Kalan adetler kasa panelinde
+`renderStockInfo()` ile görünür (yalnızca bugün seçiliyken).
 
 ### Android / Dokunmatik Ekran
 - Touch cihazlarda sadece `touchstart`, mouse'ta sadece `click` kullanılır (çift tetik önlemi)
