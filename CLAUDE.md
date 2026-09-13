@@ -122,7 +122,7 @@ kaldırıldı — iOS eşzamanlı AudioContext sayısını sınırlar. Gerekirse
 
 **Ödüller:** `whitneyPrizes` objesi, `makeCode()` → `HT50-{KOD}-{DDMM}-{4rakam}` formatında kod üretir
 
-**Ödül merdiveni:** MÜKEMMEL → Roland RH-5 Kulaklık (`RH5KL`), HARİKA → %15 (`IND15`),
+**Ödül merdiveni:** MÜKEMMEL → Kozmos S-200 Kulaklık (`KS200`), HARİKA → %15 (`IND15`),
 İYİ → Zuhal Bez Çanta (`CANTA`), İDARE EDER → Akademi 1 Ders (`AKDRS`),
 ÇALIŞMAYA DEVAM → **HEDİYE YOK** (`type:"none"`, kupon üretilmez).
 
@@ -137,7 +137,7 @@ olanları listeler) ama İSTATİSTİK'te sayılır. Yeni hediyesiz bir basamak e
 `showWhitneyResult()` içindeki üç kollu `if (p.type === "code") / else if ("none") / else`
 dalını bozma.
 
-**Fiziksel hediye stok sınırları:** `MAX_HEADPHONES_PER_DAY = 3`, `MAX_CANTA_PER_DAY = 50`.
+**Fiziksel hediye stok sınırları:** `MAX_HEADPHONES_PER_DAY = 2`, `MAX_CANTA_PER_DAY = 50`.
 Ortak sayaç `couponsIssuedToday(prizeCode)` bugünün kayıtlarında `-KOD-` içeren **kuponları**
 sayar — denemeleri değil. Bu ayrım kritik: müşteri 2 deneme yapar ama kod yalnızca oyun
 kesinleşince tek bir denemeye yazılır, yani sayı = verilen hediye adedi.
@@ -146,6 +146,13 @@ kesinleşince tek bir denemeye yazılır, yani sayı = verilen hediye adedi.
   **Kulaklığa ASLA yükseltilmez** — o ayrı ve çok daha dar bir stok.
 
 Kayıttaki `result` her iki durumda da değişmez ("perfect"/"good" kalır) — istatistik bozulmaz.
+
+**Ödül ürünü değişirse `code` ön ekini de değiştir.** Kulaklık Roland RH-5 iken stok bitti,
+Kozmos S-200 ile yenilendi ve ön ek `RH5KL` → `KS200` oldu. Sayaç ön eke baktığı için eski
+ürünün kuponları yeni ürünün günlük sınırını doldurmaz (yeni ürün = yeni stok). Müşterinin
+elindeki eski kupon kasada YİNE doğrulanır — arama kod metnine bakar, geçerli ön ek listesine
+değil. Ön eki değiştirmezsen o günün eski kuponları yeni sınırı yer.
+
 Sayılar günlük anahtardan geldiği için her gün sıfırlanır. Kalan adetler kasa panelinde
 `renderStockInfo()` ile görünür (yalnızca bugün seçiliyken).
 

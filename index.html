@@ -107,7 +107,7 @@ body{font-family:'Bebas Neue',sans-serif;}
       <div style="font-family:'Space Mono',monospace;font-size:10px;color:#ccc;line-height:1;display:flex;flex-direction:column;gap:10px;">
         <div style="display:flex;align-items:center;gap:10px;">
           <span style="font-size:18px;">🏆</span>
-          <div><div style="color:#fff;letter-spacing:2px;">MÜKEMMEL</div><div style="color:#fff;font-size:9px;margin-top:2px;">Roland RH-5 Kulaklık</div></div>
+          <div><div style="color:#fff;letter-spacing:2px;">MÜKEMMEL</div><div style="color:#fff;font-size:9px;margin-top:2px;">Kozmos S-200 Kulaklık</div></div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
           <span style="font-size:18px;">🎯</span>
@@ -275,7 +275,7 @@ body{font-family:'Bebas Neue',sans-serif;}
 
 <script>
 var TOM_HIT_TIME = 12.18; // Gerçek onset: 12.189s (waveform analizi)
-var WIN_PERFECT   = 0.03;  // 30ms  → MÜKEMMEL   → Roland RH-5 kulaklık (daraltıldı: 50→30)
+var WIN_PERFECT   = 0.03;  // 30ms  → MÜKEMMEL   → Kozmos S-200 kulaklık (daraltıldı: 50→30)
 var WIN_GREAT     = 0.13;  // 130ms → HARİKA     → %15 indirim
 var WIN_GOOD      = 0.28;  // 280ms → İYİ        → Zuhal bez çanta
 var WIN_IDAREDER  = 0.50;  // 500ms → İDARE EDER → Akademi 1 ders
@@ -521,8 +521,8 @@ function unlockAC() {
 }
 
 var whitneyPrizes = {
-  perfect:   { emoji:"🏆", label:"MÜKEMMEL!",        title:"ROLAND RH-5 KULAKLIK",
-    desc:"Tam zamanında vurdun!\nRoland RH-5 kulaklık kazandın!", code:"RH5KL", type:"code" },
+  perfect:   { emoji:"🏆", label:"MÜKEMMEL!",        title:"KOZMOS S-200 KULAKLIK",
+    desc:"Tam zamanında vurdun!\nKozmos S-200 kulaklık kazandın!", code:"KS200", type:"code" },
   great:     { emoji:"🎯", label:"HARİKA!",           title:"%15 İNDİRİM",
     desc:"Bir sonraki alışverişinde\n%15 indirim kazandın!", code:"IND15", type:"code" },
   good:      { emoji:"🎁", label:"İYİ!",              title:"ZUHAL BEZ ÇANTA",
@@ -1074,8 +1074,13 @@ function handleHit(kaynak, evt) {   // kaynak: "midi" | "touch"; evt: olayın ge
 // Sınır dolduktan sonra MÜKEMMEL vuran müşteri boş kalmasın diye bir alt ödüle
 // (%15 indirim) düşürülür; vuruşu yine "MÜKEMMEL" olarak kutlanır.
 // Kayıtta sonuç "perfect" kalır — istatistik bozulmaz, sadece ödül değişir.
-var MAX_HEADPHONES_PER_DAY = 3;
-var HEADPHONE_CODE = "RH5KL";
+// Kulaklık Roland RH-5 iken stok tükendi; ödül Kozmos S-200 ile yenilendi.
+// Kupon ön eki de değişti (RH5KL → KS200): sayaç ön eke baktığı için eski Roland
+// kuponları yeni ürünün günlük sınırını doldurmuyor — yeni ürün, yeni stok.
+// Müşterinin elindeki eski RH5KL kuponu kasada YİNE doğrulanır (arama kod
+// metnine bakar, ön ek listesine değil).
+var MAX_HEADPHONES_PER_DAY = 2;
+var HEADPHONE_CODE = "KS200";
 
 var perfectSoldOutPrize = { emoji:"🏆", label:"MÜKEMMEL!", title:"%15 İNDİRİM",
   desc:"Tam zamanında vurdun!\nBugünün kulaklıkları tükendi —\nbunun yerine %15 indirim kazandın!", code:"IND15", type:"code" };
