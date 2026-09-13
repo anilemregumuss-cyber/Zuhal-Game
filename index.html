@@ -201,7 +201,15 @@ body{font-family:'Bebas Neue',sans-serif;}
     <div id="statsDate" style="font-family:'Space Mono',monospace;font-size:9px;color:#555;letter-spacing:2px;margin-bottom:6px;"></div>
     <!-- Ses gecikmesi ölçümü: oyunun zamanlamasının doğru olup olmadığını anlamak için.
          PIN arkasında olduğu için müşteri görmez. Kalibrasyon bitince kaldırılabilir. -->
-    <div id="latencyInfo" style="font-family:'Space Mono',monospace;font-size:9px;color:#666;letter-spacing:1px;margin-bottom:20px;"></div>
+    <div id="latencyInfo" style="font-family:'Space Mono',monospace;font-size:9px;color:#666;letter-spacing:1px;margin-bottom:12px;"></div>
+
+    <!-- GÜN SEÇİCİ: kayıtlar 30 gün saklanıyor ama panel ve İNDİR eskiden yalnızca
+         bugünü gösteriyordu; önceki günün verisi cihazda durduğu halde alınamıyordu. -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+      <span style="font-family:'Space Mono',monospace;font-size:9px;color:#555;letter-spacing:2px;">GÜN</span>
+      <select id="statsDay" style="flex:1;background:#111;border:1px solid #333;color:#fff;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;padding:8px 10px;outline:none;-webkit-appearance:none;appearance:none;border-radius:0;"></select>
+    </div>
+    <div id="dayWarn" style="display:none;border:1px solid #ffb74d;background:#2a2412;color:#ffb74d;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;line-height:1.6;padding:8px 12px;margin-bottom:14px;"></div>
 
     <div style="display:flex;gap:8px;margin-bottom:20px;">
       <button id="btnTabWinners" style="flex:1;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;padding:10px 0;cursor:pointer;border:1px solid #FFD700;background:#FFD700;color:#000;font-weight:700;">🏆 KAZANANLAR</button>
@@ -351,6 +359,48 @@ function loadPlays() {
     try { localStorage.removeItem(todayKey()); } catch (e3) {}
     return {};
   }
+}
+
+// ---- Panelin gösterdiği gün ----
+// ÖNEMLİ: loadPlays() ASLA buna bağlanmaz. Oyun, kupon üretimi ve günlük kulaklık
+// sayımı her zaman BUGÜNE yazar/okur; seçim yalnızca kasa panelini ve İNDİR'i etkiler.
+// Aksi halde personel dünü seçtiğinde oyun dünün dosyasına yazmaya başlardı.
+var selectedDay = ""; // boş = bugün
+
+function selectedDayKey() { return selectedDay || todayKey(); }
+
+// Kayıtlı günler, yeniden eskiye. "_bozuk_" yedek anahtarları listelenmez.
+function playDayKeys() {
+  var liste = [];
+  try {
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (!k || k.indexOf("zuhal_plays_") !== 0) continue;
+      if (k.indexOf("_bozuk_") !== -1) continue;
+      liste.push(k);
+    }
+  } catch (e) {}
+  if (liste.indexOf(todayKey()) === -1) liste.push(todayKey());
+  liste.sort();
+  liste.reverse();
+  return liste;
+}
+
+function dayLabel(key) {
+  var p = key.replace("zuhal_plays_", "").split("-");
+  if (p.length !== 3) return key;
+  return p[2] + "." + p[1] + "." + p[0];
+}
+
+// Seçili günün kayıtları. Bugünse loadPlays() üzerinden gider — bellek yedeği
+// (storageOK false) ve bozuk JSON kurtarma mantığı orada.
+function playsForPanel() {
+  var key = selectedDayKey();
+  if (key === todayKey()) return loadPlays();
+  var raw;
+  try { raw = localStorage.getItem(key); } catch (e) { return {}; }
+  if (!raw) return {};
+  try { return JSON.parse(raw); } catch (e) { return {}; }
 }
 
 function savePlays(data) {
@@ -1161,10 +1211,8 @@ function pct(n, total) {
 }
 
 function renderStatsView() {
-  var data = loadPlays();
-  var d = new Date();
-  var dateStr = String(d.getDate()).padStart(2,"0") + "." + String(d.getMonth()+1).padStart(2,"0") + "." + d.getFullYear();
-  document.getElementById("statsDate").textContent = dateStr;
+  var data = playsForPanel();
+  document.getElementById("statsDate").textContent = dayLabel(selectedDayKey());
 
   var names = Object.keys(data);
   var totalPlays = 0, counts = { perfect:0, great:0, good:0, idareder:0, miss:0 };
@@ -1247,11 +1295,47 @@ function renderLatencyInfo() {
   el.style.color = (cikis > 20) ? "#ffb74d" : "#4caf50";
 }
 
+// Seçici yalnızca panel AÇILIRKEN doldurulur; 4 saniyelik otomatik yenilemede
+// yeniden kurulsaydı personelin seçtiği gün sürekli bugüne dönerdi.
+function fillDaySelect() {
+  var sel = document.getElementById("statsDay");
+  if (!sel) return;
+  var gunler = playDayKeys();
+  sel.innerHTML = "";
+  gunler.forEach(function(k) {
+    var o = document.createElement("option");
+    o.value = k;
+    var adet = 0;
+    try {
+      var raw = localStorage.getItem(k);
+      var obj = raw ? JSON.parse(raw) : {};
+      Object.keys(obj).forEach(function(n) {
+        if (obj[n] && obj[n].plays) adet += obj[n].plays.length;
+      });
+    } catch (e) {}
+    o.textContent = dayLabel(k) + (k === todayKey() ? "  (BUGÜN)" : "") + "  —  " + adet + " oyun";
+    sel.appendChild(o);
+  });
+  sel.value = selectedDayKey();
+}
+
+// Geçmiş bir gün seçiliyken kupon doğrulaması yanıltıcı olur (bugünün kuponu
+// "KAYITLARDA YOK" çıkar). Personel hangi güne baktığını net görsün.
+function renderDayWarning() {
+  var el = document.getElementById("dayWarn");
+  if (!el) return;
+  if (selectedDayKey() === todayKey()) { el.style.display = "none"; return; }
+  el.style.display = "block";
+  el.innerHTML = "⚠ <b>GEÇMİŞ GÜN</b> — " + dayLabel(selectedDayKey()) +
+    " görüntüleniyor.<br/>Kupon doğrulamak için günü BUGÜN'e alın.";
+}
+
 function refreshStatsAll() {
   renderStatsView();
   var se = document.getElementById("winnerSearch");
   renderWinners(se ? se.value : "");
   renderStorageWarning();
+  renderDayWarning();
   renderLatencyInfo();
 }
 
@@ -1279,6 +1363,10 @@ function stopStatsAutoRefresh() {
 function openStats() {
   var searchEl = document.getElementById("winnerSearch");
   if (searchEl) searchEl.value = "";
+  // Panel her açılışta BUGÜNE döner — kasada kupon doğrulayan personel
+  // farkında olmadan dünün listesine bakmasın.
+  selectedDay = "";
+  fillDaySelect();
   refreshStatsAll();
   switchStatsTab("winners");
   document.getElementById("statsModal").style.display = "flex";
@@ -1516,7 +1604,7 @@ function submitPin() {
 }
 
 function renderWinners(filter) {
-  var data = loadPlays();
+  var data = playsForPanel();
   var names = Object.keys(data);
   var entries = [];
   names.forEach(function(n) {
@@ -1617,9 +1705,10 @@ function xlCell(v, bold, bg, color) {
 }
 
 function downloadStats() {
-  var data = loadPlays();
-  var d = new Date();
-  var dateStr = String(d.getDate()).padStart(2,"0") + "." + String(d.getMonth()+1).padStart(2,"0") + "." + d.getFullYear();
+  var data = playsForPanel();
+  var gunKey = selectedDayKey();
+  var dateStr = dayLabel(gunKey);            // 12.09.2026
+  var dosyaGun = gunKey.replace("zuhal_plays_", "").replace(/-/g, ""); // 20260912
 
   // plays alanı olmayan bozuk bir kayıt tüm dosyayı çökertmesin
   var names = Object.keys(data).filter(function(n) {
@@ -1690,7 +1779,7 @@ function downloadStats() {
     rows + "</table></body></html>";
 
   var blob = new Blob([html], { type: "application/vnd.ms-excel;charset=utf-8;" });
-  var fileName = "zuhal-ritim-" + d.getFullYear() + String(d.getMonth()+1).padStart(2,"0") + String(d.getDate()).padStart(2,"0") + ".xls";
+  var fileName = "zuhal-ritim-" + dosyaGun + ".xls";
 
   // iOS Safari <a download> özniteliğini yok sayar; dosya indirilmek yerine ham
   // HTML olarak açılır. Bu yüzden iOS'ta ÖNCE paylaş sayfası denenir.
@@ -1827,6 +1916,12 @@ document.addEventListener("DOMContentLoaded", function() {
   addBtn("btnKasaAccess", openPinModal);
   addBtn("btnPinCancel", closePinModal);
   addBtn("btnPinSubmit", submitPin);
+
+  var dayEl = document.getElementById("statsDay");
+  if (dayEl) dayEl.addEventListener("change", function(e) {
+    selectedDay = (e.target.value === todayKey()) ? "" : e.target.value;
+    refreshStatsAll();
+  });
 
   var winnerSearchEl = document.getElementById("winnerSearch");
   if (winnerSearchEl) {

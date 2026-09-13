@@ -138,6 +138,8 @@ Personel kasa panelinde `RH5KL` arayıp gün içinde kaç kulaklık verildiğini
 
 ### İstatistik / Kazananlar Paneli
 - Günlük oyun kayıtları localStorage'dan XLS olarak indirilebilir (`downloadStats()`)
+- **Veri yalnızca kioskun kendi tarayıcısında.** GitHub Pages statik sunucudur — sunucu/veritabanı yok, hiçbir kayıt buluta gitmez. Cihaz sıfırlanır veya tarayıcı verisi temizlenirse kayıtlar gider. `cleanOldData()` 30 gün saklar.
+- **Gün seçici** (`#statsDay`): panel ve İNDİR eskiden yalnızca bugünü gösteriyordu, önceki günün verisi cihazda durduğu halde alınamıyordu. Artık `selectedDay` / `selectedDayKey()` / `playsForPanel()` üçlüsü seçili günü verir. **`loadPlays()` ASLA bu seçime bağlanmamalı** — oyun, `makeCode()` ve `headphonesIssuedToday()` her zaman bugüne yazıp okumalı; aksi halde personel dünü seçtiğinde oyun dünün dosyasına yazardı. Seçici sadece `openStats()` içinde doldurulur (`fillDaySelect()`); `refreshStatsAll()` içinde doldurulsaydı 4 saniyede bir seçim bugüne dönerdi. Panel her açılışta bugüne sıfırlanır ve geçmiş gün seçiliyken `#dayWarn` uyarısı çıkar (kupon doğrulaması yanıltmasın).
 
 ## Dikkat Edilmesi Gerekenler
 
