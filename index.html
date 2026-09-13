@@ -1621,7 +1621,10 @@ function downloadStats() {
   var d = new Date();
   var dateStr = String(d.getDate()).padStart(2,"0") + "." + String(d.getMonth()+1).padStart(2,"0") + "." + d.getFullYear();
 
-  var names = Object.keys(data);
+  // plays alanı olmayan bozuk bir kayıt tüm dosyayı çökertmesin
+  var names = Object.keys(data).filter(function(n) {
+    return data[n] && data[n].plays && data[n].plays.length;
+  });
   var totalPlays = 0, counts = { perfect:0, great:0, good:0, idareder:0, miss:0 };
   names.forEach(function(n) {
     data[n].plays.forEach(function(pl) {
@@ -1690,10 +1693,40 @@ function downloadStats() {
   var fileName = "zuhal-ritim-" + d.getFullYear() + String(d.getMonth()+1).padStart(2,"0") + String(d.getDate()).padStart(2,"0") + ".xls";
 
   // iOS Safari <a download> özniteliğini yok sayar; dosya indirilmek yerine ham
-  // HTML olarak açılır. Bu yüzden önce paylaş sayfası (AirDrop/Mail/Dosyalar)
-  // denenir, o da yoksa klasik indirmeye düşülür.
-  if (shareFile(blob, fileName)) return;
+  // HTML olarak açılır. Bu yüzden iOS'ta ÖNCE paylaş sayfası denenir.
+  // Android'de DENENMEZ: orada <a download> zaten çalışıyor, buna karşılık
+  // paylaş sayfası sadece uygulama listesi açıyor ve kiosk cihazında dosyayı
+  // alacak uygulama olmadığı için "hiçbir şey olmuyor" gibi görünüyordu.
+  if (isIOSDevice() && shareFile(blob, fileName)) return;
   triggerDownload(blob, fileName);
+}
+
+// Buton sessizce ölmesin: sonuç ne olursa olsun ekranda geri bildirim verir.
+// Kioskta dosya Downloads klasörüne düştüğü için personel hiçbir şey görmüyordu.
+function onDownloadClick(e) {
+  if (e) e.preventDefault();
+  var b = document.getElementById("btnStatsDownload");
+  var eskiYazi = b ? b.textContent : "";
+  try {
+    downloadStats();
+    if (b) {
+      b.textContent = "\u2713 \u0130ND\u0130R\u0130LD\u0130";
+      setTimeout(function() { b.textContent = eskiYazi; }, 2500);
+    }
+  } catch (err) {
+    if (b) {
+      b.textContent = "\u2715 HATA";
+      setTimeout(function() { b.textContent = eskiYazi; }, 2500);
+    }
+    alert("Dosya olu\u015fturulamad\u0131: " + (err && err.message ? err.message : err));
+  }
+}
+
+function isIOSDevice() {
+  var ua = navigator.userAgent || "";
+  if (/iPad|iPhone|iPod/.test(ua)) return true;
+  // iPadOS 13+ kendini Mac gibi tanıtır; dokunmatik varlığından ayırt edilir
+  return /Macintosh/.test(ua) && navigator.maxTouchPoints > 1;
 }
 
 function shareFile(blob, fileName) {
@@ -1701,7 +1734,13 @@ function shareFile(blob, fileName) {
     if (typeof File !== "function" || !navigator.canShare || !navigator.share) return false;
     var file = new File([blob], fileName, { type: blob.type });
     if (!navigator.canShare({ files: [file] })) return false;
-    navigator.share({ files: [file], title: fileName }).catch(function() {});
+    // share() "geçici kullanıcı etkileşimi" ister; reddedilirse ESKİDEN hata
+    // yutuluyor ama yine true dönülüyordu — klasik indirme hiç denenmiyordu ve
+    // buton ölü görünüyordu. Artık iptal dışındaki her hatada indirmeye düşülür.
+    navigator.share({ files: [file], title: fileName }).catch(function(err) {
+      if (err && err.name === "AbortError") return; // kullanıcı paylaşımı iptal etti
+      triggerDownload(blob, fileName);
+    });
     return true;
   } catch (e) {
     return false;
@@ -1770,7 +1809,13 @@ document.addEventListener("DOMContentLoaded", function() {
   addBtn("btnTamam", closeGame);
   addBtn("btnTekrarOyna", startGameDirectly);
   addBtn("btnStatsClose", closeStats);
-  addBtn("btnStatsDownload", downloadStats);
+  // İNDİR butonu bilerek bindTap KULLANMAZ. bindTap "pointerdown"a bağlanır;
+  // tarayıcı indirmesi ve navigator.share() ise "geçici kullanıcı etkileşimi"
+  // ister ve Chrome bunu dokunuşun BAŞINDA değil SONUNDA (tap/click) verir.
+  // pointerdown'a bağlıyken butona basınca hiçbir şey olmuyordu.
+  var dlEl = document.getElementById("btnStatsDownload");
+  if (dlEl) dlEl.addEventListener("click", onDownloadClick);
+
   addBtn("btnStatsReload", reloadPageFresh);
   addBtn("btnStatsCalib", openCalib);
   addBtn("btnCalibStart", calibStartRound);
