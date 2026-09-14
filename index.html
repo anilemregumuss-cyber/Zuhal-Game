@@ -1788,17 +1788,20 @@ function downloadStats() {
   "</tr>";
 
   // Oyuncu satırları
-  var resultColors = { perfect:"#2a4a1a", great:"#1a3a4a", good:"#1a2a4a", idareder:"#2a2a1a", miss:"#3a1a1a" };
+  // Renkler AÇIK ton olmak zorunda: Excel hücre yazısını siyah çizer, kioskun
+  // koyu temasındaki tonlar (#3a1a1a gibi) kullanıldığında siyah üstüne siyah
+  // çıkıyor ve dosya okunmuyordu. Yazı rengi de her hücrede açıkça siyah veriliyor.
+  var resultColors = { perfect:"#D6F0C8", great:"#CFE6F7", good:"#DCE0F5", idareder:"#FBF0C4", miss:"#F8D7D5" };
   names.forEach(function(n) {
     data[n].plays.forEach(function(pl, i) {
       var bg = resultColors[pl.result] || "";
       rows += "<tr>" +
-        xlCell(n, false, bg) +
-        xlCell(i+1, false, bg) +
-        xlCell(pl.time, false, bg) +
-        xlCell(RESULT_LABELS[pl.finalResult || pl.result] || pl.finalResult || pl.result, true, bg) +
-        xlCell(pl.finalPrize || pl.prize, false, bg) +
-        xlCell(pl.code||"-", false, bg) +
+        xlCell(n, false, bg, "#000") +
+        xlCell(i+1, false, bg, "#000") +
+        xlCell(pl.time, false, bg, "#000") +
+        xlCell(RESULT_LABELS[pl.finalResult || pl.result] || pl.finalResult || pl.result, true, bg, "#000") +
+        xlCell(pl.finalPrize || pl.prize, false, bg, "#000") +
+        xlCell(pl.code||"-", false, bg, "#000") +
       "</tr>";
     });
   });
@@ -1809,22 +1812,28 @@ function downloadStats() {
   rows += "<tr>" + xlCell("Toplam Oyun",true) + xlCell(totalPlays,true) + xlCell("Toplam Oyuncu",true) + xlCell(names.length,true) + "<td colspan='2'></td></tr>";
 
   var summaryRows = [
-    ["🏆 Mükemmel", counts.perfect, "#2a4a1a"],
-    ["🎯 Harika",   counts.great,   "#1a3a4a"],
-    ["🎵 İyi",      counts.good,    "#1a2a4a"],
-    ["🎓 İdare Eder",counts.idareder,"#2a2a1a"],
-    ["🎁 Kaçırdı",  counts.miss,    "#3a1a1a"]
+    ["🏆 Mükemmel", counts.perfect, "#D6F0C8"],
+    ["🎯 Harika",   counts.great,   "#CFE6F7"],
+    ["🎵 İyi",      counts.good,    "#DCE0F5"],
+    ["🎓 İdare Eder",counts.idareder,"#FBF0C4"],
+    ["😞 Kaçırdı",  counts.miss,    "#F8D7D5"]
   ];
   summaryRows.forEach(function(s) {
     rows += "<tr>" +
-      xlCell(s[0], true, s[2]) +
-      xlCell(s[1], true, s[2]) +
-      xlCell(pct(s[1], totalPlays), true, s[2]) +
+      xlCell(s[0], true, s[2], "#000") +
+      xlCell(s[1], true, s[2], "#000") +
+      xlCell(pct(s[1], totalPlays), true, s[2], "#000") +
       "<td colspan='3'></td></tr>";
   });
 
   var html = "<!DOCTYPE html><html><head><meta charset='UTF-8'></head><body>" +
-    "<table border='1' cellpadding='6' cellspacing='0' style='border-collapse:collapse;font-family:Calibri,Arial;font-size:11pt;'>" +
+    "<table border='1' cellpadding='6' cellspacing='0' style='border-collapse:collapse;font-family:Calibri,Arial;font-size:11pt;color:#000;'>" +
+    // Kolon genişlikleri: isim ve kupon kodu varsayılan genişliğe sığmayıp
+    // "####" ya da kırpılmış görünüyordu.
+    "<colgroup>" +
+      "<col style='width:200px'><col style='width:70px'><col style='width:70px'>" +
+      "<col style='width:120px'><col style='width:220px'><col style='width:200px'>" +
+    "</colgroup>" +
     rows + "</table></body></html>";
 
   var blob = new Blob([html], { type: "application/vnd.ms-excel;charset=utf-8;" });
