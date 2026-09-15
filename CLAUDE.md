@@ -122,14 +122,30 @@ kaldırıldı — iOS eşzamanlı AudioContext sayısını sınırlar. Gerekirse
 
 **Ödüller:** `whitneyPrizes` objesi, `makeCode()` → `HT50-{KOD}-{DDMM}-{4rakam}` formatında kod üretir
 
-**Ödül merdiveni:** MÜKEMMEL → Kozmos S-200 Kulaklık (`KS200`), HARİKA → %15 (`IND15`),
-İYİ → Zuhal Bez Çanta (`CANTA`), İDARE EDER → Akademi 1 Ders (`AKDRS`),
-ÇALIŞMAYA DEVAM → **HEDİYE YOK** (`type:"none"`, kupon üretilmez).
+**Ödül merdiveni (AKADEMİ KAMPANYASI):** MÜKEMMEL → Akademi 1 Ay 4 Ders (`AKD1AY`),
+HARİKA → Ücretsiz Deneme Dersi (`AKDRS`), İYİ → Akademide İlk Ay %50 (`AKD50`),
+İDARE EDER → Zuhal Bez Çanta (`CANTA`), ÇALIŞMAYA DEVAM → **HEDİYE YOK**
+(`type:"none"`, kupon üretilmez).
 
-Geçmiş: bez çanta eskiden ÇALIŞMAYA DEVAM'daydı ve `%10` (`IND10`) İYİ'deydi. Gelişigüzel
-vuran herkes çanta aldığı için stok eridi ve ödülün değeri kalmadı; çanta İYİ'ye çekildi,
-kaçıran hediyesiz bırakıldı, `%10` merdivenden tamamen kalktı. İDARE EDER'deki Akademi
-dersi bilerek duruyor (kullanılmayan ama akademiye yönlendiren bir hediye).
+Kampanyanın amacı indirim dağıtmak değil **Akademi'ye öğrenci çekmek**: MÜKEMMEL hariç
+her basamak müşteriyi derse yönlendiriyor. Bu yüzden `%50` burada mağaza indirimi değil,
+Akademi kayıt indirimidir.
+
+Geçmiş: önceki merdiven kulaklık (`KS200`) + `%15` (`IND15`) + `%10` (`IND10`) üzerineydi.
+İki günde 943 oyun oynandı ve ~110 indirim kuponu dağıtıldı; **indirimler ilgi görmedi,
+fiziki/ders ödülleri tuttu.** Kulaklık ve tüm yüzde indirimleri merdivenden tamamen kalktı.
+Daha eskisinde bez çanta ÇALIŞMAYA DEVAM'daydı; gelişigüzel vuran herkes aldığı için stok
+eridi, yukarı çekildi ve kaçıran hediyesiz bırakıldı.
+
+**Kupon son kullanma tarihi:** her kupon kazanıldığı günden **+1 ay** geçerli.
+`addOneMonth()` ay sonlarını kırpar (31 Ocak + 1 ay = 28/29 Şubat — JS'in kendi `Date`
+aritmetiği 3 Mart'a taşardı). Tarih `formatDate()` ile `DD.MM.YYYY` üretilir, ekranda
+`#prizeExpiry`'de, kayıtta `pl.expiry` alanında ve XLS'in 7. sütununda görünür.
+**Tarih kayda YAZILIR, kasa panelinde yeniden hesaplanmaz** — yoksa kupon kuralı
+değiştiğinde eski kuponlar yanlış tarih gösterir. `isExpired()` boş `expiry`'yi
+**geçerli** sayar: kampanyadan önceki kuponlarda bu alan yok, onları yakmamak gerekir.
+Kasa panelinde süresi dolmuş kupon yeşil "GEÇERLİ" yerine kırmızı
+`⛔ SÜRESİ DOLMUŞ KUPON` verir.
 
 **`type:"none"` sözleşmesi:** kupon kodu üretilmez, `codeBox`/`cantaBox` gösterilmez,
 kayıtta `code` boş kalır. Bu kişi KAZANANLAR listesinde çıkmaz (liste yalnızca `pl.code`
@@ -137,24 +153,41 @@ olanları listeler) ama İSTATİSTİK'te sayılır. Yeni hediyesiz bir basamak e
 `showWhitneyResult()` içindeki üç kollu `if (p.type === "code") / else if ("none") / else`
 dalını bozma.
 
-**Fiziksel hediye stok sınırları:** `MAX_HEADPHONES_PER_DAY = 2`, `MAX_CANTA_PER_DAY = 50`.
-Ortak sayaç `couponsIssuedToday(prizeCode)` bugünün kayıtlarında `-KOD-` içeren **kuponları**
-sayar — denemeleri değil. Bu ayrım kritik: müşteri 2 deneme yapar ama kod yalnızca oyun
-kesinleşince tek bir denemeye yazılır, yani sayı = verilen hediye adedi.
-- Kulaklık dolunca `prizeForResult("perfect")` → `perfectSoldOutPrize` (%15, etiket yine MÜKEMMEL!)
-- Çanta dolunca `prizeForResult("good")` → `goodSoldOutPrize` (Akademi 1 Ders, etiket yine İYİ!).
-  **Kulaklığa ASLA yükseltilmez** — o ayrı ve çok daha dar bir stok.
+**Stok sınırları — iki AYRI sayaç tipi var, karıştırma:**
 
-Kayıttaki `result` her iki durumda da değişmez ("perfect"/"good" kalır) — istatistik bozulmaz.
+Ortak temel `countCouponsIn(data, prizeCode)` bir gün nesnesindeki `-KOD-` içeren
+**kuponları** sayar — denemeleri değil. Bu ayrım kritik: müşteri 2 deneme yapar ama kod
+yalnızca oyun kesinleşince tek bir denemeye yazılır, yani sayı = verilen hediye adedi.
+
+1. **Kampanya boyu TOPLAM** — `couponsIssuedAllTime(prizeCode)` bütün `zuhal_plays_*`
+   anahtarlarını tarar. `MAX_AKD1AY_TOTAL = 5`: 1 Ay 4 Ders hediyesi kampanya boyunca
+   toplam 5 kişiye verilir, **günlük değil**. Dolunca `prizeForResult("perfect")` →
+   `perfectSoldOutPrize` (Ücretsiz Deneme Dersi, etiket yine MÜKEMMEL!).
+   ⚠ Bu sayaç `cleanOldData()`'ya bağımlı: silinen günün kuponları sayılmaz ve sınır
+   kendiliğinden gevşer. Saklama süresi bu yüzden 90 güne çıkarıldı; kampanya daha
+   uzun sürerse süreyi de uzat.
+
+2. **GÜNLÜK** — `couponsIssuedToday(prizeCode)` yalnızca bugünü sayar, her gün sıfırlanır.
+   Bez çanta böyle çalışır. Dolunca `prizeForResult("idareder")` → `idarederSoldOutPrize`
+   (Akademide İlk Ay %50, etiket yine İDARE EDER!). **1 Ay 4 Ders'e ASLA yükseltilmez** —
+   o ayrı ve çok daha dar bir stok.
+
+Kayıttaki `result` her iki durumda da değişmez ("perfect"/"idareder" kalır) — istatistik bozulmaz.
+
+**Bez çanta stoğu sabit değil, her gün kasa panelinden girilir.** `cantaStokForDay(dayKey)`
+`zuhal_canta_stok_YYYY-MM-DD` anahtarını okur; girilmemişse `DEFAULT_CANTA_STOK = 30`.
+**Girilmiş 0 ile girilmemiş ayrımı önemli** (`cantaStokGirildiMi()`): "bugün hiç çanta yok"
+demek isteyen personelin girdiği 0, varsayılan 30'a düşmemeli. `#cantaStokInput` alanı
+odaktayken `renderStockInfo()` değerin üzerine YAZMAZ — panel 4 saniyede bir yenilendiği
+için personelin yazdığı rakam siliniyordu.
 
 **Ödül ürünü değişirse `code` ön ekini de değiştir.** Kulaklık Roland RH-5 iken stok bitti,
 Kozmos S-200 ile yenilendi ve ön ek `RH5KL` → `KS200` oldu. Sayaç ön eke baktığı için eski
-ürünün kuponları yeni ürünün günlük sınırını doldurmaz (yeni ürün = yeni stok). Müşterinin
+ürünün kuponları yeni ürünün sınırını doldurmaz (yeni ürün = yeni stok). Müşterinin
 elindeki eski kupon kasada YİNE doğrulanır — arama kod metnine bakar, geçerli ön ek listesine
-değil. Ön eki değiştirmezsen o günün eski kuponları yeni sınırı yer.
+değil. Ön eki değiştirmezsen eski kuponlar yeni sınırı yer.
 
-Sayılar günlük anahtardan geldiği için her gün sıfırlanır. Kalan adetler kasa panelinde
-`renderStockInfo()` ile görünür (yalnızca bugün seçiliyken).
+Kalan adetler kasa panelinde `renderStockInfo()` ile görünür (yalnızca bugün seçiliyken).
 
 ### Android / Dokunmatik Ekran
 - Touch cihazlarda sadece `touchstart`, mouse'ta sadece `click` kullanılır (çift tetik önlemi)
@@ -163,7 +196,7 @@ Sayılar günlük anahtardan geldiği için her gün sıfırlanır. Kalan adetle
 
 ### İstatistik / Kazananlar Paneli
 - Günlük oyun kayıtları localStorage'dan XLS olarak indirilebilir (`downloadStats()`)
-- **Veri yalnızca kioskun kendi tarayıcısında.** GitHub Pages statik sunucudur — sunucu/veritabanı yok, hiçbir kayıt buluta gitmez. Cihaz sıfırlanır veya tarayıcı verisi temizlenirse kayıtlar gider. `cleanOldData()` 30 gün saklar.
+- **Veri yalnızca kioskun kendi tarayıcısında.** GitHub Pages statik sunucudur — sunucu/veritabanı yok, hiçbir kayıt buluta gitmez. Cihaz sıfırlanır veya tarayıcı verisi temizlenirse kayıtlar gider. `cleanOldData()` 90 gün saklar — bu süre `couponsIssuedAllTime()` doğru sayabilsin diye 30'dan çıkarıldı, kısaltma.
 - **Gün seçici** (`#statsDay`): panel ve İNDİR eskiden yalnızca bugünü gösteriyordu, önceki günün verisi cihazda durduğu halde alınamıyordu. Artık `selectedDay` / `selectedDayKey()` / `playsForPanel()` üçlüsü seçili günü verir. **`loadPlays()` ASLA bu seçime bağlanmamalı** — oyun, `makeCode()` ve `headphonesIssuedToday()` her zaman bugüne yazıp okumalı; aksi halde personel dünü seçtiğinde oyun dünün dosyasına yazardı. Seçici sadece `openStats()` içinde doldurulur (`fillDaySelect()`); `refreshStatsAll()` içinde doldurulsaydı 4 saniyede bir seçim bugüne dönerdi. Panel her açılışta bugüne sıfırlanır ve geçmiş gün seçiliyken `#dayWarn` uyarısı çıkar (kupon doğrulaması yanıltmasın).
 
 ## Dikkat Edilmesi Gerekenler

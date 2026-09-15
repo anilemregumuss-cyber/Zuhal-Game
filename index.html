@@ -107,19 +107,19 @@ body{font-family:'Bebas Neue',sans-serif;}
       <div style="font-family:'Space Mono',monospace;font-size:10px;color:#ccc;line-height:1;display:flex;flex-direction:column;gap:10px;">
         <div style="display:flex;align-items:center;gap:10px;">
           <span style="font-size:18px;">🏆</span>
-          <div><div style="color:#fff;letter-spacing:2px;">MÜKEMMEL</div><div style="color:#fff;font-size:9px;margin-top:2px;">Kozmos S-200 Kulaklık</div></div>
+          <div><div style="color:#fff;letter-spacing:2px;">MÜKEMMEL</div><div style="color:#fff;font-size:9px;margin-top:2px;">Akademi 1 Ay — 4 Ders Hediye</div></div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
           <span style="font-size:18px;">🎯</span>
-          <div><div style="color:#fff;letter-spacing:2px;">HARİKA</div><div style="color:#fff;font-size:9px;margin-top:2px;">%15 İndirim</div></div>
+          <div><div style="color:#fff;letter-spacing:2px;">HARİKA</div><div style="color:#fff;font-size:9px;margin-top:2px;">Akademi Ücretsiz Deneme Dersi</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:18px;">🎵</span>
+          <div><div style="color:#fff;letter-spacing:2px;">İYİ</div><div style="color:#fff;font-size:9px;margin-top:2px;">Akademide İlk Ay %50 İndirim</div></div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
           <span style="font-size:18px;">🎁</span>
-          <div><div style="color:#fff;letter-spacing:2px;">İYİ</div><div style="color:#fff;font-size:9px;margin-top:2px;">Zuhal Bez Çanta</div></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <span style="font-size:18px;">🎓</span>
-          <div><div style="color:#fff;letter-spacing:2px;">İDARE EDER</div><div style="color:#fff;font-size:9px;margin-top:2px;">Akademi 1 Ders Ücretsiz</div></div>
+          <div><div style="color:#fff;letter-spacing:2px;">İDARE EDER</div><div style="color:#fff;font-size:9px;margin-top:2px;">Zuhal Bez Çanta</div></div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
           <span style="font-size:18px;">😞</span>
@@ -173,6 +173,7 @@ body{font-family:'Bebas Neue',sans-serif;}
     <div id="codeBox" style="display:none;flex-direction:column;align-items:center;gap:8px;width:100%;">
       <div style="font-family:'Space Mono',monospace;font-size:9px;color:#FFD700;letter-spacing:4px;">KUPON KODUN</div>
       <div style="background:#FFD700;color:#000;padding:14px 32px;font-family:'Space Mono',monospace;font-size:20px;font-weight:700;letter-spacing:6px;border:3px solid #fff;" id="prizeCode"></div>
+      <div id="prizeExpiry" style="font-family:'Space Mono',monospace;font-size:10px;color:#FFD700;letter-spacing:3px;font-weight:700;"></div>
       <div style="font-family:'Space Mono',monospace;font-size:8px;color:#aaa;letter-spacing:2px;">Ad soyad + bu kodu mağaza ekibine göster</div>
     </div>
     <div id="cantaBox" style="display:none;flex-direction:column;align-items:center;gap:8px;width:100%;">
@@ -205,7 +206,7 @@ body{font-family:'Bebas Neue',sans-serif;}
          PIN arkasında olduğu için müşteri görmez. Kalibrasyon bitince kaldırılabilir. -->
     <div id="latencyInfo" style="font-family:'Space Mono',monospace;font-size:9px;color:#666;letter-spacing:1px;margin-bottom:12px;"></div>
 
-    <!-- GÜN SEÇİCİ: kayıtlar 30 gün saklanıyor ama panel ve İNDİR eskiden yalnızca
+    <!-- GÜN SEÇİCİ: kayıtlar 90 gün saklanıyor ama panel ve İNDİR eskiden yalnızca
          bugünü gösteriyordu; önceki günün verisi cihazda durduğu halde alınamıyordu. -->
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
       <span style="font-family:'Space Mono',monospace;font-size:9px;color:#555;letter-spacing:2px;">GÜN</span>
@@ -214,6 +215,13 @@ body{font-family:'Bebas Neue',sans-serif;}
     <div id="dayWarn" style="display:none;border:1px solid #ffb74d;background:#2a2412;color:#ffb74d;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;line-height:1.6;padding:8px 12px;margin-bottom:14px;"></div>
     <!-- Fiziksel hediye stok takibi — personel gün içinde kaç adet kaldığını görsün -->
     <div id="stockInfo" style="display:none;border:1px solid #222;color:#aaa;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;line-height:1.8;padding:8px 12px;margin-bottom:14px;"></div>
+    <!-- GÜNLÜK ÇANTA STOĞU: her sabah o gün kasaya konan çanta adedi girilir.
+         Sabit bir sınır yerine buradan okunur; girilmezse DEFAULT_CANTA_STOK. -->
+    <div id="cantaStokBox" style="display:none;align-items:center;gap:8px;margin-bottom:14px;">
+      <span style="font-family:'Space Mono',monospace;font-size:9px;color:#555;letter-spacing:2px;white-space:nowrap;">🎁 BUGÜNKÜ ÇANTA STOĞU</span>
+      <input id="cantaStokInput" type="number" min="0" max="999" inputmode="numeric" style="width:76px;box-sizing:border-box;background:#111;border:1px solid #333;border-radius:0;-webkit-appearance:none;appearance:none;color:#fff;font-family:'Space Mono',monospace;font-size:16px;letter-spacing:2px;padding:8px 10px;outline:none;text-align:center;" />
+      <button id="btnCantaStokKaydet" style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;padding:9px 14px;cursor:pointer;border:1px solid #FFD700;background:transparent;color:#FFD700;touch-action:manipulation;">KAYDET</button>
+    </div>
 
     <div style="display:flex;gap:8px;margin-bottom:20px;">
       <button id="btnTabWinners" style="flex:1;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;padding:10px 0;cursor:pointer;border:1px solid #FFD700;background:#FFD700;color:#000;font-weight:700;">🏆 KAZANANLAR</button>
@@ -322,9 +330,10 @@ function cleanOldData() {
       var k = localStorage.key(i);
       if (!k || !k.startsWith("zuhal_plays_")) continue;
       var d = new Date(k.replace("zuhal_plays_", ""));
-      // 30 gün sakla. Eskiden 2 gündü; personel her gün XLS almazsa kayıtlar
-      // kalıcı olarak kayboluyordu. Kampanya süresini rahatça kapsasın.
-      if (!isNaN(d) && (today - d) > 30 * 86400000) localStorage.removeItem(k);
+      // 90 gün sakla. Eskiden 2, sonra 30 gündü. 90'a çıkarıldı çünkü kampanya
+      // boyu sayan couponsIssuedAllTime() silinen günleri göremez: gün anahtarı
+      // silinirse o günün kuponları sayılmaz ve toplam sınır kendiliğinden gevşer.
+      if (!isNaN(d) && (today - d) > 90 * 86400000) localStorage.removeItem(k);
     }
   } catch(e) {}
 }
@@ -390,6 +399,65 @@ function dayLabel(key) {
   var p = key.replace("zuhal_plays_", "").split("-");
   if (p.length !== 3) return key;
   return p[2] + "." + p[1] + "." + p[0];
+}
+
+// ---- Günlük bez çanta stoğu -------------------------------------------------
+// Kasa panelinden her gün girilir. Ayrı bir localStorage anahtarında tutulur;
+// oyun kayıtlarının (zuhal_plays_*) içine konmadı, çünkü o nesne oyuncu adlarıyla
+// anahtarlanıyor ve "STOK" adında bir oyuncu gibi görünürdü.
+function cantaStokKey(dayKey) {
+  return "zuhal_canta_stok_" + dayKey.replace("zuhal_plays_", "");
+}
+
+// Girilmemişse DEFAULT_CANTA_STOK döner. Girilmiş 0 ile girilmemiş ayrımı önemli:
+// personel bilerek 0 yazdıysa (çanta kalmadı) ona saygı duyulmalı, varsayılana
+// dönülmemeli. Bu yüzden "boş string / null" kontrolü yapılıyor, falsy değil.
+function cantaStokForDay(dayKey) {
+  var raw = null;
+  try { raw = localStorage.getItem(cantaStokKey(dayKey)); } catch (e) {}
+  if (raw === null || raw === "") return DEFAULT_CANTA_STOK;
+  var n = parseInt(raw, 10);
+  return isNaN(n) || n < 0 ? DEFAULT_CANTA_STOK : n;
+}
+
+function cantaStokGirildiMi(dayKey) {
+  try {
+    var raw = localStorage.getItem(cantaStokKey(dayKey));
+    return raw !== null && raw !== "";
+  } catch (e) { return false; }
+}
+
+function setCantaStok(dayKey, adet) {
+  try { localStorage.setItem(cantaStokKey(dayKey), String(adet)); } catch (e) {}
+}
+
+// ---- Kupon son kullanma tarihi ---------------------------------------------
+// Ödül kazanıldığı günden +1 ay geçerli. Ay sonu taşması kırpılır:
+// 31 Ocak + 1 ay = 28/29 Şubat (JS'in kendi Date aritmetiği 3 Mart'a taşardı).
+function addOneMonth(d) {
+  var y = d.getFullYear(), m = d.getMonth(), gun = d.getDate();
+  var hedefAySonu = new Date(y, m + 2, 0).getDate();
+  return new Date(y, m + 1, Math.min(gun, hedefAySonu));
+}
+
+function formatDate(d) {
+  return String(d.getDate()).padStart(2,"0") + "." +
+         String(d.getMonth()+1).padStart(2,"0") + "." + d.getFullYear();
+}
+
+// "15.10.2026" -> Date (gün sonu). Kuponun son gününde de geçerli sayılması için
+// saat 23:59:59'a kurulur; aksi halde son gün sabah "süresi doldu" görünürdü.
+function parseExpiry(s) {
+  if (!s) return null;
+  var p = String(s).split(".");
+  if (p.length !== 3) return null;
+  var d = new Date(+p[2], +p[1] - 1, +p[0], 23, 59, 59);
+  return isNaN(d) ? null : d;
+}
+
+function isExpired(s) {
+  var d = parseExpiry(s);
+  return d ? Date.now() > d.getTime() : false;
 }
 
 // Seçili günün kayıtları. Bugünse loadPlays() üzerinden gider — bellek yedeği
@@ -520,15 +588,20 @@ function unlockAC() {
   preDecodeAudio();
 }
 
+// AKADEMİ KAMPANYASI ödül merdiveni. Amaç indirim dağıtmak değil, Akademi'ye
+// öğrenci çekmek: MÜKEMMEL hariç her basamak müşteriyi derse yönlendiriyor.
+// Geçmiş: önceki merdiven kulaklık + %15/%10 indirim üzerineydi. Sahada iki gün
+// boyunca 110 indirim kuponu dağıtıldı ve ilgi görmedi; fiziki/ders ödülleri
+// tuttu. Bu yüzden indirimler ve kulaklık merdivenden tamamen kaldırıldı.
 var whitneyPrizes = {
-  perfect:   { emoji:"🏆", label:"MÜKEMMEL!",        title:"KOZMOS S-200 KULAKLIK",
-    desc:"Tam zamanında vurdun!\nKozmos S-200 kulaklık kazandın!", code:"KS200", type:"code" },
-  great:     { emoji:"🎯", label:"HARİKA!",           title:"%15 İNDİRİM",
-    desc:"Bir sonraki alışverişinde\n%15 indirim kazandın!", code:"IND15", type:"code" },
-  good:      { emoji:"🎁", label:"İYİ!",              title:"ZUHAL BEZ ÇANTA",
-    desc:"Zuhal'in 50. yılına özel\nbez çantayı kazandın!", code:"CANTA", type:"code" },
-  idareder:  { emoji:"🎓", label:"İDARE EDER!",       title:"AKADEMİ 1 DERS",
+  perfect:   { emoji:"🏆", label:"MÜKEMMEL!",        title:"AKADEMİ 1 AY 4 DERS",
+    desc:"Tam zamanında vurdun!\nZuhal Akademi'de 1 ay boyunca\ntoplam 4 ders hediye kazandın!", code:"AKD1AY", type:"code" },
+  great:     { emoji:"🎯", label:"HARİKA!",           title:"ÜCRETSİZ DENEME DERSİ",
     desc:"Zuhal Akademi'de\n1 ücretsiz deneme dersi kazandın!", code:"AKDRS", type:"code" },
+  good:      { emoji:"🎵", label:"İYİ!",              title:"AKADEMİDE İLK AY %50",
+    desc:"Zuhal Akademi'ye kaydolursan\nilk ayın %50 indirimli!", code:"AKD50", type:"code" },
+  idareder:  { emoji:"🎁", label:"İDARE EDER!",       title:"ZUHAL BEZ ÇANTA",
+    desc:"Zuhal'in 50. yılına özel\nbez çantayı kazandın!", code:"CANTA", type:"code" },
   // KAÇIRDI artık HEDİYESİZ. Eskiden bez çanta buradaydı: gelişigüzel vuran
   // herkes çanta alıyordu, stok eridi ve ödülün değeri kalmadı.
   // type:"none" → kupon kodu üretilmez, kod kutusu gösterilmez, kayıtta kod boş
@@ -1069,37 +1142,42 @@ function handleHit(kaynak, evt) {   // kaynak: "midi" | "touch"; evt: olayın ge
 
 
 // Not: İDARE EDER eskiden 3 ödülden rastgele seçiliyordu (idarederPrizes dizisi).
-// Artık tek ödül (Akademi 1 Ders) olduğu için dizi kaldırıldı; whitneyPrizes tek kaynak.
-// Kulaklık fiziksel ve sınırlı stok: günde en fazla MAX_HEADPHONES_PER_DAY adet.
-// Sınır dolduktan sonra MÜKEMMEL vuran müşteri boş kalmasın diye bir alt ödüle
-// (%15 indirim) düşürülür; vuruşu yine "MÜKEMMEL" olarak kutlanır.
-// Kayıtta sonuç "perfect" kalır — istatistik bozulmaz, sadece ödül değişir.
-// Kulaklık Roland RH-5 iken stok tükendi; ödül Kozmos S-200 ile yenilendi.
-// Kupon ön eki de değişti (RH5KL → KS200): sayaç ön eke baktığı için eski Roland
-// kuponları yeni ürünün günlük sınırını doldurmuyor — yeni ürün, yeni stok.
-// Müşterinin elindeki eski RH5KL kuponu kasada YİNE doğrulanır (arama kod
-// metnine bakar, ön ek listesine değil).
-var MAX_HEADPHONES_PER_DAY = 2;
-var HEADPHONE_CODE = "KS200";
+// Artık tek ödül olduğu için dizi kaldırıldı; whitneyPrizes tek kaynak.
 
-var perfectSoldOutPrize = { emoji:"🏆", label:"MÜKEMMEL!", title:"%15 İNDİRİM",
-  desc:"Tam zamanında vurdun!\nBugünün kulaklıkları tükendi —\nbunun yerine %15 indirim kazandın!", code:"IND15", type:"code" };
+// "1 ay 4 ders" ödülü kampanyanın en pahalı basamağı: TOPLAM 5 adet verilecek.
+// DİKKAT — bu sınır GÜNLÜK DEĞİL, kampanya boyu toplam. Diğer sınırlar (bez çanta)
+// her gece sıfırlanır, bu sıfırlanmaz; bu yüzden ayrı bir sayaç kullanır
+// (couponsIssuedAllTime). Günlük sayaçla karıştırılırsa her gün 5 adet dağıtılır.
+var MAX_AKD1AY_TOTAL = 5;
+var AKD1AY_CODE = "AKD1AY";
 
-// Bez çanta da fiziksel ve sınırlı: günde en fazla MAX_CANTA_PER_DAY adet.
-// Sınır dolunca İYİ vuran müşteri Akademi 1 Ders'e yönlendirilir (kulaklığa ASLA
-// yükseltilmez — o ayrı ve daha dar bir stok). Vuruşu yine "İYİ!" olarak kutlanır,
-// kayıtta sonuç "good" kalır; istatistik bozulmaz.
-var MAX_CANTA_PER_DAY = 50;
+// 5 dolunca MÜKEMMEL vuran boş kalmasın diye bir alt basamağa (ücretsiz deneme
+// dersi) düşürülür; vuruşu yine "MÜKEMMEL!" olarak kutlanır ve kayıtta sonuç
+// "perfect" kalır — istatistik bozulmaz, yalnızca ödül değişir.
+var perfectSoldOutPrize = { emoji:"🏆", label:"MÜKEMMEL!", title:"ÜCRETSİZ DENEME DERSİ",
+  desc:"Tam zamanında vurdun!\n1 aylık hediye kontenjanı doldu —\nbunun yerine Akademi'de\nücretsiz deneme dersi kazandın!", code:"AKDRS", type:"code" };
+
+// Bez çanta fiziksel ve sınırlı. Sınır artık kodda sabit DEĞİL: her gün kasa
+// panelinden o günkü stok girilir (bkz. cantaStokForDay). Personel girmeyi
+// unutursa DEFAULT_CANTA_STOK kullanılır — 0 varsaymak, fark edilene kadar
+// hediyesiz müşteri üretirdi.
+var DEFAULT_CANTA_STOK = 30;
 var CANTA_CODE = "CANTA";
 
-var goodSoldOutPrize = { emoji:"🎓", label:"İYİ!", title:"AKADEMİ 1 DERS",
-  desc:"Bugünün bez çantaları tükendi —\nbunun yerine Zuhal Akademi'de\n1 ücretsiz deneme dersi kazandın!", code:"AKDRS", type:"code" };
+// Çanta bitince İDARE EDER, Akademi'nin ilk ay %50 indirimine yönlendirilir:
+// fiziksel maliyeti yok ve kampanyanın amacına (Akademi'ye kayıt) hizmet ediyor.
+// Ücretsiz deneme dersine ASLA yükseltilmez — o bir üst basamağın (HARİKA) ödülü.
+var idarederSoldOutPrize = { emoji:"🎁", label:"İDARE EDER!", title:"AKADEMİDE İLK AY %50",
+  desc:"Bugünün bez çantaları tükendi —\nbunun yerine Akademi'ye kaydolursan\nilk ayın %50 indirimli!", code:"AKD50", type:"code" };
 
 // Belirli bir ödülden bugün kaç KUPON üretildiğini sayar.
 // Deneme değil KUPON sayılır: müşteri 2 deneme yapar ama kod yalnızca oyun
 // kesinleşince tek bir denemeye yazılır. Yani bu sayı = verilen hediye adedi.
 function couponsIssuedToday(prizeCode) {
-  var data = loadPlays();
+  return countCouponsIn(loadPlays(), prizeCode);
+}
+
+function countCouponsIn(data, prizeCode) {
   var n = 0;
   Object.keys(data).forEach(function(name) {
     var plays = data[name] && data[name].plays ? data[name].plays : [];
@@ -1110,15 +1188,33 @@ function couponsIssuedToday(prizeCode) {
   return n;
 }
 
-function headphonesIssuedToday() { return couponsIssuedToday(HEADPHONE_CODE); }
-function cantaIssuedToday()      { return couponsIssuedToday(CANTA_CODE); }
+// Kampanya boyu TOPLAM kupon sayısı: bütün gün anahtarlarını tarar.
+// Kayıtlar cleanOldData() ile 90 gün saklanıyor; kampanya bundan uzun sürerse
+// saklama süresi de uzatılmalı, yoksa silinen günlerin kuponları sayılmaz ve
+// sınır kendiliğinden gevşer.
+function couponsIssuedAllTime(prizeCode) {
+  var toplam = 0;
+  playDayKeys().forEach(function(k) {
+    var data;
+    if (k === todayKey()) {
+      data = loadPlays();           // bugün: bellek yedeğini de kapsar
+    } else {
+      try { data = JSON.parse(localStorage.getItem(k) || "{}"); } catch (e) { return; }
+    }
+    toplam += countCouponsIn(data, prizeCode);
+  });
+  return toplam;
+}
+
+function akd1ayIssuedTotal() { return couponsIssuedAllTime(AKD1AY_CODE); }
+function cantaIssuedToday()  { return couponsIssuedToday(CANTA_CODE); }
 
 function prizeForResult(r) {
-  if (r === "perfect" && headphonesIssuedToday() >= MAX_HEADPHONES_PER_DAY) {
+  if (r === "perfect" && akd1ayIssuedTotal() >= MAX_AKD1AY_TOTAL) {
     return perfectSoldOutPrize;
   }
-  if (r === "good" && cantaIssuedToday() >= MAX_CANTA_PER_DAY) {
-    return goodSoldOutPrize;
+  if (r === "idareder" && cantaIssuedToday() >= cantaStokForDay(todayKey())) {
+    return idarederSoldOutPrize;
   }
   return whitneyPrizes[r] || whitneyPrizes["miss"];
 }
@@ -1156,9 +1252,15 @@ function showWhitneyResult(result) {
     document.getElementById("winDesc").textContent  = p.desc;
 
     var prizeCode = "";
+    var prizeExpiry = "";
     if (p.type === "code") {
       prizeCode = makeCode(p.code);
+      // Geçerlilik kazanıldığı günden +1 ay. Hem ekranda hem kayıtta tutulur;
+      // kayıtta tutulmazsa kasa paneli tarihi yeniden hesaplamak zorunda kalır ve
+      // kuponun kuralı sonradan değişirse eski kuponlar yanlış tarih gösterir.
+      prizeExpiry = formatDate(addOneMonth(new Date()));
       document.getElementById("prizeCode").textContent = prizeCode;
+      document.getElementById("prizeExpiry").textContent = "SON KULLANMA: " + prizeExpiry;
       document.getElementById("codeBox").style.display  = "flex";
       document.getElementById("cantaBox").style.display = "none";
     } else if (p.type === "none") {
@@ -1189,6 +1291,7 @@ function showWhitneyResult(result) {
     }
     var last = d2[playerName].plays.length - 1;
     d2[playerName].plays[last].code        = prizeCode;
+    d2[playerName].plays[last].expiry      = prizeExpiry;
     // Kesinleşen ödül AYRI alanlara yazılır; denemenin kendi result/prize değerleri
     // korunur. Üzerine yazılınca "İDARE EDER — %15 İNDİRİM" gibi kendi içinde
     // çelişen satırlar oluşuyordu (sahada görüldü).
@@ -1365,17 +1468,51 @@ function renderDayWarning() {
 // Yalnızca BUGÜN için anlamlı; geçmiş gün seçiliyken gizlenir.
 function renderStockInfo() {
   var el = document.getElementById("stockInfo");
+  var box = document.getElementById("cantaStokBox");
   if (!el) return;
-  if (selectedDayKey() !== todayKey()) { el.style.display = "none"; return; }
-  var k = headphonesIssuedToday(), c = cantaIssuedToday();
-  var kKalan = Math.max(0, MAX_HEADPHONES_PER_DAY - k);
-  var cKalan = Math.max(0, MAX_CANTA_PER_DAY - c);
+  if (selectedDayKey() !== todayKey()) {
+    el.style.display = "none";
+    if (box) box.style.display = "none";
+    return;
+  }
+
+  var stok = cantaStokForDay(todayKey());
+  var cKalan = Math.max(0, stok - cantaIssuedToday());
+  // "1 ay 4 ders" sınırı KAMPANYA BOYU toplam — bugünkü değil, tüm günlerin toplamı.
+  var aKalan = Math.max(0, MAX_AKD1AY_TOTAL - akd1ayIssuedTotal());
+
   el.style.display = "block";
   el.innerHTML =
-    "🏆 KULAKLIK: <b style='color:" + (kKalan ? "#4caf50" : "#ff6b6b") + "'>" + kKalan + "</b>" +
-    " / " + MAX_HEADPHONES_PER_DAY + " kaldı &nbsp;•&nbsp; " +
+    "🏆 1 AY 4 DERS: <b style='color:" + (aKalan ? "#4caf50" : "#ff6b6b") + "'>" + aKalan + "</b>" +
+    " / " + MAX_AKD1AY_TOTAL + " kaldı <span style='color:#555;'>(kampanya toplamı)</span><br/>" +
     "🎁 BEZ ÇANTA: <b style='color:" + (cKalan ? "#4caf50" : "#ff6b6b") + "'>" + cKalan + "</b>" +
-    " / " + MAX_CANTA_PER_DAY + " kaldı";
+    " / " + stok + " kaldı <span style='color:#555;'>(bugün)</span>" +
+    (cantaStokGirildiMi(todayKey()) ? "" :
+      "<br/><span style='color:#ffb74d;'>⚠ Bugünün çanta stoğu girilmedi — varsayılan " +
+      DEFAULT_CANTA_STOK + " kullanılıyor.</span>");
+
+  if (box) {
+    box.style.display = "flex";
+    // Personel yazarken input'un altından değeri değiştirmeyelim: panel 4 saniyede
+    // bir yenileniyor, odaktayken set edilirse yazdığı rakam siliniyordu.
+    var inp = document.getElementById("cantaStokInput");
+    if (inp && document.activeElement !== inp) inp.value = String(stok);
+  }
+}
+
+function saveCantaStok() {
+  var inp = document.getElementById("cantaStokInput");
+  if (!inp) return;
+  var n = parseInt(inp.value, 10);
+  if (isNaN(n) || n < 0) { inp.value = String(cantaStokForDay(todayKey())); return; }
+  setCantaStok(todayKey(), n);
+  var b = document.getElementById("btnCantaStokKaydet");
+  if (b) {
+    var eski = b.textContent;
+    b.textContent = "\u2713 KAYITLI";
+    setTimeout(function() { b.textContent = eski; }, 1800);
+  }
+  renderStockInfo();
 }
 
 function refreshStatsAll() {
@@ -1659,7 +1796,7 @@ function renderWinners(filter) {
   names.forEach(function(n) {
     data[n].plays.forEach(function(pl) {
       // finalResult: iki denemenin en iyisi (eski kayıtlarda yok → result'a düşer)
-      if (pl.code) entries.push({ name:n, time:pl.time, result:(pl.finalResult || pl.result), prize:(pl.finalPrize || pl.prize), code:pl.code });
+      if (pl.code) entries.push({ name:n, time:pl.time, result:(pl.finalResult || pl.result), prize:(pl.finalPrize || pl.prize), code:pl.code, expiry:(pl.expiry || "") });
     });
   });
   entries.sort(function(a,b) { return a.time < b.time ? 1 : (a.time > b.time ? -1 : 0); });
@@ -1689,11 +1826,20 @@ function renderWinners(filter) {
       // Yalnızca TEK kayıt eşleşirse "geçerli" denir. Birden fazla eşleşmede
       // hangisinin kastedildiği belli olmaz — yanlış kişiye ödül verilebilir.
       var hit = filtered[0];
+      // Kupon kayıtlarda VAR ama süresi dolmuş olabilir. Bu durumda yeşil
+      // "geçerli" göstermek personeli yanıltır — ayrı ve kırmızı bir sonuç verilir.
+      var suresiDolmus = isExpired(hit.expiry);
       verifyEl.style.display = "block";
-      verifyEl.style.background = "#0d2a12";
-      verifyEl.style.borderColor = "#3ddc5b";
-      verifyEl.innerHTML = "<div style='color:#3ddc5b;font-size:12px;font-weight:700;letter-spacing:2px;'>✅ GEÇERLİ KUPON</div>" +
-        "<div style='color:#9f9;font-size:10px;margin-top:4px;'>" + escapeHtml(hit.name) + " — " + hit.prize + " (" + hit.time + ")</div>";
+      verifyEl.style.background  = suresiDolmus ? "#2a0d0d" : "#0d2a12";
+      verifyEl.style.borderColor = suresiDolmus ? "#ff5555" : "#3ddc5b";
+      var tarihNotu = hit.expiry
+        ? (suresiDolmus ? " • SÜRE DOLDU: " : " • Son kullanma: ") + hit.expiry
+        : "";
+      verifyEl.innerHTML =
+        "<div style='color:" + (suresiDolmus ? "#ff5555" : "#3ddc5b") + ";font-size:12px;font-weight:700;letter-spacing:2px;'>" +
+          (suresiDolmus ? "⛔ SÜRESİ DOLMUŞ KUPON" : "✅ GEÇERLİ KUPON") + "</div>" +
+        "<div style='color:" + (suresiDolmus ? "#f99" : "#9f9") + ";font-size:10px;margin-top:4px;'>" +
+          escapeHtml(hit.name) + " — " + hit.prize + " (" + hit.time + ")" + tarihNotu + "</div>";
     } else if (filtered.length > 1) {
       verifyEl.style.display = "block";
       verifyEl.style.background = "#2a2412";
@@ -1720,7 +1866,9 @@ function renderWinners(filter) {
         "<span style='color:#555;font-size:8px;'>" + e.time + "</span>" +
       "</div>" +
       "<div style='color:#ccc;font-size:10px;'>" + (RESULT_LABELS[e.result] || e.result) + " — " + e.prize + "</div>" +
-      "<div style='color:#3ddc5b;font-size:13px;letter-spacing:1px;font-weight:700;'>" + e.code + "</div>" +
+      "<div style='color:" + (isExpired(e.expiry) ? "#ff5555" : "#3ddc5b") + ";font-size:13px;letter-spacing:1px;font-weight:700;'>" + e.code + "</div>" +
+      (e.expiry ? "<div style='color:" + (isExpired(e.expiry) ? "#ff5555" : "#777") + ";font-size:9px;'>" +
+        (isExpired(e.expiry) ? "SÜRE DOLDU: " : "Son kullanma: ") + e.expiry + "</div>" : "") +
     "</div>";
   }).join("");
 }
@@ -1774,8 +1922,8 @@ function downloadStats() {
   var rows = "";
 
   // Başlık
-  rows += "<tr>" + xlCell("ZUHAL MÜZİK — RİTİM CHALLENGE — " + dateStr, true, "#FFD700", "#000") + "<td colspan='5'></td></tr>";
-  rows += "<tr><td colspan='6'></td></tr>";
+  rows += "<tr>" + xlCell("ZUHAL MÜZİK — RİTİM CHALLENGE — " + dateStr, true, "#FFD700", "#000") + "<td colspan='6'></td></tr>";
+  rows += "<tr><td colspan='7'></td></tr>";
 
   // Tablo başlığı
   rows += "<tr>" +
@@ -1785,6 +1933,7 @@ function downloadStats() {
     xlCell("SONUÇ", true, "#222222", "#FFD700") +
     xlCell("HEDİYE", true, "#222222", "#FFD700") +
     xlCell("KUPON KODU", true, "#222222", "#FFD700") +
+    xlCell("SON KULLANMA", true, "#222222", "#FFD700") +
   "</tr>";
 
   // Oyuncu satırları
@@ -1802,14 +1951,15 @@ function downloadStats() {
         xlCell(RESULT_LABELS[pl.finalResult || pl.result] || pl.finalResult || pl.result, true, bg, "#000") +
         xlCell(pl.finalPrize || pl.prize, false, bg, "#000") +
         xlCell(pl.code||"-", false, bg, "#000") +
+        xlCell(pl.expiry||"-", false, bg, "#000") +
       "</tr>";
     });
   });
 
   // Boş satır + özet
-  rows += "<tr><td colspan='6'></td></tr>";
-  rows += "<tr>" + xlCell("ÖZET", true, "#FFD700", "#000") + "<td colspan='5'></td></tr>";
-  rows += "<tr>" + xlCell("Toplam Oyun",true) + xlCell(totalPlays,true) + xlCell("Toplam Oyuncu",true) + xlCell(names.length,true) + "<td colspan='2'></td></tr>";
+  rows += "<tr><td colspan='7'></td></tr>";
+  rows += "<tr>" + xlCell("ÖZET", true, "#FFD700", "#000") + "<td colspan='6'></td></tr>";
+  rows += "<tr>" + xlCell("Toplam Oyun",true) + xlCell(totalPlays,true) + xlCell("Toplam Oyuncu",true) + xlCell(names.length,true) + "<td colspan='3'></td></tr>";
 
   var summaryRows = [
     ["🏆 Mükemmel", counts.perfect, "#D6F0C8"],
@@ -1823,7 +1973,7 @@ function downloadStats() {
       xlCell(s[0], true, s[2], "#000") +
       xlCell(s[1], true, s[2], "#000") +
       xlCell(pct(s[1], totalPlays), true, s[2], "#000") +
-      "<td colspan='3'></td></tr>";
+      "<td colspan='4'></td></tr>";
   });
 
   var html = "<!DOCTYPE html><html><head><meta charset='UTF-8'></head><body>" +
@@ -1833,6 +1983,7 @@ function downloadStats() {
     "<colgroup>" +
       "<col style='width:200px'><col style='width:70px'><col style='width:70px'>" +
       "<col style='width:120px'><col style='width:220px'><col style='width:200px'>" +
+      "<col style='width:110px'>" +
     "</colgroup>" +
     rows + "</table></body></html>";
 
@@ -1963,6 +2114,7 @@ document.addEventListener("DOMContentLoaded", function() {
   var dlEl = document.getElementById("btnStatsDownload");
   if (dlEl) dlEl.addEventListener("click", onDownloadClick);
 
+  addBtn("btnCantaStokKaydet", saveCantaStok);
   addBtn("btnStatsReload", reloadPageFresh);
   addBtn("btnStatsCalib", openCalib);
   addBtn("btnCalibStart", calibStartRound);
