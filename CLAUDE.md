@@ -147,6 +147,32 @@ değiştiğinde eski kuponlar yanlış tarih gösterir. `isExpired()` boş `expi
 Kasa panelinde süresi dolmuş kupon yeşil "GEÇERLİ" yerine kırmızı
 `⛔ SÜRESİ DOLMUŞ KUPON` verir.
 
+**QR kod (sonuç ekranı):** müşteri kuponu telefonuna alsın diye `#prizeQR` canvas'ına
+çizilir. QR üreticisi **elle yazıldı, harici kütüphane/CDN YOK** — kiosk tek HTML
+dosyası, internet kesilse bile kupon üretilebilmeli. Kapsam bilerek dar tutuldu:
+yalnızca byte modu, ECC seviyesi **M**, sürüm 1-10 (en fazla 216 bayt). Kupon metni
+~160 bayt; daha fazlası gerekirse sürüm tablosunu genişletmek gerekir, `qrEncode()`
+sığmayan metinde `null` döner ve `qrRender()` QR'ı gizler (kupon akışı kesilmez).
+
+- **İçerik ASCII'ye indirgenir** (`qrAscii()`). Bazı okuyucular ECI'siz byte modunu
+  ISO-8859-1 varsayıp UTF-8 Türkçe karakterleri bozuk gösteriyor. Ekranda Türkçe
+  doğru görünür, yalnızca QR'ın içi sadeleşir.
+- **Sessiz bölge (4 modül) ve beyaz zemin ZORUNLU.** Kioskun siyah teması üzerine
+  doğrudan çizilirse okuyucular kodu çoğu zaman hiç bulamıyor; `#qrBox` beyaz
+  çerçeveyi bu yüzden taşıyor.
+- **Modül boyutu tam sayı piksel olmalı** (`Math.floor`), kesirli değerde kenarlar
+  bulanıklaşıp okuma düşüyor. Hedef ~250 px.
+- `#qrBox`, `#codeBox`'ın İÇİNDE. Hediyesiz (`type:"none"`) sonuçta `codeBox`
+  gizlendiği için QR da kendiliğinden gizlenir — ayrıca gizlemeye gerek yok.
+- **Doğrulama:** üretilen matris Python `segno` kütüphanesinin çıktısıyla 6 farklı
+  kupon metninde, 8 maskenin tamamında birebir karşılaştırıldı. ⚠ Karşılaştırırken
+  segno'nun `write_padding_bits` davranışı yamalanmalı: akış zaten bayt sınırındayken
+  bile 8 sıfır bit ekliyor (`8 - (length % 8)`), byte modunda akış her zaman hizalı
+  olduğu için daima fazladan bir `0x00` kod sözcüğü doğuyor. ISO/IEC 18004 §7.4.10
+  hizalıyken bit eklenmemesini söylüyor — bizim davranışımız standarda uygun.
+  Maske seçimi segno'dan farklı çıkabilir (ceza fonksiyonu yorum farkı); 8 maskenin
+  hepsi geçerli olduğu için bu bir hata değil.
+
 **`type:"none"` sözleşmesi:** kupon kodu üretilmez, `codeBox`/`cantaBox` gösterilmez,
 kayıtta `code` boş kalır. Bu kişi KAZANANLAR listesinde çıkmaz (liste yalnızca `pl.code`
 olanları listeler) ama İSTATİSTİK'te sayılır. Yeni hediyesiz bir basamak eklenirse
