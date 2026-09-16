@@ -10,14 +10,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Proje Özeti
 
-32" dokunmatik mağaza ekranı için tek dosya HTML oyunu: **`index.html`**
+32" dokunmatik mağaza ekranı için HTML oyunu: **`index.html`**
+(müşterinin telefonunda açılan kupon sayfası ayrı: **`k.html`**)
 
 Zuhal Müzik 50. Yıl — Rhythm Challenge. Müşteriler Whitney Houston parçası çalarken snare vuruşunu tam zamanında yaparak indirim/ödül kazanıyor.
 
 ## Dosya Yapısı
 
 ```
-index.html                  ← Tek kaynak dosya (tüm CSS + JS burada, ses artık harici)
+index.html                  ← Kiosk uygulaması (tüm CSS + JS burada, ses artık harici)
+k.html                      ← Müşterinin telefonunda açılan kupon sayfası (QR bunu gösterir)
 Genel-Halftime-v3.mp4       ← Ana sayfa banner videosu (autoplay, muted, loop) — dikey 1080x1920, 9.6 sn, 12.9 MB
 zuhal-muzik.wav             ← Banner arka plan müziği (dokunuşla aç/kapat)
 whitney-halftime.mp3        ← Oyun içi Whitney Houston parçası (fetch + Web Audio API decode)
@@ -44,7 +46,11 @@ MIDI izin diyaloğu karşılanmadığında SPD::One görünmez olur. Tam ekran i
 `manifest.json` (ana ekrana ekle) + `initKioskFullscreen()` (ilk dokunuşta
 Fullscreen API, `navigationUI:"hide"`) kullanılır.
 
-Repoda bu 5 dosya dışında hiçbir medya kullanılmıyor — yeni bir görsel/video eklerken önce `index.html` içinde gerçekten referans verildiğinden emin ol, aksi halde GitHub Pages deploy boyutu şişer.
+`zuhal-fifty-year-black.jpg` **iki yerde** kullanılıyor: kioskta `filter:invert(1)`
+ile beyaza çevriliyor, `k.html`'de ise beyaz zemine olduğu gibi basılıyor (siyah logo
+yazdırmaya da uygun). Logoyu değiştirirken iki tarafı da kontrol et.
+
+Repoda bu 5 medya dosyası dışında hiçbir medya kullanılmıyor — yeni bir görsel/video eklerken önce `index.html` içinde gerçekten referans verildiğinden emin ol, aksi halde GitHub Pages deploy boyutu şişer.
 
 ## index.html Mimarisi
 
@@ -55,12 +61,27 @@ Tüm uygulama tek HTML dosyasında, 3 katman:
 - Sol/sağ dikey kayan şeritler (`.vs-l`, `.vs-r`) ve üst/alt yatay bantlar (`.hs-t`, `.hs-b`) — SINIRLI STOK yazısı, CSS animasyonlu
 - `#btnGame` → Oyun ekranını açar, banner sesini durdurur
 - `#btnKasaAccess` (sağ üstte, sabit/fixed, düşük opaklık) → Kasa PIN ekranını açar, sayfa durumundan bağımsız her zaman görünür
+- **Ekrana dokununca müzik aç/kapa YALNIZCA bu sayfada çalışır.** Dinleyici `.banner`
+  üzerinde (eskiden `document.body`'deydi) ve `bannerTouch()` iki koşulda hiç
+  çalışmaz: `ustKatmanAcikMi()` (`gameOverlay` / `statsModal` / `pinModal`'dan biri
+  açıksa) ve dokunulan yer bir `<button>` içindeyse. İkisi de sahada görülen
+  hatalardan geliyor: personel kasa panelinde gezerken müzik durup duruyordu, OYNA
+  butonuna basış da banner'a kabarıp müziği bir kez daha toggle ediyordu. Yeni bir
+  tam ekran katman eklersen id'sini `ustKatmanAcikMi()` listesine EKLE.
 
 ### Sayfa 2+3 — Oyun Ekranı (`#gameOverlay`, `z-index:9999`)
 - `#gameStart` → İsim girişi, ödül listesi, BAŞLA butonu
 - `#gamePlay` → Oyun alanı (aktif vuruş)
 - `#gameWin` → Sonuç ve ödül gösterimi
 - `#overlayLogoBar` → Zuhal 50. Yıl logosu (tüm oyun sayfalarında sabit, üstte)
+- **Logo çubuğu yüksekliği ile sayfa üst boşluğu tek kaynaktan gelir** (`:root`
+  içindeki `--logobar-img` / `--logobar-pad` / `--logobar-h` / `--page-top`).
+  Eskiden ikisi ayrı ayrı `clamp`'lenmişti; 1080x1920 kioskta logo 160px yer
+  kaplarken boşluk 120px'te kalıyor ve logo başlığın üstüne biniyordu. Logo
+  boyutunu değiştireceksen SADECE bu değişkenleri değiştir.
+- `#gameStart` ve `#gameWin` `justify-content:safe center` kullanır. Düz `center`,
+  içerik ekrandan uzun olduğunda üst kısmı kaydırılamaz hale getiriyor ve ilk
+  satır logonun altında kayboluyordu (küçük pencerede / QR eklendikten sonra).
 
 ### Kasa Paneli (`#statsModal`, `#pinModal`)
 - Açılış: `#btnKasaAccess` butonuna veya `#overlayLogo`'ya 5 kez hızlı basınca PIN ekranı açılır (`openPinModal()`), doğru PIN (`STATS_PIN`, varsayılan `"5050"`) girilince panel açılır
@@ -150,10 +171,21 @@ Kasa panelinde süresi dolmuş kupon yeşil "GEÇERLİ" yerine kırmızı
 **QR kod (sonuç ekranı):** müşteri kuponu telefonuna alsın diye `#prizeQR` canvas'ına
 çizilir. QR üreticisi **elle yazıldı, harici kütüphane/CDN YOK** — kiosk tek HTML
 dosyası, internet kesilse bile kupon üretilebilmeli. Kapsam bilerek dar tutuldu:
-yalnızca byte modu, ECC seviyesi **M**, sürüm 1-10 (en fazla 216 bayt). Kupon metni
-~160 bayt; daha fazlası gerekirse sürüm tablosunu genişletmek gerekir, `qrEncode()`
-sığmayan metinde `null` döner ve `qrRender()` QR'ı gizler (kupon akışı kesilmez).
+yalnızca byte modu, ECC seviyesi **M**, sürüm 1-10 (en fazla 216 bayt). Link ~100-120
+bayt (sürüm 6-7, 41-45 modül); daha fazlası gerekirse sürüm tablosunu genişletmek
+gerekir, `qrEncode()` sığmayan metinde `null` döner ve `qrRender()` QR'ı gizler
+(kupon akışı kesilmez).
 
+- **QR bir LİNK taşır** (`qrPayload()` → `KUPON_URL + "#" + kod + "*" + sonKullanma +
+  "*" + ad`). Eskiden düz yazı taşıyordu; telefon onu Notlar'a yapıştırıyor, müşteriye
+  kupon değil çıplak metin gibi görünüyordu. Bkz. `k.html` bölümü.
+  - **Ödül adı BİLEREK taşınmıyor** — kupon kodunun içinde zaten var
+    (`HT50-<ODUL>-GGAA-XXXX`) ve `k.html` oradan çözüyor. Her karakter QR'da bir
+    bayt; kısa metin = seyrek modül = uzaktan okunabilen kod.
+  - **`KUPON_URL` sabit yazılmalı**, `location`'dan türetilmemeli: kiosk `file://`
+    üzerinden veya başka bir makineden servis edilse bile müşterinin telefonu bu
+    genel adrese gidebilmeli.
+  - Ad soyad `[^A-Za-z0-9]+` → `_` ile sadeleşir; okuyucular linki boşlukta kesiyor.
 - **İçerik ASCII'ye indirgenir** (`qrAscii()`). Bazı okuyucular ECI'siz byte modunu
   ISO-8859-1 varsayıp UTF-8 Türkçe karakterleri bozuk gösteriyor. Ekranda Türkçe
   doğru görünür, yalnızca QR'ın içi sadeleşir.
@@ -172,6 +204,33 @@ sığmayan metinde `null` döner ve `qrRender()` QR'ı gizler (kupon akışı ke
   hizalıyken bit eklenmemesini söylüyor — bizim davranışımız standarda uygun.
   Maske seçimi segno'dan farklı çıkabilir (ceza fonksiyonu yorum farkı); 8 maskenin
   hepsi geçerli olduğu için bu bir hata değil.
+
+## k.html — Müşteri Kupon Sayfası
+
+QR okutulunca müşterinin telefonunda açılan sayfa. Kiosk kodundan **tamamen bağımsız**;
+`index.html`'e hiç dokunmadan tasarımı değiştirilebilir. Amacı iki şey: kuponu markalı
+ve resmi göstermek, bir de **PDF çıktısı** vermek.
+
+- **Veri `#` (fragment) ile taşınır**, query string ile değil: fragment sunucuya HİÇ
+  gitmez, müşteri adı GitHub Pages loglarına düşmez.
+- **Ödül adı kupon kodundan çözülür** (`ODULLER` tablosu, anahtar = kodun 2. parçası).
+  Ödül merdivenini değiştirirken `index.html`'deki `whitneyPrizes` ile bu tabloyu
+  BİRLİKTE güncelle — yoksa yeni kupon "ZUHAL MÜZİK HEDİYESİ" genel metnine düşer
+  (bilerek konmuş güvenli varsayılan, çökme değil).
+- **PDF, `window.print()` ile alınır.** jsPDF gibi bir kütüphane yok; PDF'e gömülü
+  Helvetica ş/ğ/ı gibi Türkçe harfleri taşımıyor, yazdırma yolu hem doğru harfleri
+  hem logoyu basıyor. `@media print` butonları gizler ve `print-color-adjust:exact`
+  ile altın bandı/kod kutusunu zorla bastırır — yoksa kupon bomboş beyaz çıkıyor.
+- **Sayfa AÇIK temalı**, kioskun siyahı kullanılmaz: hem mürekkep yakıyor hem
+  "arka plan grafikleri" kapalıyken kupon boş görünüyor.
+- **Ad soyad `textContent` ile basılır, `innerHTML` ile ASLA** — veri URL'den geliyor,
+  yani saldırgan istediğini yazabilir (test edildi: `<img onerror>` düz metin çıkıyor).
+- Kod biçimi `^HT50-[A-Z0-9]{2,10}-\d{4}-\d{4}$` ile doğrulanır; tutmuyorsa "KUPON
+  OKUNAMADI" ekranı gelir.
+- `suresiDolduMu()` **son günü DAHİL geçerli** sayar ve tarih okunamazsa kuponu
+  yakmaz — `index.html`'deki `isExpired()` ile aynı davranış.
+- ⚠ Müşterinin telefonunda **internet gerekir** (kiosk offline çalışmaya devam eder,
+  QR üretimi yerel). Kupon kodu ayrıca kiosk ekranında yazıyor, kasa oradan doğruluyor.
 
 **`type:"none"` sözleşmesi:** kupon kodu üretilmez, `codeBox`/`cantaBox` gösterilmez,
 kayıtta `code` boş kalır. Bu kişi KAZANANLAR listesinde çıkmaz (liste yalnızca `pl.code`

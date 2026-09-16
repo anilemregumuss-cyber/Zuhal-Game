@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Zuhal Müzik — Hediye Kuponu</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Kupon sayfası kioskun karanlık temasını KULLANMAZ: bu sayfa müşterinin
+   telefonunda açılıyor ve asıl amacı PDF'e basılmak. Siyah zemin hem mürekkep
+   yakar hem "Arka plan grafikleri" kapalıyken kupon bomboş beyaz çıkar. */
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:#f2f2f2;color:#111;
+  font-family:'Space Mono',ui-monospace,monospace;-webkit-text-size-adjust:100%;}
+
+.sayfa{max-width:520px;margin:0 auto;padding:18px 14px 40px;}
+
+.kupon{background:#fff;border:2px solid #111;padding:26px 22px 22px;position:relative;}
+/* Üstteki altın bant kuponu "bilet" gibi gösteriyor */
+.kupon::before{content:"";position:absolute;top:0;left:0;right:0;height:8px;background:#FFC800;}
+
+.marka{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:18px;}
+.marka img{height:68px;width:auto;display:block;}
+.ustyazi{font-size:9px;letter-spacing:4px;color:#666;text-align:center;line-height:1.8;}
+
+.hr{border:0;border-top:1px dashed #bbb;margin:18px 0;}
+
+.etiket{font-size:9px;letter-spacing:4px;color:#8a6d00;text-align:center;margin-bottom:8px;}
+.odul{font-family:'Bebas Neue','Space Mono',monospace;font-size:34px;line-height:1.05;
+  letter-spacing:1px;text-align:center;color:#111;margin:0 0 8px;}
+.aciklama{font-size:11px;line-height:1.9;color:#444;text-align:center;margin:0;}
+
+.kodkutu{margin:18px 0 6px;background:#FFC800;border:2px solid #111;padding:14px 10px;text-align:center;}
+.kodkutu .k{font-size:22px;font-weight:700;letter-spacing:5px;color:#111;word-break:break-all;}
+
+.satir{display:flex;justify-content:space-between;gap:10px;font-size:11px;padding:9px 2px;border-bottom:1px solid #eee;}
+.satir .b{color:#777;letter-spacing:2px;}
+.satir .d{font-weight:700;text-align:right;}
+
+.rozet{margin-top:14px;padding:10px;text-align:center;font-size:10px;font-weight:700;letter-spacing:3px;border:2px solid #0a7a2f;color:#0a7a2f;}
+.rozet.bitti{border-color:#b00020;color:#b00020;}
+
+.kosul{margin-top:16px;font-size:9.5px;line-height:2;color:#666;}
+.kosul b{color:#333;letter-spacing:2px;display:block;margin-bottom:5px;font-size:9px;}
+
+.butonlar{display:flex;flex-direction:column;gap:10px;margin-top:18px;}
+button{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;letter-spacing:3px;
+  padding:16px 18px;border:2px solid #111;cursor:pointer;touch-action:manipulation;}
+#btnPdf{background:#111;color:#FFC800;}
+#btnPay{background:#fff;color:#111;}
+
+.ipucu{margin-top:12px;font-size:9px;line-height:1.9;color:#888;text-align:center;}
+.hata{background:#fff;border:2px solid #b00020;color:#b00020;padding:24px;text-align:center;
+  font-size:12px;line-height:2;letter-spacing:2px;}
+
+/* ── PDF / YAZDIRMA ──
+   Telefonda "Yazdır > PDF olarak kaydet" bu görünümü basar. Butonlar ve
+   ipuçları çıktıda olmamalı; renkler zorla korunur, yoksa altın bant ve kod
+   kutusu beyaz basılıp kupon sahte görünüyor. */
+@media print{
+  @page{size:A4;margin:14mm;}
+  html,body{background:#fff;}
+  .sayfa{max-width:none;padding:0;}
+  .butonlar,.ipucu{display:none !important;}
+  .kupon{border-width:2px;page-break-inside:avoid;}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+}
+</style>
+</head>
+<body>
+<div class="sayfa" id="sayfa"></div>
+
+<script>
+/* Kupon verisi URL'in # kısmından gelir: kod*sonKullanma*ad_soyad
+   Neden hash: fragment sunucuya HİÇ gitmez, müşteri adı Pages loglarına düşmez.
+   Neden bu kadar kısa: içerik QR'a giriyor, her karakter bir bayt. Ödül adı
+   taşınmıyor — zaten kupon kodunun içinde (HT50-<ODUL>-GGAA-XXXX). */
+var ODULLER = {
+  AKD1AY: { ad:"AKADEMİ 1 AY 4 DERS",
+            not:"Zuhal Akademi'de 1 ay boyunca toplam 4 ders hediye." },
+  AKDRS:  { ad:"ÜCRETSİZ DENEME DERSİ",
+            not:"Zuhal Akademi'de 1 ücretsiz deneme dersi." },
+  AKD50:  { ad:"AKADEMİDE İLK AY %50",
+            not:"Zuhal Akademi kaydında ilk ay %50 indirim." },
+  CANTA:  { ad:"ZUHAL BEZ ÇANTA",
+            not:"Zuhal Müzik 50. yıla özel bez çanta." }
+};
+
+function el(tag, cls, txt) {
+  var e = document.createElement(tag);
+  if (cls) e.className = cls;
+  /* textContent — ad soyad URL'den geliyor, innerHTML ile basılırsa XSS olur */
+  if (txt !== undefined) e.textContent = txt;
+  return e;
+}
+
+function tarihiCoz(s) {
+  var p = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(s || "");
+  if (!p) return null;
+  return new Date(+p[3], +p[2] - 1, +p[1]);
+}
+
+function suresiDolduMu(sonKullanma) {
+  var d = tarihiCoz(sonKullanma);
+  if (!d) return false;                       // tarih okunamadıysa kuponu yakma
+  var bugun = new Date();
+  bugun.setHours(0, 0, 0, 0);
+  return d < bugun;                            // son gün DAHİL geçerli
+}
+
+function hatayaz(mesaj) {
+  var k = document.getElementById("sayfa");
+  k.innerHTML = "";
+  k.appendChild(el("div", "hata", mesaj));
+}
+
+function ciz() {
+  var ham = decodeURIComponent((location.hash || "").replace(/^#/, ""));
+  var parca = ham.split("*");
+  var kod  = (parca[0] || "").trim().toUpperCase();
+  var son  = (parca[1] || "").trim();
+  var ad   = (parca[2] || "").replace(/_/g, " ").trim();
+
+  if (!/^HT50-[A-Z0-9]{2,10}-\d{4}-\d{4}$/.test(kod)) {
+    hatayaz("KUPON OKUNAMADI\n\nQR kodu tekrar okutun veya kupon kodunuzu mağaza ekibine gösterin.");
+    return;
+  }
+
+  var anahtar = kod.split("-")[1];
+  var odul = ODULLER[anahtar] || { ad: "ZUHAL MÜZİK HEDİYESİ", not: "Ödül detayı için mağaza ekibine başvurun." };
+  var bitti = suresiDolduMu(son);
+
+  var kupon = el("div", "kupon");
+
+  var marka = el("div", "marka");
+  var logo = el("img");
+  logo.src = "zuhal-fifty-year-black.jpg";
+  logo.alt = "Zuhal Müzik 50. Yıl";
+  marka.appendChild(logo);
+  marka.appendChild(el("div", "ustyazi", "50. YIL — RİTİM CHALLENGE\nHEDİYE KUPONU"));
+  kupon.appendChild(marka);
+
+  kupon.appendChild(el("hr", "hr"));
+
+  kupon.appendChild(el("div", "etiket", "KAZANDIĞIN ÖDÜL"));
+  kupon.appendChild(el("div", "odul", odul.ad));
+  kupon.appendChild(el("p", "aciklama", odul.not));
+
+  var kutu = el("div", "kodkutu");
+  kutu.appendChild(el("div", "k", kod));
+  kupon.appendChild(kutu);
+
+  function satir(baslik, deger) {
+    var s = el("div", "satir");
+    s.appendChild(el("span", "b", baslik));
+    s.appendChild(el("span", "d", deger));
+    kupon.appendChild(s);
+  }
+  if (ad) satir("AD SOYAD", ad);
+  satir("SON KULLANMA", son || "—");
+
+  var rozet = el("div", "rozet" + (bitti ? " bitti" : ""),
+    bitti ? "⛔ SÜRESİ DOLMUŞ KUPON" : "✓ GEÇERLİ KUPON");
+  kupon.appendChild(rozet);
+
+  var kosul = el("div", "kosul");
+  kosul.appendChild(el("b", null, "KULLANIM KOŞULLARI"));
+  kosul.appendChild(document.createTextNode(
+    "• Kupon yalnızca bir kez kullanılır ve devredilemez.\n" +
+    "• Nakit ile değiştirilemez, diğer kampanyalarla birleştirilemez.\n" +
+    "• Kuponu Zuhal Müzik mağaza ekibine ad soyad ile birlikte gösterin.\n" +
+    "• Son kullanma tarihinden sonra geçersizdir."
+  ));
+  kosul.style.whiteSpace = "pre-line";
+  kupon.appendChild(kosul);
+
+  var sayfa = document.getElementById("sayfa");
+  sayfa.innerHTML = "";
+  sayfa.appendChild(kupon);
+
+  var butonlar = el("div", "butonlar");
+
+  var btnPdf = el("button", null, "⬇ PDF OLARAK KAYDET");
+  btnPdf.id = "btnPdf";
+  btnPdf.addEventListener("click", function() { window.print(); });
+  butonlar.appendChild(btnPdf);
+
+  /* Paylaş butonu yalnızca destekleyen cihazda gösterilir — iOS/Android'de
+     kuponu WhatsApp/Notlar'a atmanın en kısa yolu. Masaüstünde çoğu tarayıcıda
+     yok, boş buton koymamak için gizleniyor. */
+  if (navigator.share) {
+    var btnPay = el("button", null, "↗ KUPONU PAYLAŞ");
+    btnPay.id = "btnPay";
+    btnPay.addEventListener("click", function() {
+      navigator.share({
+        title: "Zuhal Müzik Hediye Kuponu",
+        text: odul.ad + " — Kupon: " + kod + " (Son kullanma: " + son + ")",
+        url: location.href
+      }).catch(function() { /* kullanıcı iptal etti */ });
+    });
+    butonlar.appendChild(btnPay);
+  }
+  sayfa.appendChild(butonlar);
+
+  sayfa.appendChild(el("div", "ipucu",
+    "PDF için: butona bas, açılan ekranda hedefi \"PDF olarak kaydet\" seç.\nSayfayı yer imlerine ekleyerek kuponu saklayabilirsin."));
+
+  document.title = "Zuhal Kupon " + kod;
+}
+
+ciz();
+window.addEventListener("hashchange", ciz);
+</script>
+</body>
+</html>

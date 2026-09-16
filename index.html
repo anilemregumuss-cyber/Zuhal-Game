@@ -62,6 +62,17 @@ body{font-family:'Bebas Neue',sans-serif;}
 /* bottom: çentikli iPhone'larda home-indicator şeridiyle çakışmasın diye güvenli alan eklenir */
 #btnGame{position:absolute;bottom:52px;bottom:calc(52px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);z-index:10;padding:16px 80px;background:#FFD700;color:#000;border:none;font-family:'Space Mono',monospace;font-size:16px;font-weight:700;letter-spacing:5px;cursor:pointer;touch-action:manipulation;box-shadow:0 4px 24px rgba(0,0,0,0.5);white-space:nowrap;}
 
+/* Logo çubuğunun GERÇEK yüksekliği tek yerden hesaplanır. Oyun sayfalarının üst
+   boşluğu buna bağlı olmalı: ikisi ayrı ayrı clamp'lendiğinde 1080x1920 kioskta
+   logo 160px yer kaplarken boşluk 120px'te kalıyor ve logo başlığın üstüne
+   biniyordu. Logo boyutunu değiştirirsen SADECE bu değişkenleri değiştir. */
+:root{
+  --logobar-pad:clamp(10px,1.5vh,20px);
+  --logobar-img:clamp(64px,9vh,120px);
+  --logobar-h:calc(var(--logobar-img) + var(--logobar-pad) * 2);
+  --page-top:calc(var(--logobar-h) + clamp(12px,2vh,28px));
+}
+
 /* Oyun ekranındaki dönen halkalar */
 @keyframes ring-spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
 @keyframes ring-spin-rev{from{transform:rotate(0deg);}to{transform:rotate(-360deg);}}
@@ -91,12 +102,14 @@ body{font-family:'Bebas Neue',sans-serif;}
 
 <!-- OYUN EKRANI -->
 <div id="gameOverlay" role="dialog" aria-modal="true" aria-label="Ritim Challenge Oyunu" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#000;z-index:9999;overflow:hidden;">
-  <div id="overlayLogoBar" style="position:absolute;top:0;left:0;width:100%;padding:clamp(10px,1.5vh,20px) 0;display:flex;justify-content:center;align-items:center;z-index:2;pointer-events:none;">
-    <img id="overlayLogo" src="zuhal-fifty-year-black.jpg" alt="Zuhal Müzik 50. Yıl" style="height:clamp(64px,9vh,120px);width:auto;object-fit:contain;display:block;pointer-events:auto;cursor:default;filter:invert(1);" />
+  <div id="overlayLogoBar" style="position:absolute;top:0;left:0;width:100%;padding:var(--logobar-pad) 0;display:flex;justify-content:center;align-items:center;z-index:2;pointer-events:none;">
+    <img id="overlayLogo" src="zuhal-fifty-year-black.jpg" alt="Zuhal Müzik 50. Yıl" style="height:var(--logobar-img);width:auto;object-fit:contain;display:block;pointer-events:auto;cursor:default;filter:invert(1);" />
   </div>
 
   <!-- BAŞLANGIÇ -->
-  <div id="gameStart" style="display:none;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:center;gap:clamp(12px,2vh,22px);padding:clamp(80px,10vh,120px) clamp(20px,4vw,48px) clamp(20px,4vh,48px);box-sizing:border-box;text-align:center;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+  <!-- justify-content:safe center — düz "center" içerik taşınca üst kısmı
+       kaydırılamaz hale getirip logonun altına gömüyordu. -->
+  <div id="gameStart" style="display:none;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:center;justify-content:safe center;gap:clamp(12px,2vh,22px);padding:var(--page-top) clamp(20px,4vw,48px) clamp(20px,4vh,48px);box-sizing:border-box;text-align:center;overflow-y:auto;-webkit-overflow-scrolling:touch;">
     <div style="font-family:'Oddee','Space Mono',monospace;font-size:48px;font-weight:700;color:#FFD700;letter-spacing:3px;line-height:1.1;">RHYTHM<br/>CHALLENGE</div>
     <div style="font-family:'Space Mono',monospace;font-size:10px;color:#aaa;letter-spacing:2px;line-height:2.2;">
       Whitney Houston — <em>I Will Always Love You</em><br/>
@@ -140,7 +153,7 @@ body{font-family:'Bebas Neue',sans-serif;}
   </div>
 
   <!-- OYNUYOR -->
-  <div id="gamePlaying" style="display:none;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:center;gap:clamp(20px,4vh,40px);padding-top:clamp(80px,10vh,120px);box-sizing:border-box;">
+  <div id="gamePlaying" style="display:none;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:center;gap:clamp(20px,4vh,40px);padding-top:var(--page-top);box-sizing:border-box;">
     <div id="gameStatusTxt" style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:4px;color:#888;">YÜKLENIYOR...</div>
     <div style="position:relative;width:clamp(240px,32vmin,340px);height:clamp(240px,32vmin,340px);display:flex;align-items:center;justify-content:center;">
       <div style="position:absolute;width:clamp(240px,32vmin,340px);height:clamp(240px,32vmin,340px);border-radius:50%;border:2px dashed #222;animation:ring-spin 4s linear infinite;"></div>
@@ -160,7 +173,7 @@ body{font-family:'Bebas Neue',sans-serif;}
   </div>
 
   <!-- KAZANDIN -->
-  <div id="gameWin" style="display:none;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:center;gap:clamp(10px,1.8vh,20px);padding:clamp(80px,10vh,120px) clamp(20px,4vw,48px) clamp(20px,4vh,48px);box-sizing:border-box;text-align:center;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+  <div id="gameWin" style="display:none;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:center;justify-content:safe center;gap:clamp(10px,1.8vh,20px);padding:var(--page-top) clamp(20px,4vw,48px) clamp(20px,4vh,48px);box-sizing:border-box;text-align:center;overflow-y:auto;-webkit-overflow-scrolling:touch;">
     <div id="winPlayerName" style="font-family:'Oddee','Space Mono',monospace;font-size:clamp(22px,4vmin,40px);font-weight:700;color:#FFD700;letter-spacing:4px;display:none;"></div>
     <div id="winEmoji" aria-live="polite" style="font-size:clamp(48px,7vmin,80px);line-height:1;">🥁</div>
     <div id="winLabel" style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:5px;color:#888;"></div>
@@ -178,7 +191,7 @@ body{font-family:'Bebas Neue',sans-serif;}
            siyah zeminde sessiz bölge olmadan okuyucular kodu göremiyor. -->
       <div id="qrBox" style="display:none;flex-direction:column;align-items:center;gap:6px;margin-top:4px;">
         <canvas id="prizeQR" style="display:block;background:#fff;padding:0;border:6px solid #fff;"></canvas>
-        <div style="font-family:'Space Mono',monospace;font-size:8px;color:#FFD700;letter-spacing:2px;">📱 TELEFONUNLA OKUT — KUPONUN SENDE KALSIN</div>
+        <div style="font-family:'Space Mono',monospace;font-size:8px;color:#FFD700;letter-spacing:2px;">📱 OKUT → KUPONUN AÇILIR, PDF OLARAK KAYDEDEBİLİRSİN</div>
       </div>
       <div style="font-family:'Space Mono',monospace;font-size:8px;color:#aaa;letter-spacing:2px;">Ad soyad + bu kodu mağaza ekibine göster</div>
     </div>
@@ -192,7 +205,7 @@ body{font-family:'Bebas Neue',sans-serif;}
       <div style="font-family:'Space Mono',monospace;font-size:8px;color:#FFD700;letter-spacing:3px;margin-bottom:8px;">KAZANMAK İÇİN:</div>
       <div style="font-family:'Space Mono',monospace;font-size:9px;color:#999;line-height:2.4;">
         📷 Bu anı fotoğrafla veya video çek<br/>
-        📲 @zuhalmuzik etiketle ve paylaş<br/>
+        📲 @zuhalmuzik <span style="color:#FFD700;">ve</span> @zuhalakademi etiketle<br/>
         🎁 Mağaza ekibine göster, ödülünü al!
       </div>
     </div>
@@ -1523,15 +1536,21 @@ function qrAscii(s) {
   return out;
 }
 
+// QR, kuponu tasarımlı bir sayfada açan LİNK taşır (k.html). Eskiden düz yazı
+// taşıyordu: telefon onu Notlar'a yapıştırıyor, müşteriye kupon değil çıplak
+// metin gibi görünüyordu. k.html hem markalı görünüyor hem "PDF olarak kaydet"
+// veriyor. Adres SABİT yazılmalı — kiosk yerel dosyadan (file://) veya başka bir
+// makineden servis edilse bile müşterinin telefonu bu genel adrese gidebilmeli.
+var KUPON_URL = "https://anilemregumuss-cyber.github.io/Zuhal-Game/k.html";
+
+// Biçim: #KOD*SONKULLANMA*AD_SOYAD
+// Ödül adı BİLEREK taşınmıyor, zaten kodun içinde (HT50-<ODUL>-GGAA-XXXX) ve
+// k.html oradan çözüyor. Her karakter QR'da bir bayt; kısa metin = seyrek,
+// uzaktan okunabilen kod. Boşluklar "_" olur, aksi halde okuyucular linki
+// boşlukta kesiyor.
 function qrPayload(name, prizeTitle, code, expiry) {
-  return qrAscii(
-    "ZUHAL MUZIK 50. YIL - RITIM CHALLENGE\n" +
-    "ODUL: " + prizeTitle + "\n" +
-    "KUPON: " + code + "\n" +
-    "SON KULLANMA: " + expiry + "\n" +
-    "AD: " + String(name || "").slice(0, 40) + "\n" +
-    "Magaza ekibine gosterin."
-  );
+  var ad = qrAscii(String(name || "").slice(0, 40)).replace(/[^A-Za-z0-9]+/g, "_");
+  return KUPON_URL + "#" + code + "*" + expiry + "*" + ad;
 }
 
 // QR'ı canvas'a çizer. Sessiz bölge (4 modül) ZORUNLU — olmadan okuyucular
@@ -2500,10 +2519,27 @@ document.addEventListener("DOMContentLoaded", function() {
     openGameOverlay();
   });
 
-  // Banner dokunuş toggle
+  // Banner dokunuş toggle — YALNIZCA ana sayfada çalışmalı.
+  // Eskiden dinleyici document.body'deydi ve yalnızca gameOverlay'e bakıyordu:
+  // kasa paneline, PIN ekranına, hatta KASA butonunun kendisine basarken bile
+  // tetikleniyor, personel panelde gezerken müzik durup duruyordu.
+  // Artık dinleyici .banner üzerinde ve üstteki katmanların hiçbiri açık
+  // olmamalı. Buton kontrolü de şart: OYNA/KASA butonuna basış banner'a da
+  // kabarıyor, aksi halde oyun açılırken müzik bir kez daha toggle olur.
+  var bannerEl = document.querySelector(".banner");
+
+  function ustKatmanAcikMi() {
+    var idler = ["gameOverlay", "statsModal", "pinModal"];
+    for (var i = 0; i < idler.length; i++) {
+      var el = document.getElementById(idler[i]);
+      if (el && getComputedStyle(el).display !== "none") return true;
+    }
+    return false;
+  }
+
   function bannerTouch(e) {
-    var overlay = document.getElementById("gameOverlay");
-    if (overlay && overlay.style.display !== "none") return;
+    if (ustKatmanAcikMi()) return;
+    if (e.target && e.target.closest && e.target.closest("button")) return;
     unlockAC();
     if (bannerAudioOn) {
       stopBannerAudio();
@@ -2513,10 +2549,12 @@ document.addEventListener("DOMContentLoaded", function() {
   }
   // Touch cihazda SADECE touchstart, mouse'ta SADECE click — çift tetiklenme yok
   var isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-  if (isTouch) {
-    document.body.addEventListener("touchstart", bannerTouch, {passive:true});
-  } else {
-    document.body.addEventListener("click", bannerTouch);
+  if (bannerEl) {
+    if (isTouch) {
+      bannerEl.addEventListener("touchstart", bannerTouch, {passive:true});
+    } else {
+      bannerEl.addEventListener("click", bannerTouch);
+    }
   }
 
   // Sayfa yüklenince arka planda decode başlat
