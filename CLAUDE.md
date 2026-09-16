@@ -58,7 +58,10 @@ Tüm uygulama tek HTML dosyasında, 3 katman:
 
 ### Sayfa 1 — Banner (`.banner`)
 - `<video class="banner-vid">` → `Genel-Halftime-v3.mp4` tam ekran
-- Sol/sağ dikey kayan şeritler (`.vs-l`, `.vs-r`) ve üst/alt yatay bantlar (`.hs-t`, `.hs-b`) — SINIRLI STOK yazısı, CSS animasyonlu
+- Sol/sağ dikey kayan şeritler (`.vs-l`, `.vs-r`) ve üst/alt yatay bantlar (`.hs-t`, `.hs-b`) — Akademi kampanya cümleleri, CSS animasyonlu
+  - **Metin tam olarak İKİ eş yarıdan oluşmalı.** Animasyon `-50%` kaydırıyor; yarılar birebir aynı değilse döngü başa dönerken görünür bir sıçrama olur. Şu an 5 cümlelik grup 4 kez tekrarlanıyor (çift sayı şart) ve her cümle `• ` ile bitiyor — son tekrardaki boşluğu da SİLME.
+  - **Toplam uzunluk ekranı aşmalı**: bir yarı, yatayda ekran genişliğinden / dikeyde ekran yüksekliğinden uzun olmazsa şeritte boşluk açılır. 1080x1920'de ölçülen kapsama: yatay 1.98×, dikey 1.12×. Cümleleri kısaltırsan tekrar sayısını artır.
+  - Süre 20 sn sabit, yani metin uzadıkça akış HIZLANIR (yarı mesafesi büyür). Uzunluğu ciddi değiştirirsen `vsL`/`vsR`/`hsT`/`hsB` sürelerini de ayarla.
 - `#btnGame` → Oyun ekranını açar, banner sesini durdurur
 - `#btnKasaAccess` (sağ üstte, sabit/fixed, düşük opaklık) → Kasa PIN ekranını açar, sayfa durumundan bağımsız her zaman görünür
 - **Ekrana dokununca müzik aç/kapa YALNIZCA bu sayfada çalışır.** Dinleyici `.banner`
