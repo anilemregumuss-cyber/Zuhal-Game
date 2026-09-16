@@ -60,9 +60,13 @@ Tüm uygulama tek HTML dosyasında, 3 katman:
 - `<video class="banner-vid">` → `Genel-Halftime-v3.mp4` tam ekran
 - Sol/sağ dikey kayan şeritler (`.vs-l`, `.vs-r`) ve üst/alt yatay bantlar (`.hs-t`, `.hs-b`) — Akademi kampanya cümleleri, CSS animasyonlu
   - **Metin tam olarak İKİ eş yarıdan oluşmalı.** Animasyon `-50%` kaydırıyor; yarılar birebir aynı değilse döngü başa dönerken görünür bir sıçrama olur. Şu an 5 cümlelik grup 4 kez tekrarlanıyor (çift sayı şart) ve her cümle `• ` ile bitiyor — son tekrardaki boşluğu da SİLME.
-  - **Toplam uzunluk ekranı aşmalı**: bir yarı, yatayda ekran genişliğinden / dikeyde ekran yüksekliğinden uzun olmazsa şeritte boşluk açılır. 1080x1920'de ölçülen kapsama: yatay 1.98×, dikey 1.12×. Cümleleri kısaltırsan tekrar sayısını artır.
-  - Süre 20 sn sabit, yani metin uzadıkça akış HIZLANIR (yarı mesafesi büyür). Uzunluğu ciddi değiştirirsen `vsL`/`vsR`/`hsT`/`hsB` sürelerini de ayarla.
+  - **Toplam uzunluk ekranı aşmalı**: bir yarı, yatayda ekran genişliğinden / dikeyde ekran yüksekliğinden uzun olmazsa şeritte boşluk açılır. 1080x1920'de ölçülen kapsama: yatay 3.90×, dikey 2.20×. Cümleleri kısaltırsan tekrar sayısını artır.
+  - **Akış hızı 107 px/sn olmalı** — sahada okunabilir bulunan hız bu. Süre sabit olduğu için metin uzadıkça veya yazı büyüdükçe akış HIZLANIR. Yazı 13px'ten ~26px'e çıkarıldığında piksel uzunluğu iki katına çıktı ve süre 20 sn → 40 sn yapıldı. Boyutu/metni değiştirirsen `vsL`/`vsR`/`hsT`/`hsB` sürelerini yeniden hesapla (yarı mesafesi ÷ 107).
+  - **Zemin altın (`#FFD700`), yazı siyah.** Eskiden kahve zemin (`#1a0f05`) üstüne beyaz yazıydı: kahve, videonun sepya kenarlarına UYSUN diye seçilmişti ve şerit neredeyse görünmez oluyordu. Artık amaç uyum değil dikkat çekmek — kampanya cümleleri okunsun. Ton kioskun geri kalanıyla aynı; `k.html` kuponundaki `#FFC800` bilerek AYRI (kupon beyaz kâğıda basılıyor, ekran sarısı orada fazla parlıyor).
+  - **Yazı boyutu vw tabanlı olmalı** (`clamp(13px,2.4vw,30px)`): şerit kalınlığı da `6.9vw`, ikisi birlikte ölçeklenince yazı her ekranda bandın ~%35'i kalıyor. Sabit px verilirse küçük ekranda bandı taşırıyor.
 - `#btnGame` → Oyun ekranını açar, banner sesini durdurur
+  - **Alt bandın ÜSTÜNDE durmalı.** `bottom` eskiden sabit `52px`'ti ve 1080x1920'de butonun alt 23px'i bandın içinde kalıyordu; bant kahveyken sarı buton yine seçiliyordu, bant altına dönünce alt kenarı bandın içinde eriyordu. Artık `calc(6.9vw + 28px)`, yani bant kalınlığına bağlı — bandı büyütürsen buton da birlikte kayar.
+  - `border:3px solid #000` bant ile buton aynı altın olduğu için var; kaldırırsan buton sarı zeminde şeklini kaybeder.
 - `#btnKasaAccess` (sağ üstte, sabit/fixed, düşük opaklık) → Kasa PIN ekranını açar, sayfa durumundan bağımsız her zaman görünür
 - **Ekrana dokununca müzik aç/kapa YALNIZCA bu sayfada çalışır.** Dinleyici `.banner`
   üzerinde (eskiden `document.body`'deydi) ve `bannerTouch()` iki koşulda hiç

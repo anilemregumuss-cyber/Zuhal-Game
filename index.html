@@ -39,28 +39,49 @@ body{font-family:'Bebas Neue',sans-serif;}
 }
 
 
-/* ── Sol/Sağ şeritler ── */
-.vs{position:absolute;top:0;bottom:0;width:6.9vw;overflow:hidden;background:#1a0f05;z-index:2;}
+/* ── Kayan şeritler: ZEMİN ALTIN, YAZI SİYAH ──
+   Eskiden kahve zemin (#1a0f05) üstüne beyaz 13px yazı vardı. Kahve, videonun
+   sepya kenarlarına UYSUN diye seçilmişti ve şerit neredeyse görünmez oluyordu.
+   Artık amaç uyum değil dikkat çekmek: Akademi kampanya cümleleri okunsun.
+   Altın tonu #FFD700 — kioskun her yerinde (OYNA, başlıklar, ödül listesi)
+   kullanılan ton. k.html kuponundaki #FFC800 AYRI kalsın: kupon beyaz kâğıda
+   basılıyor, ekran sarısı orada fazla parlıyor.
+
+   Yazı boyutu vw tabanlı olmalı — şerit kalınlığı da 6.9vw, ikisi birlikte
+   ölçeklensin ki yazı her ekranda bandın ~%35'i kalsın. Sabit px verilirse
+   küçük ekranda bandı taşırıyor.
+
+   Süre 20s -> 40s: yazı 13px'ten ~26px'e çıkınca metnin PİKSEL uzunluğu da iki
+   katına çıktı, sabit sürede bu akışı İKİ KAT HIZLANDIRIRDI. Canlı sayfada
+   ölçülen hız 107 px/sn; 40 sn ile aynı hız korunuyor. Boyutu veya metni yine
+   değiştirirsen süreyi de yeniden hesapla. */
+.vs{position:absolute;top:0;bottom:0;width:6.9vw;overflow:hidden;background:#FFD700;z-index:2;}
 .vs-l{left:0;} .vs-r{right:0;}
-.vs-t{position:absolute;top:0;left:50%;writing-mode:vertical-rl;white-space:nowrap;font:700 13px/1 'Space Mono',monospace;color:rgba(255,255,255,0.85);letter-spacing:3px;}
-.vs-l .vs-t{animation:vsL 20s linear infinite;}
-.vs-r .vs-t{animation:vsR 20s linear infinite;}
+.vs-t{position:absolute;top:0;left:50%;writing-mode:vertical-rl;white-space:nowrap;font:700 clamp(13px,2.4vw,30px)/1 'Space Mono',monospace;color:#000;letter-spacing:0.22em;}
+.vs-l .vs-t{animation:vsL 40s linear infinite;}
+.vs-r .vs-t{animation:vsR 40s linear infinite;}
 @keyframes vsL{0%{transform:translateX(-50%) translateY(0)}100%{transform:translateX(-50%) translateY(-50%)}}
 @keyframes vsR{0%{transform:translateX(-50%) translateY(-50%)}100%{transform:translateX(-50%) translateY(0)}}
 
 /* ── Üst/Alt yatay bantlar ── */
-.hs{position:absolute;left:0;right:0;height:6.9vw;overflow:hidden;background:#1a0f05;z-index:2;}
+.hs{position:absolute;left:0;right:0;height:6.9vw;overflow:hidden;background:#FFD700;z-index:2;}
 .hs-t{top:0;} .hs-b{bottom:0;}
-.hs-i{position:absolute;top:50%;left:0;white-space:nowrap;font:700 13px/1 'Space Mono',monospace;color:rgba(255,255,255,0.85);letter-spacing:3px;}
-.hs-t .hs-i{animation:hsT 20s linear infinite;}
-.hs-b .hs-i{animation:hsB 20s linear infinite;}
+.hs-i{position:absolute;top:50%;left:0;white-space:nowrap;font:700 clamp(13px,2.4vw,30px)/1 'Space Mono',monospace;color:#000;letter-spacing:0.22em;}
+.hs-t .hs-i{animation:hsT 40s linear infinite;}
+.hs-b .hs-i{animation:hsB 40s linear infinite;}
 @keyframes hsT{0%{transform:translateY(-50%) translateX(0)}100%{transform:translateY(-50%) translateX(-50%)}}
 @keyframes hsB{0%{transform:translateY(-50%) translateX(-50%)}100%{transform:translateY(-50%) translateX(0)}}
 
 
 /* ── OYNA butonu ── */
-/* bottom: çentikli iPhone'larda home-indicator şeridiyle çakışmasın diye güvenli alan eklenir */
-#btnGame{position:absolute;bottom:52px;bottom:calc(52px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);z-index:10;padding:16px 80px;background:#FFD700;color:#000;border:none;font-family:'Space Mono',monospace;font-size:16px;font-weight:700;letter-spacing:5px;cursor:pointer;touch-action:manipulation;box-shadow:0 4px 24px rgba(0,0,0,0.5);white-space:nowrap;}
+/* bottom: çentikli iPhone'larda home-indicator şeridiyle çakışmasın diye güvenli alan eklenir.
+   6.9vw = alt bandın kalınlığı: buton bandın ÜSTÜNDE durmalı. Eskiden sabit 52px'ti
+   ve 1080x1920'de butonun alt 23px'i bandın içinde kalıyordu; bant kahveyken sarı
+   buton yine seçiliyordu, bant altına dönünce alt kenarı bandın içinde eriyecekti.
+   Bant kalınlığına bağlandı ki bant büyürse buton da birlikte kaysın.
+   border: bant da buton da altın; aradaki sınır çizgiyle veriliyor. Kenarlığı
+   kaldırırsan buton sarı zeminde şeklini kaybeder. */
+#btnGame{position:absolute;bottom:calc(6.9vw + 28px);bottom:calc(6.9vw + 28px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);z-index:10;padding:16px 80px;background:#FFD700;color:#000;border:3px solid #000;font-family:'Space Mono',monospace;font-size:16px;font-weight:700;letter-spacing:5px;cursor:pointer;touch-action:manipulation;box-shadow:0 4px 24px rgba(0,0,0,0.5);white-space:nowrap;}
 
 /* Logo çubuğunun GERÇEK yüksekliği tek yerden hesaplanır. Oyun sayfalarının üst
    boşluğu buna bağlı olmalı: ikisi ayrı ayrı clamp'lendiğinde 1080x1920 kioskta
