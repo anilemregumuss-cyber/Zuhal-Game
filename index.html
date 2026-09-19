@@ -30,6 +30,7 @@ body{font-family:'Bebas Neue',sans-serif;}
   height:100vh;height:100dvh;
   overflow:hidden;
   display:flex;align-items:flex-end;justify-content:center;
+  isolation:isolate; /* .ton katmanlarının blend'i banner dışına taşmasın */
 }
 .banner-vid{
   position:absolute;top:0;left:0;
@@ -37,6 +38,31 @@ body{font-family:'Bebas Neue',sans-serif;}
   object-fit:cover;object-position:center top;
   display:block;z-index:0;
 }
+
+/* ── Videonun kahverengi bölgesi bordoya çevriliyor ──
+   Videonun kenarları sepya/kahve; altın şeritler geldikten sonra bu ton ucuz
+   duruyordu. Video yeniden export edilemediği için renk CSS'le değiştiriliyor.
+
+   NEREDE: kahve yalnızca videonun ÜST kuşağında ve ALT kenarında. Sınırlar
+   ölçülerek bulundu (kare 1080x1920 canvas'a çizilip krem kartın sınırları
+   tarandı): kart y=505'te başlıyor, y=1732'de bitiyor. Yüzdeye çevrildi
+   (505/1920 = %26.3, 1732/1920 = %90.2) — video 9:16, kiosk da 9:16 olduğu
+   için oran birebir tutuyor. Ortadaki krem karta DOKUNULMAZ.
+
+   NEDEN mix-blend-mode:color, neden düz renk kutusu değil: bu mod zeminin
+   PARLAKLIĞINI korur, sadece rengini değiştirir. Videonun sarı başlığı bu
+   sayede kaybolmaz, bordonun açık tonuna döner (ölçülen kontrast 9.8:1).
+   Üzerine düz bir renk basılsaydı başlık tamamen örtülürdü.
+
+   Kenarlardaki şeffaf durak, kart sınırında keskin bir çizgi oluşmasın diye.
+   isolation:isolate .banner'da: blend katmanı banner dışına taşmasın.
+   Geri almak için bu blok ile iki <div class="ton"> satırını silmek yeterli;
+   video dosyasına hiç dokunulmadı. */
+.ton{position:absolute;left:0;right:0;z-index:1;pointer-events:none;mix-blend-mode:color;}
+.ton-ust{top:0;height:26.3%;
+  background:linear-gradient(to bottom,#4A101F 0%,#4A101F 93%,rgba(74,16,31,0) 100%);}
+.ton-alt{top:90.2%;bottom:0;
+  background:linear-gradient(to top,#4A101F 0%,#4A101F 88%,rgba(74,16,31,0) 100%);}
 
 
 /* ── Kayan şeritler: ZEMİN ALTIN, YAZI SİYAH ──
@@ -106,6 +132,10 @@ body{font-family:'Bebas Neue',sans-serif;}
 
 <div class="banner">
   <video class="banner-vid" src="Genel-Halftime-v3.mp4" autoplay muted loop playsinline webkit-playsinline></video>
+
+  <!-- Videonun kahve kenarlarını bordoya çeviren renk katmanları (bkz. .ton) -->
+  <div class="ton ton-ust"></div>
+  <div class="ton ton-alt"></div>
 
   <!-- Sol şerit: PNG sol koyu kenara örter, yukarı akar -->
   <div class="vs vs-l"><div class="vs-t">🎵 ZUHAL AKADEMİ • 🎤 ÜCRETSİZ DENEME DERSİ • 🎸 4 DERS HEDİYE • 🎹 İLK AY %50 İNDİRİM • 🥁 MÜZİĞE BUGÜN BAŞLA • 🎵 ZUHAL AKADEMİ • 🎤 ÜCRETSİZ DENEME DERSİ • 🎸 4 DERS HEDİYE • 🎹 İLK AY %50 İNDİRİM • 🥁 MÜZİĞE BUGÜN BAŞLA • 🎵 ZUHAL AKADEMİ • 🎤 ÜCRETSİZ DENEME DERSİ • 🎸 4 DERS HEDİYE • 🎹 İLK AY %50 İNDİRİM • 🥁 MÜZİĞE BUGÜN BAŞLA • 🎵 ZUHAL AKADEMİ • 🎤 ÜCRETSİZ DENEME DERSİ • 🎸 4 DERS HEDİYE • 🎹 İLK AY %50 İNDİRİM • 🥁 MÜZİĞE BUGÜN BAŞLA • </div></div>
