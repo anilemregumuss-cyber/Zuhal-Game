@@ -38,34 +38,14 @@ body{font-family:'Bebas Neue',sans-serif;}
   display:block;z-index:0;
 }
 
-/* ── Videonun kahverengi kenarları MOR ile kapatılıyor ──
-   Videonun çerçevesi sepya/kahve; altın şeritler geldikten sonra bu ton ucuz
-   duruyordu. Video yeniden export edilemediği için renk CSS'le değiştiriliyor.
-
-   NEREDE: videonun ortasında krem bir kart var, kahve o kartın DIŞINDA kalan
-   her yer. Kartın sınırları ölçülerek bulundu (kare 1080x1920 canvas'a çizilip
-   krem pikseller tarandı): x 160..907, y 505..1720. Yüzdeye çevrildi —
-     sol  160/1080  = %14.81
-     sağ  173/1080  = %16.02
-     üst  505/1920  = %26.30
-     alt  1720/1920 = %89.58
-   Video 9:16, kiosk da 9:16 olduğu için oranlar birebir tutuyor.
-   Ortadaki krem karta DOKUNULMAZ.
-
-   NEDEN DÜZ RENK: ilk deneme mix-blend-mode:color ileydi — zeminin
-   parlaklığını koruduğu için videonun yazısı kaybolmuyordu ama değişim o
-   kadar hafif kalıyordu ki sahibi "hiç değişmemiş" dedi. Ayrıca yalnızca
-   üst/alt kaplanmış, YANLARDAKİ kahve şeritler açıkta kalmıştı. Artık dört
-   kenar da düz renkle kapanıyor; videodaki yazının örtülmesi kabul edildi
-   ("silebiliriz, sonra tekrar yazarız") — gerekirse üzerine HTML ile yazılır.
-
-   Geri almak için bu blok ile dört <div class="ton"> satırını silmek yeterli;
-   video dosyasına hiç dokunulmadı. */
-.ton{position:absolute;z-index:1;pointer-events:none;background:#2E1049;}
-.ton-ust{top:0;left:0;right:0;height:26.30%;}
-.ton-alt{left:0;right:0;top:89.58%;bottom:0;}
-.ton-sol{top:0;bottom:0;left:0;width:14.81%;}
-.ton-sag{top:0;bottom:0;right:0;width:16.02%;}
+/* NOT — videonun kahve kenarını renklendirme denemesi GERİ ALINDI (2026-09-19).
+   Videonun çerçevesi sepya/kahve; CSS katmanıyla değiştirmek iki kez denendi:
+     1) mix-blend-mode:color ile bordo — parlaklığı koruduğu için videonun
+        yazısı kayboluyordu ama değişim o kadar hafifti ki fark edilmedi.
+     2) dört kenara düz mor — bu kez belirgindi, sahada bakıldı ve beğenilmedi.
+   Sonuç: video olduğu gibi kalıyor. Aynı fikre dönülürse asıl çözüm videoyu
+   yeni renkle yeniden export etmek; ölçülen kart sınırları x 160..907,
+   y 505..1720 (kahve bu dikdörtgenin dışında kalan her yer). */
 
 
 /* ── Kayan şeritler: ZEMİN ALTIN, YAZI SİYAH ──
@@ -135,12 +115,6 @@ body{font-family:'Bebas Neue',sans-serif;}
 
 <div class="banner">
   <video class="banner-vid" src="Genel-Halftime-v3.mp4" autoplay muted loop playsinline webkit-playsinline></video>
-
-  <!-- Videonun kahve kenarlarını mora çeviren renk katmanları (bkz. .ton) -->
-  <div class="ton ton-ust"></div>
-  <div class="ton ton-alt"></div>
-  <div class="ton ton-sol"></div>
-  <div class="ton ton-sag"></div>
 
   <!-- Sol şerit: PNG sol koyu kenara örter, yukarı akar -->
   <div class="vs vs-l"><div class="vs-t">🎵 ZUHAL AKADEMİ • 🎤 ÜCRETSİZ DENEME DERSİ • 🎸 4 DERS HEDİYE • 🎹 İLK AY %50 İNDİRİM • 🥁 MÜZİĞE BUGÜN BAŞLA • 🎵 ZUHAL AKADEMİ • 🎤 ÜCRETSİZ DENEME DERSİ • 🎸 4 DERS HEDİYE • 🎹 İLK AY %50 İNDİRİM • 🥁 MÜZİĞE BUGÜN BAŞLA • 🎵 ZUHAL AKADEMİ • 🎤 ÜCRETSİZ DENEME DERSİ • 🎸 4 DERS HEDİYE • 🎹 İLK AY %50 İNDİRİM • 🥁 MÜZİĞE BUGÜN BAŞLA • 🎵 ZUHAL AKADEMİ • 🎤 ÜCRETSİZ DENEME DERSİ • 🎸 4 DERS HEDİYE • 🎹 İLK AY %50 İNDİRİM • 🥁 MÜZİĞE BUGÜN BAŞLA • </div></div>
