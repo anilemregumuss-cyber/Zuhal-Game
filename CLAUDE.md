@@ -2,11 +2,41 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Altyapı (2026-09-19 devrinden sonra — ÖNCE BUNU OKU)
+
+Oyun Zuhal Müzik'e devredildi. Kod, yayın ve veritabanı artık şirketin hesaplarında;
+geliştirme dış geliştiricide (Anıl Emre Gümüş) devam ediyor.
+
+| Katman | Nerede |
+|---|---|
+| Depo | `toftamars/Zuhal-Game` (eski `anilemregumuss-cyber/Zuhal-Game` DEĞİL) |
+| Yayın | **Vercel** — `main`'e her push otomatik yayınlanır (~25 sn). GitHub Pages ARTIK ASIL YOL DEĞİL |
+| Canlı adres | https://zuhal-game.vercel.app |
+| Veritabanı | Supabase projesi `zuhal-oyun` → `https://cglwmzrsbzuirlwgfxqc.supabase.co` |
+
+⚠️ **Eski yayın adresi `anilemregumuss-cyber.github.io/Zuhal-Game/` ÖLÜ (404).**
+Depo devrinde GitHub depo adresini yönlendirir ama **yayın adresini yönlendirmez**.
+Sahada QR'lı kupon dolaşırken devir/adres değişikliği yapılacaksa önce eski adrese
+yönlendirme sayfası konmalı.
+
+🔴 **Supabase panel yetkisi YOK, gerek de yok.** Şema/RPC/migration işleri `anil`
+veritabanı kullanıcısıyla **doğrudan bağlantıdan** yapılır:
+
+```bash
+psql "postgresql://anil:<sifre>@db.cglwmzrsbzuirlwgfxqc.supabase.co:5432/postgres" -f supabase/<dosya>.sql
+```
+
+Şifre depoya GİRMEZ (depo herkese açık) — yerelde gizli dosyada tutulur.
+Yerel geliştirme: `supabase start` buluta hiç dokunmadan tam kopya verir.
+**Disiplin:** her şema değişikliği önce `supabase/` altında bir `.sql` dosyası
+olarak depoya girer, sonra uygulanır — veritabanında ne yapıldığı depodan okunsun.
+
 ## Git Kuralları
 
 - **Her zaman `main` branch üzerinde çalış ve push et.** Feature branch kullanma.
 - Her değişiklikten sonra: `git add <dosya>`, `git commit -m "..."`, `git push origin main`
 - Commit mesajları Türkçe olabilir.
+- Push = yayın. `main`'e giden her şey birkaç saniye içinde canlıya çıkar.
 
 ## Proje Özeti
 
@@ -50,7 +80,7 @@ Fullscreen API, `navigationUI:"hide"`) kullanılır.
 ile beyaza çevriliyor, `k.html`'de ise beyaz zemine olduğu gibi basılıyor (siyah logo
 yazdırmaya da uygun). Logoyu değiştirirken iki tarafı da kontrol et.
 
-Repoda bu 5 medya dosyası dışında hiçbir medya kullanılmıyor — yeni bir görsel/video eklerken önce `index.html` içinde gerçekten referans verildiğinden emin ol, aksi halde GitHub Pages deploy boyutu şişer.
+Repoda bu 5 medya dosyası dışında hiçbir medya kullanılmıyor — yeni bir görsel/video eklerken önce `index.html` içinde gerçekten referans verildiğinden emin ol, aksi halde Vercel deploy boyutu şişer.
 
 ## index.html Mimarisi
 
@@ -191,7 +221,10 @@ gerekir, `qrEncode()` sığmayan metinde `null` döner ve `qrRender()` QR'ı giz
     bayt; kısa metin = seyrek modül = uzaktan okunabilen kod.
   - **`KUPON_URL` sabit yazılmalı**, `location`'dan türetilmemeli: kiosk `file://`
     üzerinden veya başka bir makineden servis edilse bile müşterinin telefonu bu
-    genel adrese gidebilmeli.
+    genel adrese gidebilmeli. Güncel değer: `https://zuhal-game.vercel.app/k.html`.
+    ⚠️ **Bu adres değişirse elde dolaşan kuponlar ölür** (kupon 1 ay geçerli, QR
+    adresi taşıyor). Özel alan adı eklense bile vercel.app adresi çalışmaya devam
+    edeceği için bu sabiti bir daha değiştirmeye gerek YOK.
   - Ad soyad `[^A-Za-z0-9]+` → `_` ile sadeleşir; okuyucular linki boşlukta kesiyor.
 - **İçerik ASCII'ye indirgenir** (`qrAscii()`). Bazı okuyucular ECI'siz byte modunu
   ISO-8859-1 varsayıp UTF-8 Türkçe karakterleri bozuk gösteriyor. Ekranda Türkçe
@@ -219,7 +252,7 @@ QR okutulunca müşterinin telefonunda açılan sayfa. Kiosk kodundan **tamamen 
 ve resmi göstermek, bir de **PDF çıktısı** vermek.
 
 - **Veri `#` (fragment) ile taşınır**, query string ile değil: fragment sunucuya HİÇ
-  gitmez, müşteri adı GitHub Pages loglarına düşmez.
+  gitmez, müşteri adı sunucu (Vercel) loglarına düşmez.
 - **Ödül adı kupon kodundan çözülür** (`ODULLER` tablosu, anahtar = kodun 2. parçası).
   Ödül merdivenini değiştirirken `index.html`'deki `whitneyPrizes` ile bu tabloyu
   BİRLİKTE güncelle — yoksa yeni kupon "ZUHAL MÜZİK HEDİYESİ" genel metnine düşer
@@ -294,7 +327,9 @@ Kalan adetler kasa panelinde `renderStockInfo()` ile görünür (yalnızca bugü
 
 ### İstatistik / Kazananlar Paneli
 - Günlük oyun kayıtları localStorage'dan XLS olarak indirilebilir (`downloadStats()`)
-- **Veri yalnızca kioskun kendi tarayıcısında.** GitHub Pages statik sunucudur — sunucu/veritabanı yok, hiçbir kayıt buluta gitmez. Cihaz sıfırlanır veya tarayıcı verisi temizlenirse kayıtlar gider. `cleanOldData()` 90 gün saklar — bu süre `couponsIssuedAllTime()` doğru sayabilsin diye 30'dan çıkarıldı, kısaltma.
+- **Veri BUGÜN hâlâ yalnızca kioskun kendi tarayıcısında.** Supabase projesi kuruldu
+  (Faz 1: tablolar + RLS + RPC hazır ve doğrulandı) ama **kiosk henüz ona bağlı DEĞİL** —
+  `index.html` içinde tek satır Supabase kodu yok. Yani bugün hiçbir kayıt buluta gitmiyor. Cihaz sıfırlanır veya tarayıcı verisi temizlenirse kayıtlar gider. `cleanOldData()` 90 gün saklar — bu süre `couponsIssuedAllTime()` doğru sayabilsin diye 30'dan çıkarıldı, kısaltma.
 - **Gün seçici** (`#statsDay`): panel ve İNDİR eskiden yalnızca bugünü gösteriyordu, önceki günün verisi cihazda durduğu halde alınamıyordu. Artık `selectedDay` / `selectedDayKey()` / `playsForPanel()` üçlüsü seçili günü verir. **`loadPlays()` ASLA bu seçime bağlanmamalı** — oyun, `makeCode()` ve `headphonesIssuedToday()` her zaman bugüne yazıp okumalı; aksi halde personel dünü seçtiğinde oyun dünün dosyasına yazardı. Seçici sadece `openStats()` içinde doldurulur (`fillDaySelect()`); `refreshStatsAll()` içinde doldurulsaydı 4 saniyede bir seçim bugüne dönerdi. Panel her açılışta bugüne sıfırlanır ve geçmiş gün seçiliyken `#dayWarn` uyarısı çıkar (kupon doğrulaması yanıltmasın).
 
 ## Dikkat Edilmesi Gerekenler
@@ -308,3 +343,27 @@ Kalan adetler kasa panelinde `renderStockInfo()` ile görünür (yalnızca bugü
 - **`#btnStatsDownload` bilerek `bindTap` KULLANMAZ**, düz `click` dinleyicisine bağlıdır. `bindTap` `pointerdown`a bağlanır; tarayıcı indirmesi ve `navigator.share()` ise *geçici kullanıcı etkileşimi* ister, Chrome bunu dokunuşun başında değil sonunda (tap/click) verir. `pointerdown`a bağlıyken share sessizce `NotAllowedError` ile reddediliyor, `shareFile()` yine de `true` döndürdüğü için klasik indirmeye de düşülmüyordu → buton ölüydü. `shareFile()` artık `AbortError` dışındaki hatalarda indirmeye düşer; `onDownloadClick()` butonda görünür geri bildirim verir (`✓ İNDİRİLDİ` / `✕ HATA`).
 - `whitney-halftime.mp3` harici dosya olduğu için tarayıcı tarafından cache'lenir; her 5 dakikalık yenilemede tekrar indirilmez (base64 gömme dönemindeki performans sorunu buydu).
 - Yeni medya dosyası eklerken repoya bırakmadan önce `index.html` içinde gerçekten kullanıldığından emin ol (bkz. Dosya Yapısı notu) — geçmişte ~100MB kullanılmayan dosya birikmişti.
+
+## Supabase Faz 2 — canlıya çıkmadan kapatılması gereken iki açık
+
+Şema (`supabase/schema.sql`) kuruldu ve doğrulandı: 7 tablo, 11 RLS politikası,
+5 fonksiyon; ödül merdiveni test edildi (günlük tavan dolunca `odul_sec('AKD1AY')`
+gerçekten `AKDRS` döndürüyor). Ama kiosk bağlanmadan önce iki nokta düzeltilmeli —
+sonradan düzeltmek çok daha pahalı, çünkü o zaman canlı kupon verisi olacak.
+
+1. **Kupon uydurulabiliyor.** `p_kuponlar_insert` politikası `anon`'a serbest INSERT
+   veriyor; `anon` anahtarı tarayıcıda göründüğü için isteyen kendine istediği ödülde
+   kupon yazabilir (`kullanildi=false` şartı bunu engellemiyor — sadece "kullanılmış
+   olarak doğmasını" engelliyor). Kasa kuponu veritabanından doğrulayacaksa bu delik
+   doğrulamanın anlamını kaldırır. **Çözüm:** kupon üretimi de `security definer` bir
+   fonksiyona alınmalı, `anon`'un doğrudan INSERT hakkı çekilmeli.
+
+2. **Son ödül yarışı hâlâ açık.** Şemadaki yorum *"ödül kararı sunucuda verildiği için
+   iki ekran son bez çantayı aynı anda veremez"* diyor; ama `odul_sec` yalnızca sayıp
+   cevap veriyor, kuponu **ayırmıyor**. Karar ile kupon yazımı iki ayrı adım olduğu
+   için iki ekran aynı anda "verilebilir" cevabı alabilir. **Çözüm:** karar + kupon
+   üretimi tek fonksiyonda, `kuponlar` üzerinde kilitle (`for update`).
+
+Ayrıca kiosk bağlanırken: `localStorage` bugünkü tek kaynak. Buluta geçişte iki kaynağın
+aynı anda yazması (ve stok sayaçlarının ikisinden birden okunması) en olası hata sınıfı —
+sayaç TEK yerden okunmalı.
