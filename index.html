@@ -1194,18 +1194,24 @@ function handleHit(kaynak, evt) {   // kaynak: "midi" | "touch"; evt: olayın ge
 // Not: İDARE EDER eskiden 3 ödülden rastgele seçiliyordu (idarederPrizes dizisi).
 // Artık tek ödül olduğu için dizi kaldırıldı; whitneyPrizes tek kaynak.
 
-// "1 ay 4 ders" ödülü kampanyanın en pahalı basamağı: TOPLAM 5 adet verilecek.
-// DİKKAT — bu sınır GÜNLÜK DEĞİL, kampanya boyu toplam. Diğer sınırlar (bez çanta)
-// her gece sıfırlanır, bu sıfırlanmaz; bu yüzden ayrı bir sayaç kullanır
-// (couponsIssuedAllTime). Günlük sayaçla karıştırılırsa her gün 5 adet dağıtılır.
-var MAX_AKD1AY_TOTAL = 5;
+// "1 ay 4 ders" ödülü kampanyanın en pahalı basamağı: TOPLAM 10 adet verilecek.
+// DİKKAT — bu sınır GÜNLÜK DEĞİL, kampanya boyu (1 ay) toplam. Diğer sınırlar
+// (bez çanta) her gece sıfırlanır, bu sıfırlanmaz; bu yüzden ayrı bir sayaç
+// kullanır (couponsIssuedAllTime). Günlük sayaçla karıştırılırsa her gün 10 adet
+// dağıtılır. Önce 5'ti; 1 aylık kampanyada ilk günlerde tükenip kalan ~26 günü
+// hediyesiz bırakacağı için 10'a çıkarıldı.
+var MAX_AKD1AY_TOTAL = 10;
+// Ayrıca GÜNLÜK tavan: aynı günde en fazla 1 kişi alabilir. Toplam sınır tek
+// başına yetmiyordu — 10 adet ilk yoğun günde tükenip kalan ayı hediyesiz
+// bırakıyordu. İki sınır birlikte ödülü aya yayar.
+var MAX_AKD1AY_DAILY = 1;
 var AKD1AY_CODE = "AKD1AY";
 
-// 5 dolunca MÜKEMMEL vuran boş kalmasın diye bir alt basamağa (ücretsiz deneme
+// Kontenjan dolunca MÜKEMMEL vuran boş kalmasın diye bir alt basamağa (ücretsiz deneme
 // dersi) düşürülür; vuruşu yine "MÜKEMMEL!" olarak kutlanır ve kayıtta sonuç
 // "perfect" kalır — istatistik bozulmaz, yalnızca ödül değişir.
 var perfectSoldOutPrize = { emoji:"🏆", label:"MÜKEMMEL!", title:"ÜCRETSİZ DENEME DERSİ",
-  desc:"Tam zamanında vurdun!\n1 aylık hediye kontenjanı doldu —\nbunun yerine Akademi'de\nücretsiz deneme dersi kazandın!", code:"AKDRS", type:"code" };
+  desc:"Tam zamanında vurdun!\n1 ay 4 ders kontenjanı şu an dolu —\nbunun yerine Akademi'de\nücretsiz deneme dersi kazandın!", code:"AKDRS", type:"code" };
 
 // Bez çanta fiziksel ve sınırlı. Sınır artık kodda sabit DEĞİL: her gün kasa
 // panelinden o günkü stok girilir (bkz. cantaStokForDay). Personel girmeyi
@@ -1257,10 +1263,16 @@ function couponsIssuedAllTime(prizeCode) {
 }
 
 function akd1ayIssuedTotal() { return couponsIssuedAllTime(AKD1AY_CODE); }
+function akd1ayIssuedToday() { return couponsIssuedToday(AKD1AY_CODE); }
 function cantaIssuedToday()  { return couponsIssuedToday(CANTA_CODE); }
 
+// 1 Ay 4 Ders'te İKİ sınır birden var ve ikisi de geçilmemeli:
+//   toplam 10 (kampanya boyu) VE günde en fazla 1.
+// Günlük sınır olmadan 10 adet ilk birkaç günde tükeniyor; toplam sınır olmadan
+// 30 günde 30 adet dağıtılırdı. Hangisi önce dolarsa ödül alt basamağa düşer.
 function prizeForResult(r) {
-  if (r === "perfect" && akd1ayIssuedTotal() >= MAX_AKD1AY_TOTAL) {
+  if (r === "perfect" &&
+      (akd1ayIssuedTotal() >= MAX_AKD1AY_TOTAL || akd1ayIssuedToday() >= MAX_AKD1AY_DAILY)) {
     return perfectSoldOutPrize;
   }
   if (r === "idareder" && cantaIssuedToday() >= cantaStokForDay(todayKey())) {
@@ -1877,12 +1889,16 @@ function renderStockInfo() {
   var stok = cantaStokForDay(todayKey());
   var cKalan = Math.max(0, stok - cantaIssuedToday());
   // "1 ay 4 ders" sınırı KAMPANYA BOYU toplam — bugünkü değil, tüm günlerin toplamı.
+  // Ayrıca günlük tavan var; personel ikisini de görsün diye iki satır yazılıyor.
   var aKalan = Math.max(0, MAX_AKD1AY_TOTAL - akd1ayIssuedTotal());
+  var aBugun = Math.max(0, MAX_AKD1AY_DAILY - akd1ayIssuedToday());
 
   el.style.display = "block";
   el.innerHTML =
     "🏆 1 AY 4 DERS: <b style='color:" + (aKalan ? "#4caf50" : "#ff6b6b") + "'>" + aKalan + "</b>" +
     " / " + MAX_AKD1AY_TOTAL + " kaldı <span style='color:#555;'>(kampanya toplamı)</span><br/>" +
+    "&nbsp;&nbsp;&nbsp;bugün: <b style='color:" + (aBugun ? "#4caf50" : "#ff6b6b") + "'>" + aBugun + "</b>" +
+    " / " + MAX_AKD1AY_DAILY + " <span style='color:#555;'>(günlük tavan)</span><br/>" +
     "🎁 BEZ ÇANTA: <b style='color:" + (cKalan ? "#4caf50" : "#ff6b6b") + "'>" + cKalan + "</b>" +
     " / " + stok + " kaldı <span style='color:#555;'>(bugün)</span>" +
     (cantaStokGirildiMi(todayKey()) ? "" :

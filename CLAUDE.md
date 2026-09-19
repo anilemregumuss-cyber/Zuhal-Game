@@ -252,9 +252,15 @@ Ortak temel `countCouponsIn(data, prizeCode)` bir gün nesnesindeki `-KOD-` içe
 yalnızca oyun kesinleşince tek bir denemeye yazılır, yani sayı = verilen hediye adedi.
 
 1. **Kampanya boyu TOPLAM** — `couponsIssuedAllTime(prizeCode)` bütün `zuhal_plays_*`
-   anahtarlarını tarar. `MAX_AKD1AY_TOTAL = 5`: 1 Ay 4 Ders hediyesi kampanya boyunca
-   toplam 5 kişiye verilir, **günlük değil**. Dolunca `prizeForResult("perfect")` →
+   anahtarlarını tarar. `MAX_AKD1AY_TOTAL = 10`: 1 Ay 4 Ders hediyesi kampanya boyunca
+   toplam 10 kişiye verilir, **günlük değil**. Dolunca `prizeForResult("perfect")` →
    `perfectSoldOutPrize` (Ücretsiz Deneme Dersi, etiket yine MÜKEMMEL!).
+   **Ayrıca günlük tavan var** — `MAX_AKD1AY_DAILY = 1` (`akd1ayIssuedToday()`):
+   aynı günde en fazla 1 kişi alabilir. Hangi sınır önce dolarsa ödül alt basamağa
+   düşer. Merdivende iki sınırı birden taşıyan TEK ödül budur. Gerekçe: kampanya
+   1 ay sürüyor; tek başına toplam sınır ilk yoğun günde tükenip kalan ~26 günü
+   hediyesiz bırakıyordu, tek başına günlük tavan ise ayda 30 adet dağıtırdı.
+   Kasa panelinde iki satır ayrı gösterilir (kampanya toplamı + bugün).
    ⚠ Bu sayaç `cleanOldData()`'ya bağımlı: silinen günün kuponları sayılmaz ve sınır
    kendiliğinden gevşer. Saklama süresi bu yüzden 90 güne çıkarıldı; kampanya daha
    uzun sürerse süreyi de uzat.
