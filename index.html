@@ -51,15 +51,16 @@ body{font-family:'Bebas Neue',sans-serif;}
    ölçeklensin ki yazı her ekranda bandın ~%35'i kalsın. Sabit px verilirse
    küçük ekranda bandı taşırıyor.
 
-   Süre 20s -> 40s: yazı 13px'ten ~26px'e çıkınca metnin PİKSEL uzunluğu da iki
-   katına çıktı, sabit sürede bu akışı İKİ KAT HIZLANDIRIRDI. Canlı sayfada
-   ölçülen hız 107 px/sn; 40 sn ile aynı hız korunuyor. Boyutu veya metni yine
-   değiştirirsen süreyi de yeniden hesapla. */
+   Süre 20s -> 40s -> 46s: yazı 13px'ten ~26px'e çıkınca metnin PİKSEL uzunluğu
+   iki katına çıktı (40s), sonra cümle başlarına enstrüman emoji'si eklenince
+   %15 daha uzadı (46s). Sabit sürede uzayan metin akışı HIZLANDIRIR; hedef hız
+   107 px/sn. Metni veya boyutu değiştirirsen süreyi yeniden hesapla:
+   yarı mesafe (px) / 107. */
 .vs{position:absolute;top:0;bottom:0;width:6.9vw;overflow:hidden;background:#FFD700;z-index:2;}
 .vs-l{left:0;} .vs-r{right:0;}
 .vs-t{position:absolute;top:0;left:50%;writing-mode:vertical-rl;white-space:nowrap;font:700 clamp(13px,2.4vw,30px)/1 'Space Mono',monospace;color:#000;letter-spacing:0.22em;}
-.vs-l .vs-t{animation:vsL 40s linear infinite;}
-.vs-r .vs-t{animation:vsR 40s linear infinite;}
+.vs-l .vs-t{animation:vsL 46s linear infinite;}
+.vs-r .vs-t{animation:vsR 46s linear infinite;}
 @keyframes vsL{0%{transform:translateX(-50%) translateY(0)}100%{transform:translateX(-50%) translateY(-50%)}}
 @keyframes vsR{0%{transform:translateX(-50%) translateY(-50%)}100%{transform:translateX(-50%) translateY(0)}}
 
@@ -67,8 +68,8 @@ body{font-family:'Bebas Neue',sans-serif;}
 .hs{position:absolute;left:0;right:0;height:6.9vw;overflow:hidden;background:#FFD700;z-index:2;}
 .hs-t{top:0;} .hs-b{bottom:0;}
 .hs-i{position:absolute;top:50%;left:0;white-space:nowrap;font:700 clamp(13px,2.4vw,30px)/1 'Space Mono',monospace;color:#000;letter-spacing:0.22em;}
-.hs-t .hs-i{animation:hsT 40s linear infinite;}
-.hs-b .hs-i{animation:hsB 40s linear infinite;}
+.hs-t .hs-i{animation:hsT 46s linear infinite;}
+.hs-b .hs-i{animation:hsB 46s linear infinite;}
 @keyframes hsT{0%{transform:translateY(-50%) translateX(0)}100%{transform:translateY(-50%) translateX(-50%)}}
 @keyframes hsB{0%{transform:translateY(-50%) translateX(-50%)}100%{transform:translateY(-50%) translateX(0)}}
 
@@ -107,14 +108,14 @@ body{font-family:'Bebas Neue',sans-serif;}
   <video class="banner-vid" src="Genel-Halftime-v3.mp4" autoplay muted loop playsinline webkit-playsinline></video>
 
   <!-- Sol şerit: PNG sol koyu kenara örter, yukarı akar -->
-  <div class="vs vs-l"><div class="vs-t">ZUHAL AKADEMİ • ÜCRETSİZ DENEME DERSİ • 4 DERS HEDİYE • İLK AY %50 İNDİRİM • MÜZİĞE BUGÜN BAŞLA • ZUHAL AKADEMİ • ÜCRETSİZ DENEME DERSİ • 4 DERS HEDİYE • İLK AY %50 İNDİRİM • MÜZİĞE BUGÜN BAŞLA • ZUHAL AKADEMİ • ÜCRETSİZ DENEME DERSİ • 4 DERS HEDİYE • İLK AY %50 İNDİRİM • MÜZİĞE BUGÜN BAŞLA • ZUHAL AKADEMİ • ÜCRETSİZ DENEME DERSİ • 4 DERS HEDİYE • İLK AY %50 İNDİRİM • MÜZİĞE BUGÜN BAŞLA • </div></div>
+  <div class="vs vs-l"><div class="vs-t">🎵 ZUHAL AKADEMİ • 🎤 ÜCRETSİZ DENEME DERSİ • 🎸 4 DERS HEDİYE • 🎹 İLK AY %50 İNDİRİM • 🥁 MÜZİĞE BUGÜN BAŞLA • 🎵 ZUHAL AKADEMİ • 🎤 ÜCRETSİZ DENEME DERSİ • 🎸 4 DERS HEDİYE • 🎹 İLK AY %50 İNDİRİM • 🥁 MÜZİĞE BUGÜN BAŞLA • 🎵 ZUHAL AKADEMİ • 🎤 ÜCRETSİZ DENEME DERSİ • 🎸 4 DERS HEDİYE • 🎹 İLK AY %50 İNDİRİM • 🥁 MÜZİĞE BUGÜN BAŞLA • 🎵 ZUHAL AKADEMİ • 🎤 ÜCRETSİZ DENEME DERSİ • 🎸 4 DERS HEDİYE • 🎹 İLK AY %50 İNDİRİM • 🥁 MÜZİĞE BUGÜN BAŞLA • </div></div>
   <!-- Sağ şerit: PNG sağ koyu kenara örter, aşağı akar -->
-  <div class="vs vs-r"><div class="vs-t">ZUHAL AKADEMİ • ÜCRETSİZ DENEME DERSİ • 4 DERS HEDİYE • İLK AY %50 İNDİRİM • MÜZİĞE BUGÜN BAŞLA • ZUHAL AKADEMİ • ÜCRETSİZ DENEME DERSİ • 4 DERS HEDİYE • İLK AY %50 İNDİRİM • MÜZİĞE BUGÜN BAŞLA • ZUHAL AKADEMİ • ÜCRETSİZ DENEME DERSİ • 4 DERS HEDİYE • İLK AY %50 İNDİRİM • MÜZİĞE BUGÜN BAŞLA • ZUHAL AKADEMİ • ÜCRETSİZ DENEME DERSİ • 4 DERS HEDİYE • İLK AY %50 İNDİRİM • MÜZİĞE BUGÜN BAŞLA • </div></div>
+  <div class="vs vs-r"><div class="vs-t">🎵 ZUHAL AKADEMİ • 🎤 ÜCRETSİZ DENEME DERSİ • 🎸 4 DERS HEDİYE • 🎹 İLK AY %50 İNDİRİM • 🥁 MÜZİĞE BUGÜN BAŞLA • 🎵 ZUHAL AKADEMİ • 🎤 ÜCRETSİZ DENEME DERSİ • 🎸 4 DERS HEDİYE • 🎹 İLK AY %50 İNDİRİM • 🥁 MÜZİĞE BUGÜN BAŞLA • 🎵 ZUHAL AKADEMİ • 🎤 ÜCRETSİZ DENEME DERSİ • 🎸 4 DERS HEDİYE • 🎹 İLK AY %50 İNDİRİM • 🥁 MÜZİĞE BUGÜN BAŞLA • 🎵 ZUHAL AKADEMİ • 🎤 ÜCRETSİZ DENEME DERSİ • 🎸 4 DERS HEDİYE • 🎹 İLK AY %50 İNDİRİM • 🥁 MÜZİĞE BUGÜN BAŞLA • </div></div>
 
   <!-- Üst yatay bant: kartın üst iç şeridini örter, sola akar -->
-  <div class="hs hs-t"><div class="hs-i">ZUHAL AKADEMİ • ÜCRETSİZ DENEME DERSİ • 4 DERS HEDİYE • İLK AY %50 İNDİRİM • MÜZİĞE BUGÜN BAŞLA • ZUHAL AKADEMİ • ÜCRETSİZ DENEME DERSİ • 4 DERS HEDİYE • İLK AY %50 İNDİRİM • MÜZİĞE BUGÜN BAŞLA • ZUHAL AKADEMİ • ÜCRETSİZ DENEME DERSİ • 4 DERS HEDİYE • İLK AY %50 İNDİRİM • MÜZİĞE BUGÜN BAŞLA • ZUHAL AKADEMİ • ÜCRETSİZ DENEME DERSİ • 4 DERS HEDİYE • İLK AY %50 İNDİRİM • MÜZİĞE BUGÜN BAŞLA • </div></div>
+  <div class="hs hs-t"><div class="hs-i">🎵 ZUHAL AKADEMİ • 🎤 ÜCRETSİZ DENEME DERSİ • 🎸 4 DERS HEDİYE • 🎹 İLK AY %50 İNDİRİM • 🥁 MÜZİĞE BUGÜN BAŞLA • 🎵 ZUHAL AKADEMİ • 🎤 ÜCRETSİZ DENEME DERSİ • 🎸 4 DERS HEDİYE • 🎹 İLK AY %50 İNDİRİM • 🥁 MÜZİĞE BUGÜN BAŞLA • 🎵 ZUHAL AKADEMİ • 🎤 ÜCRETSİZ DENEME DERSİ • 🎸 4 DERS HEDİYE • 🎹 İLK AY %50 İNDİRİM • 🥁 MÜZİĞE BUGÜN BAŞLA • 🎵 ZUHAL AKADEMİ • 🎤 ÜCRETSİZ DENEME DERSİ • 🎸 4 DERS HEDİYE • 🎹 İLK AY %50 İNDİRİM • 🥁 MÜZİĞE BUGÜN BAŞLA • </div></div>
   <!-- Alt yatay bant -->
-  <div class="hs hs-b"><div class="hs-i">ZUHAL AKADEMİ • ÜCRETSİZ DENEME DERSİ • 4 DERS HEDİYE • İLK AY %50 İNDİRİM • MÜZİĞE BUGÜN BAŞLA • ZUHAL AKADEMİ • ÜCRETSİZ DENEME DERSİ • 4 DERS HEDİYE • İLK AY %50 İNDİRİM • MÜZİĞE BUGÜN BAŞLA • ZUHAL AKADEMİ • ÜCRETSİZ DENEME DERSİ • 4 DERS HEDİYE • İLK AY %50 İNDİRİM • MÜZİĞE BUGÜN BAŞLA • ZUHAL AKADEMİ • ÜCRETSİZ DENEME DERSİ • 4 DERS HEDİYE • İLK AY %50 İNDİRİM • MÜZİĞE BUGÜN BAŞLA • </div></div>
+  <div class="hs hs-b"><div class="hs-i">🎵 ZUHAL AKADEMİ • 🎤 ÜCRETSİZ DENEME DERSİ • 🎸 4 DERS HEDİYE • 🎹 İLK AY %50 İNDİRİM • 🥁 MÜZİĞE BUGÜN BAŞLA • 🎵 ZUHAL AKADEMİ • 🎤 ÜCRETSİZ DENEME DERSİ • 🎸 4 DERS HEDİYE • 🎹 İLK AY %50 İNDİRİM • 🥁 MÜZİĞE BUGÜN BAŞLA • 🎵 ZUHAL AKADEMİ • 🎤 ÜCRETSİZ DENEME DERSİ • 🎸 4 DERS HEDİYE • 🎹 İLK AY %50 İNDİRİM • 🥁 MÜZİĞE BUGÜN BAŞLA • 🎵 ZUHAL AKADEMİ • 🎤 ÜCRETSİZ DENEME DERSİ • 🎸 4 DERS HEDİYE • 🎹 İLK AY %50 İNDİRİM • 🥁 MÜZİĞE BUGÜN BAŞLA • </div></div>
 
 
 <button id="btnGame">▶ OYNA</button>
