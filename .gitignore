@@ -1,1 +1,16 @@
 __MACOSX/
+
+# Gizli bilgiler — depo HERKESE AÇIK, bunlar asla girmemeli.
+# Veritabani baglanti adresi (anil kullanicisinin sifresi) buraya yazilir.
+.env
+.env.*
+!.env.example
+*.pgpass
+.pgpass
+secrets.*
+*.key
+
+# Yerel Supabase (supabase start) ve arac ciktilari
+supabase/.temp/
+supabase/.branches/
+.DS_Store
