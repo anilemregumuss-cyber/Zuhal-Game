@@ -23,8 +23,24 @@ yönlendirme sayfası konmalı.
 veritabanı kullanıcısıyla **doğrudan bağlantıdan** yapılır:
 
 ```bash
-psql "postgresql://anil:<sifre>@db.cglwmzrsbzuirlwgfxqc.supabase.co:5432/postgres" -f supabase/<dosya>.sql
+source .env && psql "$ZUHAL_OYUN_DB_URL" -f supabase/<dosya>.sql
 ```
+
+🔴 **POOLER adresi kullanilir, dogrudan adres DEGIL** (olculdu 19 Eyl):
+`db.cglwmzrsbzuirlwgfxqc.supabase.co` yalnizca **IPv6 (AAAA)** kaydina sahip, IPv4 kaydi
+**yok**. IPv6'si olmayan aglarda (Windows'ta yaygin) `could not translate host name`
+hatasi verir ve bu bir yapilandirma hatasi degil, adresin kendisidir. Dogrusu:
+
+```
+postgresql://anil.cglwmzrsbzuirlwgfxqc:<sifre>@aws-0-eu-central-1.pooler.supabase.com:5432/postgres
+```
+
+- Kullanici adi **proje referansini de icerir**: `anil.cglwmzrsbzuirlwgfxqc` (duz `anil` DEGIL).
+- **Port 5432 = session modu** — migration/DDL icin dogru olan budur. 6543 transaction
+  modudur, uygulama sorgulari icindir.
+- ⚠️ `aws-1-eu-central-1...` bu projeye ait DEGIL (`tenant/user not found` doner). Bolge
+  ayni olsa da pooler dugumu projeye gore degisir; tahmin etme, hata mesajindan ayirt et:
+  *"password authentication failed"* = dogru dugum, *"tenant/user not found"* = yanlis dugum.
 
 Şifre depoya GİRMEZ (depo herkese açık) — yerelde gizli dosyada tutulur.
 Yerel geliştirme: `supabase start` buluta hiç dokunmadan tam kopya verir.
